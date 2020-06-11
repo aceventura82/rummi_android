@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.servoz.rummi.ui.home.HomeFragment"
+        android:label="menu_home"
+        tools:layout="@layout/fragment_home">
+
+        <action android:id="@+id/action_my_games_to_edit_game"
+            app:destination="@id/nav_edit_game" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_login"
+        android:name="com.servoz.rummi.ui.login.LoginFragment"
+        android:label="menu_login"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/nav_register"
+        android:name="com.servoz.rummi.ui.login.RegisterFragment"
+        android:label="menu_login"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.servoz.rummi.ui.login.ProfileFragment"
+        android:label="profile"
+        tools:layout="@layout/fragment_profile"/>
+
+
+    <fragment
+        android:id="@+id/nav_search_game"
+        android:name="com.servoz.rummi.ui.game.SearchGameFragment"
+        android:label="menu_search_game"
+        tools:layout="@layout/fragment_find_game" />
+
+    <fragment
+        android:id="@+id/nav_rules"
+        android:name="com.servoz.rummi.ui.rules.RulesFragment"
+        android:label="menu_game_rules"
+        tools:layout="@layout/fragment_rules" />
+
+
+    <fragment
+        android:id="@+id/nav_join_game"
+        android:name="com.servoz.rummi.ui.game.JoinGameFragment"
+        android:label="menu_join_game"
+        tools:layout="@layout/fragment_join_game" >
+
+        <argument
+            android:name="code"
+            app:argType="string" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_game"
+        android:name="com.servoz.rummi.ui.game.GameFragment"
+        android:label="menu_forecasts"
+        tools:layout="@layout/fragment_game" >
+        <argument
+            android:name="gameId"
+            app:argType="integer" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_edit_game"
+        android:name="com.servoz.rummi.ui.game.EditGameFragment"
+        android:label="menu_forecasts"
+        tools:layout="@layout/fragment_edit_game" >
+        <argument
+            android:name="gameId"
+            app:argType="integer" />
+
+    </fragment>
+
+        <fragment
+        android:id="@+id/nav_add_game"
+        android:name="com.servoz.rummi.ui.game.AddGameFragment"
+        android:label="menu_forecasts"
+        tools:layout="@layout/fragment_add_game" />
+
+    <action
+        android:id="@+id/action_global_nav_home"
+        app:destination="@id/nav_home" />
+        <action
+        android:id="@+id/action_global_nav_login"
+        app:destination="@id/nav_login" />
+    <action
+        android:id="@+id/action_global_nav_register"
+        app:destination="@id/nav_register" />
+    <action
+        android:id="@+id/action_global_nav_profile"
+        app:destination="@id/nav_profile" />
+    <action
+        android:id="@+id/action_global_nav_rules"
+        app:destination="@id/nav_rules" />
+    <action
+        android:id="@+id/action_global_nav_join_game"
+        app:destination="@id/nav_join_game" />
+    <action
+        android:id="@+id/action_global_nav_search_game"
+        app:destination="@id/nav_search_game" />
+    <action
+        android:id="@+id/action_global_nav_add_game"
+        app:destination="@id/nav_add_game" />
+    <action android:id="@+id/action_global_to_game"
+            app:destination="@id/nav_game" />
+
+</navigation>

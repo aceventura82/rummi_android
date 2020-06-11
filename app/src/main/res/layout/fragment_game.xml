@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/table"
+    android:layout_height="match_parent" >
+
+    <!--Dummy view to get full screen fix-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!--the five users image and name-->
+    <TextView
+        android:id="@+id/gameP1"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/discard1"
+        android:drawableTop="@drawable/ic_account_box_black_80dp"/>
+
+    <TextView
+        android:id="@+id/gameP2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:drawableTop="@drawable/ic_account_box_black_80dp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/discard2"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/gameP3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:drawableTop="@drawable/ic_account_box_black_80dp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/gameP4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:drawableTop="@drawable/ic_account_box_black_80dp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/gameP5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:drawableTop="@drawable/ic_account_box_black_80dp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/discard1"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!--Layout for user cards-->
+    <RelativeLayout
+        android:id="@+id/cards"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_margin="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/discard2"
+        app:layout_constraintStart_toEndOf="@+id/gameP1"/>
+
+    <!--The five discard positions-->
+    <RelativeLayout
+        android:id="@+id/discard1"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@color/game_text_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/discard2"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@color/game_text_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <RelativeLayout
+        android:id="@+id/discard3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/game_text_bg"
+        app:layout_constraintBottom_toTopOf="@+id/gameP2"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/discard4"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/game_text_bg"
+        app:layout_constraintEnd_toStartOf="@+id/gameP3"
+        app:layout_constraintStart_toEndOf="@+id/gameP4"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/discard5"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@color/game_text_bg"
+        app:layout_constraintBottom_toTopOf="@+id/gameP5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!--The preview Discards-->
+
+    <!--the stack deck image -->
+    <ImageView
+        android:id="@+id/deck"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/deck"
+        android:src="@drawable/red_deck"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/discard4" />
+
+    <!--the five draw positions-->
+    <RelativeLayout
+        android:id="@+id/draw1"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        app:layout_constraintBottom_toTopOf="@+id/cards"
+        app:layout_constraintEnd_toStartOf="@+id/gameP2"
+        app:layout_constraintStart_toEndOf="@+id/gameP5" />
+
+    <RelativeLayout
+        android:id="@+id/draw2"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/draw1"
+        app:layout_constraintEnd_toStartOf="@+id/discard3"
+        app:layout_constraintStart_toEndOf="@+id/deck" />
+
+    <RelativeLayout
+        android:id="@+id/draw3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/draw2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/deck"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/draw4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/draw5"
+        app:layout_constraintEnd_toStartOf="@+id/deck"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/draw5"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/draw1"
+        app:layout_constraintEnd_toStartOf="@+id/deck"
+        app:layout_constraintStart_toEndOf="@+id/discard5" />
+
+    <RelativeLayout
+        android:id="@+id/drawPreview"
+        android:layout_width="0dp"
+        android:layout_height="140dp"
+        android:layout_margin="0dp"
+        android:visibility="invisible"
+        android:focusable="true"
+        android:background="@color/game_text_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--Text for main messages-->
+    <TextView
+        android:id="@+id/text_game_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/game_text_bg"
+        android:padding="10dp"
+        android:text="@string/loading"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/discard4" />
+
+        <Button
+            android:id="@+id/mainButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintTop_toBottomOf="@+id/text_game_info"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+    <!--Layout for draw info-->
+    <LinearLayout
+        android:id="@+id/draw_info_layout"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintStart_toEndOf="@+id/text_game_info"
+        app:layout_constraintTop_toTopOf="parent">
+
+         <LinearLayout
+             android:id="@+id/text_draw_info"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:background="@color/game_text_bg"
+             android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/addGameDrawButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_draw_game"
+            app:layout_constraintStart_toEndOf="@+id/discard4"
+            app:layout_constraintTop_toBottomOf="@+id/text_draw_info" />
+
+    </LinearLayout>
+
+    <!--Card animation from stack-->
+    <ImageView
+        android:id="@+id/moveCardFromStack"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/red_back"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/deck"
+        app:layout_constraintStart_toStartOf="@+id/deck"
+        app:layout_constraintTop_toTopOf="@+id/deck"
+        android:contentDescription="@string/deck" />
+
+    <!--Card animation for preview-->
+    <ImageView
+        android:id="@+id/moveCardFromStack1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_margin="30dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/cards"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/deck" />
+
+    <!--Card animation from discard-->
+    <ImageView
+        android:id="@+id/moveCardFromDiscard"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/deck"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!--Loading animation-->
+    <ProgressBar
+        android:id="@+id/loadingGame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--Top Menu-->
+    <GridLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:rowCount="1"
+        android:columnCount="2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:id="@+id/configLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_columnWeight="1"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:background="@color/game_text_bg"
+            android:visibility="invisible">
+
+            <ImageView
+                android:id="@+id/buttonLauncherSortC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/sort"
+                android:src="@drawable/ic_colors"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherSortN"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/sort"
+                android:src="@drawable/ic_numbers"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/messages"
+                android:src="@drawable/ic_baseline_chat_24"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherStanding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/standing"
+                android:src="@drawable/ic_positions"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/standing"
+                android:src="@drawable/ic_baseline_info_24"
+                android:textColor="#fff" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/buttonLauncherMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_gravity="end|bottom"
+            android:background="@color/game_text_bg"
+            android:contentDescription="@string/menu"
+            android:textColor="#fff"
+            app:srcCompat="@drawable/ic_baseline_arrow_back_ios_24" />
+
+    </GridLayout>
+
+    <!--messages view-->
+    <LinearLayout
+        android:id="@+id/message_layout"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:minHeight="150dp"
+        android:orientation="vertical"
+        android:background="@color/game_text_bg"
+        android:layout_marginStart="50dp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ScrollView
+            android:id="@+id/message_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="150dp">
+
+            <TextView
+                android:id="@+id/messages_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white" />
+
+        </ScrollView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/messages_text"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:background="@color/game_text_bg"
+                android:layout_height="wrap_content"
+                android:autofillHints="@string/messages"
+                android:inputType="text"
+                tools:ignore="LabelFor" />
+
+            <ImageButton
+                android:id="@+id/send_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:src="@drawable/ic_baseline_send_24"
+                android:contentDescription="@string/messages" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/move_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/messages"
+        android:padding="0dp"
+        android:visibility="invisible"
+        android:src="@drawable/ic_move"
+        app:layout_constraintStart_toEndOf="@+id/message_layout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

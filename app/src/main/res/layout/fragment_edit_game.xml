@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp">
+
+                    <LinearLayout
+                        android:id="@+id/gridLayoutProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/ImageViewEditGame"
+                            android:layout_marginBottom="20dp"
+                            android:contentDescription="@string/profile_image"
+                            android:minHeight="150dp"
+                            android:maxHeight="150dp"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent"
+                            android:src="@mipmap/ic_launcher" />
+
+                        <TextView
+                            android:id="@+id/textGameCodeInfo"
+                            android:textAlignment="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:textSize="24sp"
+                            android:textStyle="bold"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/edit_game_delete_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="12dp"
+                                android:layout_gravity="center"
+                                android:text="@string/delete" />
+                            <Button
+                                android:id="@+id/edit_game_share_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="12dp"
+                                android:layout_gravity="center"
+                                android:text="@string/share" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:focusableInTouchMode="true"
+                        android:orientation="vertical">
+
+                        <CheckBox
+                            android:id="@+id/checkBoxPrivate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/privateStr" />
+
+                        <LinearLayout
+                            android:id="@+id/editGameNameRL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:text="@string/name"
+                                android:layout_height="wrap_content"/>
+
+                            <TextView
+                                android:id="@+id/editGameNameR"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:textAlignment="center"
+                                android:layout_height="wrap_content"/>
+
+
+                        </LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="4dp"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:hint="@string/name">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/editGameName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/full_draw_games"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="5dp"
+                            android:gravity="center_horizontal"
+                            android:focusableInTouchMode="true"
+                            android:orientation="horizontal">
+
+                            <CheckBox
+                                android:id="@+id/checkBoxFD1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1" />
+                            <CheckBox
+                                android:id="@+id/checkBoxFD2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2" />
+                            <CheckBox
+                                android:id="@+id/checkBoxFD3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="3" />
+                            <CheckBox
+                                android:id="@+id/checkBoxFD4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="4" />
+                            <CheckBox
+                                android:id="@+id/checkBoxFD5"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="5" />
+                            <CheckBox
+                                android:id="@+id/checkBoxFD6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="6" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:layout_weight="1"
+                                android:text="@string/speed"/>
+
+                            <TextView
+                                android:id="@+id/gameSpeedR"
+                                android:layout_width="100dp"
+                                android:visibility="gone"
+                                android:layout_height="wrap_content"/>
+
+                            <com.tiper.MaterialSpinner
+                                android:id="@+id/gameSpeed"
+                                android:layout_width="100dp"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/max_players"/>
+
+                            <TextView
+                                android:id="@+id/gameMaxPlayersR"
+                                android:layout_width="100dp"
+                                android:visibility="gone"
+                                android:layout_height="wrap_content"/>
+
+                            <com.tiper.MaterialSpinner
+                                android:id="@+id/gameMaxPlayers"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="100dp"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <Button
+                                android:id="@+id/buttonSaveEditGame"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:text="@string/save" />
+
+                            <Button
+                                android:id="@+id/edit_game_cancel_button"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="12dp"
+                                android:layout_toStartOf="@id/buttonSaveEditGame"
+                                android:text="@string/cancel" />
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <ProgressBar
+            android:id="@+id/loadingEditGame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

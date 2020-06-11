@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:orderInCategory="100"
+        android:title="@string/changeTheme" >
+        <menu>
+            <item
+                android:id="@+id/settings_change_theme_dark"
+                android:title="@string/darkTheme" />
+            <item android:id="@+id/settings_change_theme_light" android:title="@string/lightTheme" />
+            <item android:id="@+id/settings_change_theme_sys" android:title="@string/sysTheme" />
+        </menu>
+    </item>
+    <item
+    android:id="@+id/settings_es_menu"
+    android:orderInCategory="102"
+    android:title="@string/espanol" />
+    <item
+    android:id="@+id/settings_en_menu"
+    android:orderInCategory="103"
+    android:title="@string/english" />
+    <item
+    android:id="@+id/settings_exit_menu"
+    android:orderInCategory="104"
+    android:title="@string/exit" />
+
+</menu>
