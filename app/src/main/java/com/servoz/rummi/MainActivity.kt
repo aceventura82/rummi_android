@@ -200,8 +200,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun logout() {
-        prefs!!.edit().remove("appKey").apply()
-        prefs!!.edit().remove("userInfo").apply()
+        prefs!!.edit().clear().apply()
         Toast.makeText(this, getString(R.string.logoutOK), Toast.LENGTH_SHORT).show()
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)

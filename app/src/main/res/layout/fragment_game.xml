@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:background="@drawable/table"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:keepScreenOn="true">
 
     <!--Dummy view to get full screen fix-->
     <View
@@ -111,13 +112,13 @@
         app:layout_constraintStart_toEndOf="@+id/gameP4"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RelativeLayout
+    <!--<RelativeLayout
         android:id="@+id/discard5"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:background="@color/game_text_bg"
         app:layout_constraintBottom_toTopOf="@+id/gameP5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />-->
 
     <!--The preview Discards-->
 
@@ -144,15 +145,17 @@
     <RelativeLayout
         android:id="@+id/draw2"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/draw1"
         app:layout_constraintEnd_toStartOf="@+id/discard3"
+        app:layout_constraintTop_toBottomOf="@id/draw3"
         app:layout_constraintStart_toEndOf="@+id/deck" />
 
     <RelativeLayout
         android:id="@+id/draw3"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:minHeight="100dp"
         app:layout_constraintBottom_toTopOf="@+id/draw2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/deck"
@@ -162,6 +165,7 @@
         android:id="@+id/draw4"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:minHeight="100dp"
         app:layout_constraintBottom_toTopOf="@+id/draw5"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,10 +174,12 @@
     <RelativeLayout
         android:id="@+id/draw5"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="0dp"
+        android:minHeight="100dp"
         app:layout_constraintBottom_toTopOf="@+id/draw1"
         app:layout_constraintEnd_toStartOf="@+id/deck"
-        app:layout_constraintStart_toEndOf="@+id/discard5" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/draw4"/>
 
     <RelativeLayout
         android:id="@+id/drawPreview"
@@ -201,7 +207,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/discard4" />
+        app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/mainButton"
@@ -211,6 +217,22 @@
             app:layout_constraintTop_toBottomOf="@+id/text_game_info"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_game_flow"
+        android:layout_width="250dp"
+        android:maxHeight="200dp"
+        android:layout_height="wrap_content"
+        android:background="@color/game_text_bg"
+        android:padding="5dp"
+        android:textSize="14sp"
+        android:textColor="@color/white"
+        android:visibility="invisible"
+        android:scrollbars = "vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent" />
     <!--Layout for draw info-->
     <LinearLayout
         android:id="@+id/draw_info_layout"
@@ -329,6 +351,15 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/messages"
                 android:src="@drawable/ic_baseline_chat_24"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherFlow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/messages"
+                android:src="@drawable/ic_game_flow"
                 android:textColor="#fff" />
 
             <ImageView

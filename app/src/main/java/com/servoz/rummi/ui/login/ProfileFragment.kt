@@ -49,7 +49,7 @@ class ProfileFragment : Fragment() {
         }
         putInfo(userInfo)
         buttonSaveProfile.setOnClickListener{
-            updProfile()
+            updProfile(userInfo["userId_id"].toString())
         }
         profile_cancel_button.setOnClickListener{
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
@@ -135,14 +135,14 @@ class ProfileFragment : Fragment() {
         }
     }
     
-    private fun updProfile(){
+    private fun updProfile(userId:String){
         loadingSaveProfile.isVisible=true
         val params= hashMapOf(
             "name" to editProfileName.text.toString(),"lastname" to editProfileLastName.text.toString(),
             "nickname" to editProfileNickName.text.toString(), "email" to editProfileEmail.text.toString(),
             "country" to editProfileCountry.text.toString(), "city" to editProfileCity.text.toString(),
             "birthDate" to editProfileBirthDate.text.toString(), "extension" to ".jpg",
-            "gender" to genderOpc
+            "gender" to genderOpc, "userId" to userId
             
         )
         FetchData(arrayListOf(),this).updateData("editProfile", "",cache = false, addParams = params){

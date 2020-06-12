@@ -84,6 +84,7 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
             appLinkData.toString().contains(urlCheck)) {
             val code = appLinkData.toString().substringAfterLast(urlCheck, "").trim('/')
             NavHostFragment.findNavController(this).navigate(HomeFragmentDirections.actionGlobalNavJoinGame(code))
+            intent.data = null
             return true
         }
         return false
@@ -94,9 +95,9 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
         if(!login)
             return ArrayList()
         ProfileFragment().updateData(this@HomeFragment)
-        return FetchData(arrayListOf("id", "name", "date", "private", "fullDraw", "speed", "maxPlayers",
+        return FetchData(arrayListOf("id", "name", "date", "private", "started", "fullDraw", "speed", "maxPlayers",
             "code", "current_set", "current_stack", "current_discarded", "userId_id",
-            "playersPos", "currentPlayerPos"), this@HomeFragment).cacheRepo("OK", "game")
+            "playersPos", "currentPlayerPos"), this@HomeFragment).cacheRepo("OK", "game", "`started` ASC, `date` DESC")
     }
 
     private fun updateData(login:Boolean, cachedData:ArrayList<ArrayList<String>>){
@@ -110,25 +111,22 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
         .updateData("viewMyGames", "",
             cache = false){ result ->
             prefs!!.edit().putString("loadData", "").apply()
-            val games=try{
-                MyTools().stringListToJSON(result)
-            } catch (e: JSONException) {
-                println(result)
-                ArrayList<JSONObject>()
-            }
-            //get details for each game
-            var gamesIds=""
-            for ((c,game) in games.withIndex()){
-                gamesIds+="${game["id"]},"
-                fetchGame.updateData("gameInfo", "game", where="`id`=${game["id"]}",
-                    addParams = hashMapOf("gameId" to game["id"].toString())){
-                    // check if new data after last response
-                    if(c==games.count()-1)
-                        if(cachedData!=fetchGame.cacheRepo("OK", "game"))
-                            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+            try{
+                val games=MyTools().stringListToJSON(result)
+                //get details for each game
+                var gamesIds=""
+                for ((c,game) in games.withIndex()){
+                    gamesIds+="${game["id"]},"
+                    fetchGame.updateData("gameInfo", "game", where="`id`=${game["id"]}",
+                        addParams = hashMapOf("gameId" to game["id"].toString())){
+                        // check if new data after last response
+                        if(c==games.count()-1)
+                            if(cachedData!=fetchGame.cacheRepo("OK", "game", "`started` ASC, `date` DESC"))
+                                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                    }
                 }
-            }
-            cleanData(gamesIds.trim(','))
+                cleanData(gamesIds.trim(','))
+            } catch (e: JSONException) {}
         }
     }
 

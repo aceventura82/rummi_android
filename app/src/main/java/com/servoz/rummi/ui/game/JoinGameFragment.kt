@@ -116,7 +116,7 @@ class JoinGameFragment: Fragment() {
         }
         //set color of selected seat
         if(posN!=-1){
-            updateChair(posN, Color.WHITE)
+            updateChair(posN, Color.GRAY)
         }
     }
 

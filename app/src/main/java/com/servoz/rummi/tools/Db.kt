@@ -11,10 +11,11 @@ class Db(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenH
 
     override fun onCreate(db: SQLiteDatabase) {
         // println("DEBUG:Creating DBS")
-        db.execSQL("CREATE TABLE `game`( `id` INTEGER PRIMARY KEY, `name` TEXT, `date` TEXT, `private` INTEGER, `fullDraw` TEXT, `speed` INTEGER, `maxPlayers` INTEGER,  `code` TEXT, `current_set` INTEGER, `current_stack` TEXT, `current_discarded` TEXT, `userId_id` INTEGER, `playersPos` INTEGER, `currentPlayerPos` INTEGER)")
+        db.execSQL("CREATE TABLE `game`( `id` INTEGER PRIMARY KEY, `name` TEXT, `date` TEXT, `private` INTEGER, `started` INTEGER, `fullDraw` TEXT, `speed` INTEGER, `maxPlayers` INTEGER,  `code` TEXT, `current_set` INTEGER, `current_stack` TEXT, `current_discarded` TEXT, `userId_id` INTEGER, `playersPos` INTEGER, `currentPlayerPos` INTEGER)")
         db.execSQL("CREATE TABLE `gameSet`( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `set_id` INTEGER, `set_set` INTEGER, `set_date` TEXT, `set_fullDraw` INTEGER, `set_points` INTEGER, `set_userId_id` INTEGER, `set_gameId_id` INTEGER, `set_current_cards` TEXT, `set_drawn` TEXT)")
         db.execSQL("CREATE TABLE `player`( `id` INTEGER PRIMARY KEY, `name` TEXT, `userId` INTEGER, `extension` TEXT)")
         db.execSQL("CREATE TABLE `messages`( `id` INTEGER, `msg` TEXT, `date` TEXT, `userId_id` INTEGER, `gameId_id` INTEGER)")
+        db.execSQL("CREATE TABLE `flow`( `id` INTEGER, `msg` TEXT, `date` TEXT, `gameId_id` INTEGER)")
     }
 
 

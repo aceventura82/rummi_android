@@ -45,7 +45,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
             //set info
             itemView.textItemMyGameName.text = data[1]
             //change the icon if vew only
-            if(data[11] != userId)
+            if(data[12] != userId)
                 itemView.buttonItemMyGamesEdit.setImageResource(R.drawable.ic_baseline_remove_red_eye_24)
             //listener for the setting button
             itemView.buttonItemMyGamesEdit.setOnClickListener {

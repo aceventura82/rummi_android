@@ -1,13 +1,11 @@
 <resources>
     <string name="app_name">Rummi</string>
     <string name="nav_header_desc">Navigation header</string>
-
     <string name="menu_home">Home</string>
     <string name="menu_my_games">My Games</string>
     <string name="menu_rules">Game Rules</string>
     <string name="menu_login">Login</string>
     <string name="menu_logout">Logout</string>
-
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="changeTheme">Change Theme</string>
@@ -18,7 +16,6 @@
     <string name="exit">Exit</string>
     <string name="login_ok">Login successful</string>
     <string name="logoutOK">Logout successful</string>
-
     <string name="points">%1$s Points</string>
     <string name="updating">Updating data</string>
     <string name="InternetError">Check your Internet connection</string>
@@ -132,4 +129,19 @@
     <string name="open">Open</string>
     <string name="started">Started</string>
     <string name="ended">Ended</string>
+    <string name="picked_card_stack">Picked card from stack</string>
+    <string name="picked_card_discard">Picked card from discard</string>
+    <string name="spades">Spades</string>
+    <string name="hearts">Hearts</string>
+    <string name="diamonds">Diamonds</string>
+    <string name="clubs">Clubs</string>
+    <string name="joker">Joker</string>
+    <string name="discarded_card">Discarded a card</string>
+    <string name="draw_over_card">draw over a card</string>
+    <string name="message_visible">Message are visible now</string>
+    <string name="message_hidden">Messages hidden</string>
+    <string name="sort_color">Sort by Color</string>
+    <string name="sort_number">Sort by Number</string>
+    <string name="flow_visible">Game flow message always visible</string>
+    <string name="flow_auto_hide">Auto hide Game flow messages</string>
 </resources>
