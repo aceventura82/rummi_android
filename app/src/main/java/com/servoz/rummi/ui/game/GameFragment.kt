@@ -95,8 +95,8 @@ class GameFragment: Fragment() {
         try{
             gameId= arguments?.getString("gameId")!!
             //get stored messages from Db
-            getStoredMessages()
-            getStoredFlow()
+            getStoredMessages(true)
+            getStoredFlow(true)
             //get remote data and set all UI when user enters the game
             remoteData(false)
             //set listeners
@@ -165,7 +165,6 @@ class GameFragment: Fragment() {
             addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
                 "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
             if(result!="OK"){
-                println("new data")
                 val data = MyTools().stringListToJSON(result)
                 if (data.count() > 0) {
                     //set new update time
@@ -177,9 +176,13 @@ class GameFragment: Fragment() {
                     updateCards=false
                 }else
                     text_game_info.text = getString(R.string.unknown_error)
-                //start background remote sync if first time
-                if(!bg)
+                if(!bg){
+                    //start background remote sync if first time
                     bgSync()
+                    //get stored messages
+                    getStoredMessages()
+                    getStoredFlow()
+                }
             }
         }
     }
@@ -351,7 +354,7 @@ class GameFragment: Fragment() {
             gameP4.setCompoundDrawables(null,image, null, null)
         else{
             gameP4.visibility=GONE
-            draw5.visibility=GONE
+            draw4.visibility=GONE
         }
         if(playersNames[4]!="")
             gameP5.setCompoundDrawables(null,image, null, null)
@@ -574,7 +577,6 @@ class GameFragment: Fragment() {
         inCard=""
         //get cards in hand
         val myCards= gameSetData[keySetUser]?.get(0)!!.trim(',').split(",")
-        println(myCards)
         cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
         if(cardsSpace>30.dp)
             cardsSpace=30.dp
@@ -1424,22 +1426,26 @@ class GameFragment: Fragment() {
     }
 
     //get message from db when first load
-    private fun getStoredMessages(){
+    private fun getStoredMessages(getId:Boolean=false){
         val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
         messagesLastId=try{
             Integer.parseInt(lastId[0][0])
         }catch(ex:java.lang.NumberFormatException){ 0 }
+        if(getId)
+            return
         for(message in dbHandler.getData("messages", "`gameId_id`=$gameId")){
             messages_input.append(putMsg(message[1], message[2], message[3]))
         }
     }
 
     //get flow message from db when first load
-    private fun getStoredFlow(){
+    private fun getStoredFlow(getId:Boolean=false){
         val lastId=dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
         flowLastId=try{
             Integer.parseInt(lastId[0][0])
         }catch(ex:java.lang.NumberFormatException){ 0 }
+        if(getId)
+            return
         for(message in dbHandler.getData("flow", "`gameId_id`=$gameId")){
             text_game_flow.append(putMsg(message[1], message[2]))
         }
