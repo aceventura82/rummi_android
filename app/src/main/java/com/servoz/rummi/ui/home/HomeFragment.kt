@@ -24,7 +24,6 @@ import kotlinx.android.synthetic.main.fragment_home.loadingMyGames
 import kotlinx.android.synthetic.main.fragment_home.recyclerViewMyGames
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
 
@@ -54,6 +53,7 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
 
         //get cached data, update data and populate the search options in the background
         val data = getData(login)
+        cleanData()
         doAsync {
             //check if new data
             updateData(login, data)
@@ -107,34 +107,15 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
         val fetchGame=FetchData(arrayListOf("id", "name", "date", "private", "fullDraw", "speed", "maxPlayers",
             "code", "current_set", "current_stack", "current_discarded", "userId_id",
             "playersPos", "currentPlayerPos"), this)
-        FetchData(arrayListOf(), this)
-        .updateData("viewMyGames", "",
-            cache = false){ result ->
-            prefs!!.edit().putString("loadData", "").apply()
-            try{
-                val games=MyTools().stringListToJSON(result)
-                //get details for each game
-                var gamesIds=""
-                for ((c,game) in games.withIndex()){
-                    gamesIds+="${game["id"]},"
-                    fetchGame.updateData("gameInfo", "game", where="`id`=${game["id"]}",
-                        addParams = hashMapOf("gameId" to game["id"].toString())){
-                        // check if new data after last response
-                        if(c==games.count()-1)
-                            if(cachedData!=fetchGame.cacheRepo("OK", "game", "`started` ASC, `date` DESC"))
-                                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
-                    }
-                }
-                cleanData(gamesIds.trim(','))
-            } catch (e: JSONException) {}
+        fetchGame.updateData("viewMyGames", "game","`started` ASC, `date` DESC"){
+            if(cachedData!=fetchGame.cacheRepo("OK", "game", "`started` ASC, `date` DESC"))
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
         }
     }
 
-    //remove old or deleted games/gameSets
-    private fun cleanData(gamesIds:String){
+    private fun cleanData(){
         val dbHandler=Db(requireContext(), null)
-        dbHandler.deleteWhere("game", "`id` not in ($gamesIds)")
-        dbHandler.deleteWhere("gameSet", "`set_gameId_id` not in ($gamesIds)")
+        dbHandler.deleteWhere("game")
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {

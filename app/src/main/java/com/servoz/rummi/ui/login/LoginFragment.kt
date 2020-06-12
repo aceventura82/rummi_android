@@ -63,13 +63,12 @@ class LoginFragment : Fragment() {
                     requireActivity().finish()
                     val intent = Intent(requireContext(), MainActivity::class.java)
                     startActivity(intent)
-                    loadingLogin.isVisible=false
                 }
             }else{
-                //println("DEBUG:Login Fail $result")
                 Toast.makeText(requireContext(), result, Toast.LENGTH_SHORT).show()
                 prefs.edit().putString("appKey", "").apply()
             }
+            loadingLogin.isVisible=false
         }
     }
 }

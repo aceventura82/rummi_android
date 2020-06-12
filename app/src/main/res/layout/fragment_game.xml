@@ -305,23 +305,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!--Top Menu-->
-    <GridLayout
+    <LinearLayout
         android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:rowCount="1"
-        android:columnCount="2"
+        android:layout_gravity="end|bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/configLayout"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_columnWeight="1"
-            android:layout_row="0"
-            android:layout_column="0"
+            android:layout_weight="1"
             android:background="@color/game_text_bg"
             android:visibility="invisible">
 
@@ -386,15 +383,12 @@
             android:id="@+id/buttonLauncherMenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:layout_gravity="end|bottom"
             android:background="@color/game_text_bg"
             android:contentDescription="@string/menu"
             android:textColor="#fff"
             app:srcCompat="@drawable/ic_baseline_arrow_back_ios_24" />
 
-    </GridLayout>
+    </LinearLayout>
 
     <!--messages view-->
     <LinearLayout

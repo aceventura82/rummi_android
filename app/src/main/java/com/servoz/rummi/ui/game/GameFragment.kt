@@ -7,13 +7,14 @@ import android.content.pm.ActivityInfo
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.method.ScrollingMovementMethod
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.view.*
-import android.view.View.GONE
+import android.view.View.*
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.*
@@ -27,8 +28,9 @@ import com.servoz.rummi.tools.FetchData
 import com.servoz.rummi.tools.MyTools
 import com.servoz.rummi.tools.PREF_FILE
 import kotlinx.android.synthetic.main.fragment_game.*
-import kotlinx.android.synthetic.main.fragment_game.view.*
+import kotlinx.android.synthetic.main.fragment_game.view.text_game_info
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.android.synthetic.main.game_info.view.*
 import kotlinx.android.synthetic.main.set_summary.view.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -50,7 +52,7 @@ class GameFragment: Fragment() {
     private var players= listOf<String>()
     private var playersCount=0
     private var userId=-1
-    private var keySedUser=""
+    private var keySetUser=""
     private var playersNames=arrayListOf("","","","","")
     private var inCard=""
     private var myPos=0
@@ -69,6 +71,8 @@ class GameFragment: Fragment() {
     private var moving=false
     private lateinit var summaryWindow:PopupWindow
     private var flowAuto=""
+    private lateinit var dbHandler:Db
+    private var updateCards=true
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -86,13 +90,15 @@ class GameFragment: Fragment() {
         if(prefs!!.getString("MESSAGES","")=="ON")
             switchMessageView()
         flowAuto=prefs!!.getString("MESSAGES_FLOW","").toString()
+        dbHandler=Db(requireContext(),null)
 
         try{
             gameId= arguments?.getString("gameId")!!
-            //set all UI data when user enters the game
-            initialView()
-            //background remote sync
-            bgSync()
+            //get stored messages from Db
+            getStoredMessages()
+            getStoredFlow()
+            //get remote data and set all UI when user enters the game
+            remoteData(false)
             //set listeners
             setListeners()
         }catch (ex:NullPointerException){}
@@ -110,33 +116,36 @@ class GameFragment: Fragment() {
     }
 
     //************ CONTROL FUNCTIONS
+
+    //update remote data each 3 sec
+    private fun bgSync(){
+        doAsync {
+            while(true){
+                sleep(3_000)
+                remoteData(true)
+                if(gameData["started"].toString()== "2")
+                    break
+            }
+        }
+    }
+
     //get initial view after each movement
     private fun initialView(bg:Boolean=false):Boolean{
-        FetchData(arrayListOf(),this).updateData("gameDetailInfo", "",cache = false,
-            addParams = hashMapOf("gameId" to gameId)) { result ->
-            val data=MyTools().stringListToJSON(result)
-            if(data.count()>0) {
-                //set game Data in variables
-                setGameData(data)
-                //check Game status, set controls if open or in game
-                gameStatus(bg)
-                //show discards
-                showDiscards()
-                //show drawn cards
-                showDrawn()
-                // get messages
-                getLastMessages()
-                if(!bg){
-                    //playersInfo
-                    playersInfo()
-                    //put my cards
-                    showMyCards()
-                }
-            }else{
-                text_game_info.text = getString(R.string.unknown_error)
-            }
-            loadingGame.isVisible=false
+        //check Game status, set controls if open or in game
+        gameStatus(bg)
+        //show discards
+        showDiscards()
+        //show drawn cards
+        showDrawn()
+        // get messages
+        getLastMessages()
+        if(!bg){
+            //playersInfo
+            playersInfo()
+            //put my cards
+            showMyCards()
         }
+        loadingGame.isVisible=false
         return try{
             gameData["started"]==""
         }catch(ex: JSONException){
@@ -144,24 +153,76 @@ class GameFragment: Fragment() {
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
+    private fun remoteData(bg:Boolean){
+        val updDate=try{
+            if(bg)dbHandler.getData("remote_data", "`gameId_id`=$gameId")[0][1]  else ""
+        }catch (ex:java.lang.IndexOutOfBoundsException){
+            dbHandler.addData("remote_data", hashMapOf("gameId_id" to gameId, "date" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())))
+            ""
+        }
+        FetchData(arrayListOf(),this).updateData("bundleData", "",cache = false,
+            addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
+                "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
+            if(result!="OK"){
+                println("new data")
+                val data = MyTools().stringListToJSON(result)
+                if (data.count() > 0) {
+                    //set new update time
+                    dbHandler.editData("remote_data", "`gameId_id`=$gameId", hashMapOf("date" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())))
+                    //set game Data in variables
+                    setGameData(data)
+                    //update views
+                    initialView(!updateCards)
+                    updateCards=false
+                }else
+                    text_game_info.text = getString(R.string.unknown_error)
+                //start background remote sync if first time
+                if(!bg)
+                    bgSync()
+            }
+        }
+    }
     //set game Data in variables
     private fun setGameData(data:ArrayList<JSONObject>){
         gameData=data[0]
         playersCount=0
         players=gameData["playersPos"].toString().split(",")
-        for(dataSet in data){
-            gameSetData["${dataSet["set_set"]}_${dataSet["set_userId_id"]}"]= arrayListOf(dataSet["set_current_cards"].toString(), dataSet["set_drawn"].toString(), dataSet["set_points"].toString())
-            if(dataSet["set_set"]=="1")
-            playersCount++
+        var recordType=0
+        for(dataSet in data) {
+            if (dataSet.has("messages") && dataSet["messages"] == 1) {//add messages
+                recordType = 1
+                continue
+            }
+            else if (dataSet.has("flow") && dataSet["flow"] == 1) {//add flow messages
+                recordType = 2
+                continue
+            }
+            when(recordType){ // adding game set data
+                0-> {gameSetData["${dataSet["set_set"]}_${dataSet["set_userId_id"]}"] = arrayListOf(dataSet["set_current_cards"].toString(), dataSet["set_drawn"].toString(), dataSet["set_points"].toString())
+                    if (dataSet["set_set"] == "1")
+                        playersCount++
+                }
+                1 -> dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
+                        "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
+                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                    ))
+                2 -> dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
+                        "gameId_id" to dataSet["gameId_id"].toString(),
+                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                    ))
+            }
         }
         userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
-        keySedUser="${gameData["current_set"]}_$userId"
+        keySetUser="${gameData["current_set"]}_$userId"
         // get Players names
         playersNames=arrayListOf("","","","","")
         for( (c,p) in players.withIndex())
             if(p!="")
                 for (dataSet in data)
-                    if(dataSet["set_userId_id"]==p)
+                    if (dataSet.has("messages") && dataSet["messages"] == 1) // stop when get to messages section
+                        break
+                    else if(dataSet["set_userId_id"]==p)
                         playersNames[c]=dataSet["name"].toString()
         // order info starting with me
         orderInfo()
@@ -242,7 +303,7 @@ class GameFragment: Fragment() {
             else ->{
                 mainButton.isVisible=false
                 //show draw button if not drawn yet and already picked a card and not selecting cards to draw
-                if(gameSetData[keySedUser]!![1]=="" && inCard!="" && mainButton.text!=getString(R.string.cancel)){
+                if(gameSetData[keySetUser]!![1]=="" && inCard!="" && mainButton.text!=getString(R.string.cancel)){
                     mainButton.text=getString(R.string.draw)
                     mainButton.isVisible=true
                 }
@@ -256,18 +317,6 @@ class GameFragment: Fragment() {
         }
         if(cards.childCount==0)
             showMyCards()
-    }
-
-    //update remote data each 3 sec
-    private fun bgSync(){
-        doAsync {
-            while(true){
-                sleep(3_000)
-                initialView(true)
-                if(gameData["started"].toString()== "2")
-                    break
-            }
-        }
     }
 
     //************ END CONTROL FUNCTIONS
@@ -320,12 +369,23 @@ class GameFragment: Fragment() {
         }catch(ex:UninitializedPropertyAccessException){}
         if(opc=="game" && bg)
             return
-        summaryWindow= PopupWindow(requireContext())
-        val windowView=LayoutInflater.from(context).inflate(R.layout.set_summary, gridLayoutProfile, false)
+        val windowView=LayoutInflater.from(context).inflate(R.layout.set_summary, layoutProfile, false)
+        if(Build.VERSION.SDK_INT<=22){
+            summaryWindow= PopupWindow(windowView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            summaryWindow.isOutsideTouchable=false
+            summaryWindow.elevation = 5.0f
+        }else
+            summaryWindow= PopupWindow(requireContext())
         summaryWindow.contentView=windowView
         summaryWindow.isFocusable=true
         summaryWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
         windowView.summaryGrid.columnCount=playersCount+1
+        windowView.setSummaryLayout.setOnClickListener{
+            summaryWindow.dismiss()
+        }
         //add set title
         addGrid(windowView,getString(R.string.set),0,0,60.dp, true)
         var col=1
@@ -441,11 +501,24 @@ class GameFragment: Fragment() {
 
     // show game info window
     private fun displayGameInfo(){
-        val gameWindow= PopupWindow(requireContext())
-        val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, gridLayoutProfile, false)
+        val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
+        val gameWindow:PopupWindow
+        if(Build.VERSION.SDK_INT<=22){
+            gameWindow= PopupWindow(windowView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            gameWindow.isOutsideTouchable=false
+            gameWindow.elevation = 5.0f
+        }else
+            gameWindow= PopupWindow(requireContext())
+        //val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
         gameWindow.contentView=windowView
         gameWindow.isFocusable=true
         gameWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
+        windowView.gameInfoLayout.setOnClickListener{
+            gameWindow.dismiss()
+        }
         val setN:String
         val setG:String
         val fulD=if(gameData["fullDraw"].toString()[Integer.parseInt(gameData["current_set"].toString())-1]=='0') " "+getString(R.string.not_upper) else ""
@@ -500,7 +573,8 @@ class GameFragment: Fragment() {
         cards.removeAllViews()
         inCard=""
         //get cards in hand
-        val myCards= gameSetData[keySedUser]?.get(0)!!.trim(',').split(",")
+        val myCards= gameSetData[keySetUser]?.get(0)!!.trim(',').split(",")
+        println(myCards)
         cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
         if(cardsSpace>30.dp)
             cardsSpace=30.dp
@@ -510,7 +584,7 @@ class GameFragment: Fragment() {
                 addMyCard(card, c)
         //get inCard if returning user to game
         if("2345".indexOf(gameData["moveStatus"].toString())!=-1){
-            val cardsAux= gameSetData[keySedUser]!![0].trim(',').split(',')
+            val cardsAux= gameSetData[keySetUser]!![0].trim(',').split(',')
             if(cardsAux.count()>0) {
                 inCard = cardsAux[cardsAux.count() - 1]
             }
@@ -700,7 +774,7 @@ class GameFragment: Fragment() {
         //lower a card in the hand
         private fun moveCard(pos:Int){
             val cards= arrayListOf<String>()
-            val cardList=gameSetData[keySedUser]!![0].trim(',').split(",")
+            val cardList=gameSetData[keySetUser]!![0].trim(',').split(",")
             for((c,card) in cardList.withIndex()){
                 if(c!=pos && c!=cardPos) //add previous cards and rest of card, but moved card
                     cards.add(card)
@@ -709,7 +783,7 @@ class GameFragment: Fragment() {
                     cards.add(cardList[cardPos])
                 }
             }
-            gameSetData[keySedUser]!![0]=cards.joinToString(",")+","
+            gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
             showMyCards()
             doAsync {
                 FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
@@ -719,12 +793,14 @@ class GameFragment: Fragment() {
 
         //order cards, 0: same number, 1: same color
         private fun sortCards(color:Boolean=false){
-            var cardList= gameSetData[keySedUser]!![0].trim(',').split(",").toMutableList()
+            if(gameSetData[keySetUser]!![0]=="")
+                return
+            var cardList= gameSetData[keySetUser]!![0].trim(',').split(",").toMutableList()
             //fix to keep numeric sort
             cardList=fixSort(cardList,true,color)
             var cards= cardList.sorted() as MutableList<String>
             cards=fixSort(cards,false,color)
-            gameSetData[keySedUser]!![0]=cards.joinToString(",")+","
+            gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
             showMyCards()
             MyTools().toast(requireContext(),getString(if(color)R.string.sort_color else R.string.sort_number))
             doAsync {
@@ -767,13 +843,13 @@ class GameFragment: Fragment() {
             if(!configLayout.isVisible){
                 p1=configLayout.width.toFloat()
                 p2=0f
-                configLayout.isVisible=true
+                configLayout.visibility= VISIBLE
                 buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_forward_ios_24))
             }
             else{
                 p1=0f
                 p2=configLayout.width.toFloat()
-                configLayout.isVisible=false
+                configLayout.visibility= INVISIBLE
                 buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_back_ios_24))
             }
             val animate = TranslateAnimation(p1, p2, 0f, 0f)
@@ -839,6 +915,7 @@ class GameFragment: Fragment() {
     //call dragCard from deck to preview card
     private fun moveCardFromStack(){
         sendFlow("${playersNames[0]}: ${getString(R.string.picked_card_stack)}")
+        updateCards=true
         dragCard(moveCardFromStack,deck,moveCardFromStack1){
             moveCardFromStack.isVisible=false
             moveCardFromStack1.isVisible=true
@@ -846,6 +923,7 @@ class GameFragment: Fragment() {
             doAsync {
                 sleep(1000)
                 uiThread {
+                    addMyCard(inCard,cards.childCount+1)
                     moveCardFromStack1.isVisible=false
                     initialView()
                 }
@@ -855,6 +933,7 @@ class GameFragment: Fragment() {
 
     //call dragCard from discard1 to last cards
     private fun moveCardFromDiscard(){
+        updateCards=true
         sendFlow("${playersNames[0]}: ${getString(R.string.picked_card_discard)}: ${getCardName(inCard)}")
         moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+inCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
         dragCard(moveCardFromDiscard,discard1,moveCardFromStack1){
@@ -864,6 +943,7 @@ class GameFragment: Fragment() {
             doAsync {
                 sleep(1000)
                 uiThread {
+                    addMyCard(inCard,cards.childCount+1)
                     moveCardFromStack1.isVisible=false
                     initialView()
                 }
@@ -873,8 +953,10 @@ class GameFragment: Fragment() {
 
     //call dragCard from raised card to discard 2
     private fun moveCardToDiscard(){
+        updateCards=true
         sendFlow("${playersNames[0]}: ${getString(R.string.discarded_card)}: ${getCardName(outCard)}")
         dragCard(cardViewPos,cardViewPos,discard2){
+            cardViewPos.isVisible=false
             moveCardFromStack1.isVisible=false
             inCard = ""
             outCard = ""
@@ -884,8 +966,10 @@ class GameFragment: Fragment() {
 
     //call dragCard from raised card to drawn
     private fun moveCardToDraw(view:View){
+        updateCards=true
         sendFlow("${playersNames[0]}: ${getString(R.string.draw_over_card)}: ${getCardName(outCard)}")
         dragCard(cardViewPos,cardViewPos,view){
+            cardViewPos.isVisible=false
             moveCardFromStack1.isVisible=false
             outCard = ""
         }
@@ -1054,6 +1138,7 @@ class GameFragment: Fragment() {
                             msg=res[1]
                             text_game_info.text = getString(R.string.loading)
                             mainButton.isVisible=false
+                            updateCards=true
                             initialView()
                             sendFlow("${playersNames[0]}: ${getString(R.string.start_game)}")
                         }
@@ -1078,6 +1163,7 @@ class GameFragment: Fragment() {
                     msg=res[1]
                     text_game_info.text = getString(R.string.loading)
                     mainButton.isVisible=false
+                    updateCards=true
                     initialView()
                     sendFlow("${playersNames[0]}: ${getString(R.string.deal_cards)}")
                 }
@@ -1130,7 +1216,7 @@ class GameFragment: Fragment() {
                     MyTools().toast(requireContext(),getString(R.string.already_picked_card))
                     loadingGame.isVisible=false
                 }
-                gameSetData[keySedUser]?.get(1)!=""->{
+                gameSetData[keySetUser]?.get(1)!=""->{
                     MyTools().toast(requireContext(),getString(R.string.cannot_pick_discard_drawn))
                     loadingGame.isVisible=false
                 }
@@ -1260,6 +1346,7 @@ class GameFragment: Fragment() {
                     drawCards="-1"
                     text_draw_info.removeAllViews()
                     addGameDrawButton.text=getString(R.string.add_draw_game)
+                    updateCards=true
                     initialView()
                     sendFlow("${playersNames[0]}: ${getString(R.string.draw)}")
                 }
@@ -1295,7 +1382,7 @@ class GameFragment: Fragment() {
     }
     @SuppressLint("ClickableViewAccessibility")
     private fun dragMessagesListener(){
-        val listener = View.OnTouchListener(function = { _, motionEvent ->
+        val listener = OnTouchListener(function = { _, motionEvent ->
             if(moving){
                 if (motionEvent.action == MotionEvent.ACTION_MOVE) {
                     message_layout.y = motionEvent.rawY - message_layout.height/2
@@ -1322,7 +1409,6 @@ class GameFragment: Fragment() {
             getStoredFlow()
             getStoredMessages()
         }
-        val dbHandler= Db(requireContext(),null)
         // get id of last message
         val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
         val curId=try{
@@ -1331,18 +1417,14 @@ class GameFragment: Fragment() {
         if(messagesLastId!=curId)
             for(message in dbHandler.getData("messages", "`gameId_id`=$gameId AND `id` >$messagesLastId"))
                 messages_input.append(putMsg(message[1], message[2], message[3]))
-        message_scroll.fullScroll(View.FOCUS_DOWN)
+        message_scroll.fullScroll(FOCUS_DOWN)
         messagesLastId=curId
-        //get new messages
-        FetchData(arrayListOf("id", "msg", "date", "gameId_id", "userId_id"),this).updateData("getMessages", "messages",
-            addParams = hashMapOf("gameId" to gameId, "lastId" to (messagesLastId+1).toString()),
-            where = "`id`>$curId")
-        getLastFlow()
+        if(gameData["started"]=="1")
+            getLastFlow()
     }
 
     //get message from db when first load
     private fun getStoredMessages(){
-        val dbHandler= Db(requireContext(),null)
         val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
         messagesLastId=try{
             Integer.parseInt(lastId[0][0])
@@ -1354,7 +1436,6 @@ class GameFragment: Fragment() {
 
     //get flow message from db when first load
     private fun getStoredFlow(){
-        val dbHandler= Db(requireContext(),null)
         val lastId=dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
         flowLastId=try{
             Integer.parseInt(lastId[0][0])
@@ -1377,7 +1458,6 @@ class GameFragment: Fragment() {
     }
     //get flow from server
     private fun getLastFlow(){
-        val dbHandler= Db(requireContext(),null)
         // get id of last message
         val lastId=dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
         val curId=try{
@@ -1399,18 +1479,16 @@ class GameFragment: Fragment() {
                 }
         }
         flowLastId=curId
-        //get new messages
-        FetchData(arrayListOf("id", "msg", "date", "gameId_id"),this).updateData("getFlow", "flow",
-            addParams = hashMapOf("gameId" to gameId, "lastId" to (flowLastId+1).toString()),
-            where = "`id`>$curId")
     }
 
     private fun scrollTVDown(){
-        val scrollAmount = text_game_flow.layout.getLineTop(text_game_flow.lineCount) - text_game_flow.height
-        if (scrollAmount > 0)
-            text_game_flow.scrollTo(0, scrollAmount)
-        else
-            text_game_flow.scrollTo(0, 0)
+        try{
+            val scrollAmount = text_game_flow.layout.getLineTop(text_game_flow.lineCount) - text_game_flow.height
+            if (scrollAmount > 0)
+                text_game_flow.scrollTo(0, scrollAmount)
+            else
+                text_game_flow.scrollTo(0, 0)
+        }catch (ex:Exception){}
     }
 
     //put a message in the messages area
@@ -1418,9 +1496,6 @@ class GameFragment: Fragment() {
     private fun putMsg(msg:String, date:String, userId:String=""):SpannableString{
         val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val formatter = SimpleDateFormat("HH:mm:ss")
-
-        /*val localDateTime: LocalDateTime = LocalDateTime.parse(date.replace(" ","T"))
-        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")*/
         val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
         val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: $msg\n")
         ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size

@@ -66,7 +66,7 @@ class ProfileFragment : Fragment() {
 
         requireActivity().toolbar.buttonChangePass.setOnClickListener {
             val passWindow=PopupWindow(context)
-            val windowView=LayoutInflater.from(context).inflate(R.layout.change_pass, gridLayoutProfile, false)
+            val windowView=LayoutInflater.from(context).inflate(R.layout.change_pass, layoutProfile, false)
             passWindow.contentView=windowView
             passWindow.isFocusable=true
             passWindow.showAsDropDown(requireActivity().toolbar.buttonChangePass)
