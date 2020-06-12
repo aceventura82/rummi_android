@@ -75,7 +75,7 @@ class EditGameFragment: Fragment() {
             val sendIntent = Intent()
             sendIntent.action = Intent.ACTION_SEND
             sendIntent.putExtra(
-                Intent.EXTRA_TEXT,getString(R.string.share_desc, gameData[7],"$URL/joinGame/${gameData[7]}")
+                Intent.EXTRA_TEXT,getString(R.string.share_desc, gameData[8],"$URL/joinGame/${gameData[8]}")
             )
             sendIntent.type = "text/plain"
             startActivity(sendIntent)
