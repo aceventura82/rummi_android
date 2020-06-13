@@ -24,6 +24,7 @@ import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
+import org.jetbrains.anko.doAsync
 import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var prefs: SharedPreferences? = null
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
+    private var processId=0
 
     override fun attachBaseContext(newBase: Context?) {
         prefs = newBase!!.getSharedPreferences(PREF_FILE, 0)
@@ -46,6 +48,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         prefs = getSharedPreferences(PREF_FILE, 0)
         setContentView(R.layout.activity_main)
+        prefs!!.edit().putString("check_turn", "ON").apply()
+        processId= (1..99999999).random()
+        checkTurn(processId)
         //set the app theme
         when(prefs!!.getString("THEME","System")){
             "Dark" -> {
@@ -69,6 +74,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         notificationChannels()
         hideShowMenuItems(prefs!!.getString("appKey", "") !== "")
         drawerData()
+    }
+
+    override fun onPause() {
+        processId= (1..99999999).random()
+        checkTurn(processId)
+        super.onPause()
+    }
+
+    override fun onResume() {
+        processId= (1..99999999).random()
+        checkTurn(processId)
+        super.onResume()
     }
 
     //put the user data in the left drawer
@@ -207,5 +224,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         deleteDatabase(DB_NAME)
         finish()
         startActivity(intent)
+    }
+
+    //check turn for notifications
+    private fun checkTurn(pId:Int){
+        doAsync {
+            while(processId==pId) {
+                if (prefs!!.getString("check_turn", "") == "ON") {
+                    //check remote if my turn only if app in background and game started and not ended
+                    FetchData(arrayListOf(), nav_host_fragment).updateData("myTurn", "", cache = false) { result ->
+                        if (result != "") {
+                            val res = result.split(",")
+                            //send notification
+                            for (gameId in res)
+                                checkGameName(gameId)
+                            prefs!!.edit().putString("check_turn", "").apply()
+                        }
+                    }
+                }
+                Thread.sleep(30000)
+            }
+        }
+    }
+
+    private fun checkGameName(gameId:String){
+        if(prefs!!.getString("current_game","")!=gameId)
+        FetchData(arrayListOf(),nav_host_fragment).updateData("gameInfo", "",cache = false,addParams = hashMapOf("gameId" to gameId)) { result ->
+            val data = MyTools().stringListToJSON(result)
+            if (data.count() > 0)
+                Notifications().create(this@MainActivity, getString(R.string.your_turn), getString(R.string.notif_turn_game, data[0]["name"]), gameId)
+        }
     }
 }

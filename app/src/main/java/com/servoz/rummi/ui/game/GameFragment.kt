@@ -5,8 +5,11 @@ import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
+import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Color
 import android.graphics.Typeface
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
@@ -23,10 +26,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import com.servoz.rummi.R
-import com.servoz.rummi.tools.Db
-import com.servoz.rummi.tools.FetchData
-import com.servoz.rummi.tools.MyTools
-import com.servoz.rummi.tools.PREF_FILE
+import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.fragment_game.*
 import kotlinx.android.synthetic.main.fragment_game.view.text_game_info
 import kotlinx.android.synthetic.main.fragment_profile.*
@@ -94,6 +94,7 @@ class GameFragment: Fragment() {
 
         try{
             gameId= arguments?.getString("gameId")!!
+            prefs!!.edit().putString("current_game", gameId).apply()
             //get stored messages from Db
             getStoredMessages(true)
             getStoredFlow(true)
@@ -113,6 +114,11 @@ class GameFragment: Fragment() {
             fragment.arguments = args
             return fragment
         }
+    }
+
+    override fun onPause() {
+        prefs!!.edit().putString("current_game", "").apply()
+        super.onPause()
     }
 
     //************ CONTROL FUNCTIONS
@@ -137,8 +143,6 @@ class GameFragment: Fragment() {
         showDiscards()
         //show drawn cards
         showDrawn()
-        // get messages
-        getLastMessages()
         if(!bg){
             //playersInfo
             playersInfo()
@@ -206,14 +210,26 @@ class GameFragment: Fragment() {
                     if (dataSet["set_set"] == "1")
                         playersCount++
                 }
-                1 -> dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
-                        "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
-                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                    ))
-                2 -> dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
-                        "gameId_id" to dataSet["gameId_id"].toString(),
-                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                    ))
+                1 -> {
+                    try{
+                        dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
+                            "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
+                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                        ))
+                        messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(),dataSet["userId_id"].toString()))
+                        if(userId.toString()!=dataSet["userId_id"].toString())
+                            playNotification()
+                    }catch (ex: SQLiteConstraintException){}
+                }
+                2 -> {
+                    try{
+                        dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
+                            "gameId_id" to dataSet["gameId_id"].toString(),
+                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                        ))
+                        text_game_flow.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString()))
+                    }catch (ex: SQLiteConstraintException){}
+                }
             }
         }
         userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
@@ -280,6 +296,7 @@ class GameFragment: Fragment() {
                     mainButton.text=getString(R.string.start_game)
                     mainButton.isVisible=true
                 }
+                myTurn=false
             }
             // check if game ended?
             gameData["started"].toString()== "2"->{
@@ -291,16 +308,21 @@ class GameFragment: Fragment() {
                 text_game_info.text = getString(R.string.your_turn)
                 mainButton.text=getString(R.string.deal_cards)
                 mainButton.isVisible=true
+                //play sound if first time
+                if(!myTurn)
+                    playNotification()
             }
             //is started but no dealt yet?
             gameData["current_stack"]=="" ->{
                 text_game_info.text = getString(R.string.waiting_for_deal)
+                myTurn=false
             }
             //check if not my turn
             gameData["current_stack"]!="" && currentUser != userId ->{
                 text_game_info.text = getString(R.string.waiting_for_player_move, playersNames[Integer.parseInt(gameData["currentPlayerPos"].toString())])
                 draw_info_layout.isVisible=false
                 mainButton.isVisible=false
+                myTurn=false
             }
             // my turn!
             else ->{
@@ -315,6 +337,9 @@ class GameFragment: Fragment() {
                     "23".indexOf(gameData["moveStatus"].toString())!=-1 ->{text_game_info.text = getString(R.string.discard_card_or_draw)}
                     "45".indexOf(gameData["moveStatus"].toString())!=-1 ->{text_game_info.text = getString(R.string.discard_card)}
                 }
+                //play sound if first time
+                if(!myTurn)
+                    playNotification()
                 myTurn=true
             }
         }
@@ -1404,26 +1429,6 @@ class GameFragment: Fragment() {
     // *********** END LISTENERS FUNCTIONS
 
     // *********** MESSAGES
-    //get message from server
-    private fun getLastMessages(){
-        //get stored messages
-        if(messagesLastId==-1){
-            getStoredFlow()
-            getStoredMessages()
-        }
-        // get id of last message
-        val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
-        val curId=try{
-            Integer.parseInt(lastId[0][0])
-        }catch(ex:java.lang.NumberFormatException){ 0 }
-        if(messagesLastId!=curId)
-            for(message in dbHandler.getData("messages", "`gameId_id`=$gameId AND `id` >$messagesLastId"))
-                messages_input.append(putMsg(message[1], message[2], message[3]))
-        message_scroll.fullScroll(FOCUS_DOWN)
-        messagesLastId=curId
-        if(gameData["started"]=="1")
-            getLastFlow()
-    }
 
     //get message from db when first load
     private fun getStoredMessages(getId:Boolean=false){
@@ -1462,30 +1467,6 @@ class GameFragment: Fragment() {
                 }
             }
     }
-    //get flow from server
-    private fun getLastFlow(){
-        // get id of last message
-        val lastId=dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
-        val curId=try{
-            Integer.parseInt(lastId[0][0])
-        }catch(ex:java.lang.NumberFormatException){ 0 }
-        if(flowLastId!=curId) {
-            text_game_flow.isVisible=true
-            for (message in dbHandler.getData("flow", "`gameId_id`=$gameId AND `id` >$flowLastId"))
-                text_game_flow.append(putMsg(message[1], message[2]))
-            scrollTVDown()
-            if(flowAuto=="")
-                doAsync {
-                    sleep(5000)
-                    uiThread {
-                        try {
-                            text_game_flow.isVisible = false
-                        }catch (ex:IllegalStateException){}
-                    }
-                }
-        }
-        flowLastId=curId
-    }
 
     private fun scrollTVDown(){
         try{
@@ -1500,13 +1481,17 @@ class GameFragment: Fragment() {
     //put a message in the messages area
     @SuppressLint("SimpleDateFormat")
     private fun putMsg(msg:String, date:String, userId:String=""):SpannableString{
-        val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val formatter = SimpleDateFormat("HH:mm:ss")
-        val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
-        val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: $msg\n")
-        ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size
-        ss1.setSpan(ForegroundColorSpan(Color.LTGRAY), user.count(), user.count()+9, 0) // set color
-        return ss1
+        return try{
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val formatter = SimpleDateFormat("HH:mm:ss")
+            val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
+            val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: $msg\n")
+            ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size
+            ss1.setSpan(ForegroundColorSpan(Color.LTGRAY), user.count(), user.count()+9, 0) // set color
+            ss1
+        }catch (ex:Exception){
+            SpannableString(msg)
+        }
     }
 
     //add new message in the server
@@ -1523,6 +1508,17 @@ class GameFragment: Fragment() {
         FetchData(arrayListOf("id", "msg", "date", "gameId_id"),this).updateData("addToFlow", "", cache=false,
             addParams = hashMapOf("gameId" to gameId, "msg" to msg))
     }
+
+    private fun playNotification(){
+        try {
+            val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val r = RingtoneManager.getRingtone(requireContext().applicationContext, notification)
+            r.play()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
     // *********** END MESSAGES
 }

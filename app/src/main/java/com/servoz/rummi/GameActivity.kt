@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import com.servoz.rummi.tools.PREF_FILE
 import com.servoz.rummi.ui.game.GameFragment
 
 
@@ -18,6 +19,8 @@ class GameActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         setContentView(R.layout.activity_game)
+
+        getSharedPreferences(PREF_FILE, 0).edit().putString("check_turn", "ON").apply()
 
         val gameFragment = GameFragment.newInstance(intent.getStringExtra("gameId")!!)
         supportFragmentManager

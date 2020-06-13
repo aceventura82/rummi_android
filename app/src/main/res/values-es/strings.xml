@@ -147,4 +147,5 @@
     <string name="sort_number">Ordenar por numero</string>
     <string name="flow_visible">Mensajes del juego visibles</string>
     <string name="flow_auto_hide">Auto ocultar mensajes del juego</string>
+    <string name="notif_turn_game">It\'s your turn to play in game %1$s</string>
 </resources>
