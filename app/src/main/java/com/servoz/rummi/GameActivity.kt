@@ -19,7 +19,7 @@ class GameActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         setContentView(R.layout.activity_game)
-
+        //start notifications if user came from notification
         getSharedPreferences(PREF_FILE, 0).edit().putString("check_turn", "ON").apply()
 
         val gameFragment = GameFragment.newInstance(intent.getStringExtra("gameId")!!)

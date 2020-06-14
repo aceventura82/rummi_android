@@ -2,6 +2,7 @@ package com.servoz.rummi.ui.home
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -62,6 +63,12 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
             itemView.buttonLeaveGame.setOnClickListener{
                 leaveGame(fragment, Integer.parseInt(data[0]), fragment.loadingMyGames)
             }
+            //check if is player turn
+            if(data[13].split(",")[Integer.parseInt(data[14])]==userId && data[4]=="1")
+                if(Build.VERSION.SDK_INT<=22)
+                    itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().resources.getColor(R.color.game_turn))
+                else
+                    itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().getColor(R.color.game_turn))
         }
 
         private fun leaveGame(fragment: Fragment,gameId:Int, loadingMyGames: View){

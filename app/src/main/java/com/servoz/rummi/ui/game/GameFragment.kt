@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.content.res.Resources
-import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Color
 import android.graphics.Typeface
 import android.media.RingtoneManager
@@ -22,6 +21,7 @@ import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.*
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
@@ -94,6 +94,11 @@ class GameFragment: Fragment() {
 
         try{
             gameId= arguments?.getString("gameId")!!
+            //cancel notification if exists
+            with(NotificationManagerCompat.from(requireContext())) {
+                cancel(Integer.parseInt(gameId))
+            }
+            //mark this gameId as current game
             prefs!!.edit().putString("current_game", gameId).apply()
             //get stored messages from Db
             getStoredMessages(true)
@@ -117,6 +122,7 @@ class GameFragment: Fragment() {
     }
 
     override fun onPause() {
+        //remove this game id from current game
         prefs!!.edit().putString("current_game", "").apply()
         super.onPause()
     }
@@ -135,36 +141,20 @@ class GameFragment: Fragment() {
         }
     }
 
-    //get initial view after each movement
-    private fun initialView(bg:Boolean=false):Boolean{
-        //check Game status, set controls if open or in game
-        gameStatus(bg)
-        //show discards
-        showDiscards()
-        //show drawn cards
-        showDrawn()
-        if(!bg){
-            //playersInfo
-            playersInfo()
-            //put my cards
-            showMyCards()
-        }
-        loadingGame.isVisible=false
-        return try{
-            gameData["started"]==""
-        }catch(ex: JSONException){
-            false
-        }
-    }
-
     @SuppressLint("SimpleDateFormat")
     private fun remoteData(bg:Boolean){
         val updDate=try{
-            if(bg)dbHandler.getData("remote_data", "`gameId_id`=$gameId")[0][1]  else ""
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val formatter1 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            formatter1.timeZone = TimeZone.getTimeZone(TIMEZONE)
+            if(bg)
+                formatter1.format(parser.parse(dbHandler.getData("remote_data", "`gameId_id`=$gameId")[0][1])!!)
+            else ""
         }catch (ex:java.lang.IndexOutOfBoundsException){
             dbHandler.addData("remote_data", hashMapOf("gameId_id" to gameId, "date" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())))
             ""
         }
+
         FetchData(arrayListOf(),this).updateData("bundleData", "",cache = false,
             addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
                 "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
@@ -186,6 +176,7 @@ class GameFragment: Fragment() {
                     //get stored messages
                     getStoredMessages()
                     getStoredFlow()
+                    loadingGame.isVisible=false
                 }
             }
         }
@@ -194,6 +185,7 @@ class GameFragment: Fragment() {
     private fun setGameData(data:ArrayList<JSONObject>){
         gameData=data[0]
         playersCount=0
+        inCard=""
         players=gameData["playersPos"].toString().split(",")
         var recordType=0
         for(dataSet in data) {
@@ -211,24 +203,30 @@ class GameFragment: Fragment() {
                         playersCount++
                 }
                 1 -> {
-                    try{
-                        dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
-                            "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
-                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                        ))
-                        messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(),dataSet["userId_id"].toString()))
-                        if(userId.toString()!=dataSet["userId_id"].toString())
-                            playNotification()
-                    }catch (ex: SQLiteConstraintException){}
+                    if(dbHandler.getData("messages", "`id`=${dataSet["id"]}").count()==0)
+                    dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
+                        "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
+                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                    ))
+                    messagesLastId=Integer.parseInt(dataSet["id"].toString())
+                    try {
+                        messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), dataSet["userId_id"].toString()))
+                        scrollTVDown()
+                    }catch (ex:Exception){}
+                    if(userId.toString()!=dataSet["userId_id"].toString())
+                        playNotification()
                 }
                 2 -> {
+                    if(dbHandler.getData("flow", "`id`=${dataSet["id"]}").count()==0)
+                    dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
+                        "gameId_id" to dataSet["gameId_id"].toString(),
+                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                    ))
+                    flowLastId=Integer.parseInt(dataSet["id"].toString())
                     try{
-                        dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
-                            "gameId_id" to dataSet["gameId_id"].toString(),
-                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                        ))
                         text_game_flow.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString()))
-                    }catch (ex: SQLiteConstraintException){}
+                        scrollTVDown()
+                    }catch (ex:Exception){}
                 }
             }
         }
@@ -243,6 +241,13 @@ class GameFragment: Fragment() {
                         break
                     else if(dataSet["set_userId_id"]==p)
                         playersNames[c]=dataSet["name"].toString()
+        //get inCard if returning user to game
+        if("2345".indexOf(gameData["moveStatus"].toString())!=-1){
+            val cardsAux= gameSetData[keySetUser]!![0].trim(',').split(',')
+            if(cardsAux.count()>0) {
+                inCard = cardsAux[cardsAux.count() - 1]
+            }
+        }
         // order info starting with me
         orderInfo()
     }
@@ -279,6 +284,32 @@ class GameFragment: Fragment() {
                 return aux
             }
 
+    //get initial view after each movement
+    private fun initialView(bg:Boolean=false):Boolean{
+        return try {
+            mainButton.isVisible = false
+            //check Game status, set controls if open or in game
+            gameStatus(bg)
+            //show discards
+            showDiscards()
+            //show drawn cards
+            showDrawn()
+            //playersInfo
+            playersInfo(bg)
+            //put my cards
+            if(!bg || cards.childCount==0)
+            showMyCards()
+             try {
+                gameData["started"] == ""
+            } catch (ex: JSONException) {
+                false
+            }
+        }catch (ex:Exception){
+            ex.printStackTrace()
+            false
+        }
+    }
+
     //check Game status, set controls if open or in game
     private fun gameStatus(bg: Boolean=false){
         //check if set just ended and show summary windows
@@ -290,7 +321,7 @@ class GameFragment: Fragment() {
         when{
             //is started?
             gameData["started"].toString()== "0"->{
-                text_game_info.text = getString(R.string.waiting_for_player)
+                text_game_info.text = getString(R.string.waiting_for_player, gameData["code"])
                 // if creator user, show start game button
                 if(playersCount>1 && userId==Integer.parseInt(gameData["userId_id"].toString())){
                     mainButton.text=getString(R.string.start_game)
@@ -314,7 +345,7 @@ class GameFragment: Fragment() {
             }
             //is started but no dealt yet?
             gameData["current_stack"]=="" ->{
-                text_game_info.text = getString(R.string.waiting_for_deal)
+                text_game_info.text = getString(R.string.waiting_for_deal, playersNames[Integer.parseInt(gameData["currentPlayerPos"].toString())])
                 myTurn=false
             }
             //check if not my turn
@@ -326,19 +357,20 @@ class GameFragment: Fragment() {
             }
             // my turn!
             else ->{
-                mainButton.isVisible=false
+
                 //show draw button if not drawn yet and already picked a card and not selecting cards to draw
                 if(gameSetData[keySetUser]!![1]=="" && inCard!="" && mainButton.text!=getString(R.string.cancel)){
                     mainButton.text=getString(R.string.draw)
                     mainButton.isVisible=true
-                }
+                }else if(mainButton.text==getString(R.string.cancel))
+                    mainButton.isVisible=true
                 when{
                     gameData["moveStatus"]=="1" ->{text_game_info.text = getString(R.string.pick_card)}
                     "23".indexOf(gameData["moveStatus"].toString())!=-1 ->{text_game_info.text = getString(R.string.discard_card_or_draw)}
                     "45".indexOf(gameData["moveStatus"].toString())!=-1 ->{text_game_info.text = getString(R.string.discard_card)}
                 }
                 //play sound if first time
-                if(!myTurn)
+                if(!myTurn && inCard=="")
                     playNotification()
                 myTurn=true
             }
@@ -350,40 +382,59 @@ class GameFragment: Fragment() {
     //************ END CONTROL FUNCTIONS
 
     //*********** INFO
-    private fun playersInfo(){
-        gameP1.text=playersNames[0]
-        gameP2.text=playersNames[1]
-        gameP3.text=playersNames[2]
-        gameP4.text=playersNames[3]
-        gameP5.text=playersNames[4]
+    private fun playersInfo(bg:Boolean){
+        if(bg){
+
+            return
+        }
+        val c1=" ("+gameSetData["${gameData["current_set"]}_${players[0]}"]!![0].trim(',').split(",").count()+")"
+        val c2=if(players[1]!="")" ("+gameSetData["${gameData["current_set"]}_${players[1]}"]!![0].trim(',').split(",").count()+")" else ""
+        val c3=if(players[2]!="")" ("+gameSetData["${gameData["current_set"]}_${players[2]}"]!![0].trim(',').split(",").count()+")" else ""
+        val c4=if(players[3]!="")" ("+gameSetData["${gameData["current_set"]}_${players[3]}"]!![0].trim(',').split(",").count()+")" else ""
+        val c5=if(players[4]!="")" ("+gameSetData["${gameData["current_set"]}_${players[4]}"]!![0].trim(',').split(",").count()+")" else ""
+        gameP1.text=getString(R.string.player_cards,playersNames[0],c1)
+        gameP2.text=getString(R.string.player_cards,playersNames[1],c2)
+        gameP3.text=getString(R.string.player_cards,playersNames[2],c3)
+        gameP4.text=getString(R.string.player_cards,playersNames[3],c4)
+        gameP5.text=getString(R.string.player_cards,playersNames[4],c5)
         val image = getDrawable(requireContext(),R.drawable.ic_account_box_white_80dp)
         val h = image!!.intrinsicHeight
         val w = image.intrinsicWidth
         image.setBounds(0, 0, w, h)
         gameP1.setCompoundDrawables(null,image, null, null)
-        if(playersNames[1]!="")
-            gameP2.setCompoundDrawables(null,image, null, null)
-        else{
+        if(playersNames[1]!="") {
+            gameP2.setCompoundDrawables(null, image, null, null)
+            gameP2.visibility= VISIBLE
+            draw2.visibility=VISIBLE
+            discard3.visibility=VISIBLE
+        }else{
             gameP2.visibility= GONE
             draw2.visibility=GONE
             discard3.visibility=GONE
         }
-        if(playersNames[2]!="")
-            gameP3.setCompoundDrawables(null,image, null, null)
-        else{
+        if(playersNames[2]!="") {
+            gameP3.setCompoundDrawables(null, image, null, null)
+            gameP3.visibility=VISIBLE
+            draw3.visibility=VISIBLE
+            discard4.visibility=VISIBLE
+        }else{
             gameP3.visibility=GONE
             draw3.visibility=GONE
             discard4.visibility=GONE
         }
-        if(playersNames[3]!="")
-            gameP4.setCompoundDrawables(null,image, null, null)
-        else{
+        if(playersNames[3]!="") {
+            gameP4.setCompoundDrawables(null, image, null, null)
+            gameP4.visibility=VISIBLE
+            draw4.visibility=VISIBLE
+        }else{
             gameP4.visibility=GONE
             draw4.visibility=GONE
         }
-        if(playersNames[4]!="")
-            gameP5.setCompoundDrawables(null,image, null, null)
-        else{
+        if(playersNames[4]!="") {
+            gameP5.setCompoundDrawables(null, image, null, null)
+            gameP5.visibility= VISIBLE
+            draw5.visibility=VISIBLE
+        }else{
             gameP5.visibility=GONE
             draw5.visibility=GONE
         }
@@ -599,23 +650,15 @@ class GameFragment: Fragment() {
     //show user cards in hand
     private fun showMyCards(){
         cards.removeAllViews()
-        inCard=""
         //get cards in hand
         val myCards= gameSetData[keySetUser]?.get(0)!!.trim(',').split(",")
-        cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
+        cardsSpace=(cards.width-80.dp).div(myCards.count()+2)
         if(cardsSpace>30.dp)
             cardsSpace=30.dp
         //display each card
         for ((c,card) in myCards.withIndex())
             if(card!="")
                 addMyCard(card, c)
-        //get inCard if returning user to game
-        if("2345".indexOf(gameData["moveStatus"].toString())!=-1){
-            val cardsAux= gameSetData[keySetUser]!![0].trim(',').split(',')
-            if(cardsAux.count()>0) {
-                inCard = cardsAux[cardsAux.count() - 1]
-            }
-        }
     }
         //called by showMyCards to add each card
         private fun addMyCard(card:String, pos:Int){
@@ -716,6 +759,10 @@ class GameFragment: Fragment() {
 
     //show each user drawn games
     private fun showDrawn(){
+        var setAux= gameData["current_set"]
+        if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1)
+            setAux=Integer.parseInt(gameData["current_set"].toString())-1
+
         draw1.removeAllViews()
         draw2.removeAllViews()
         draw3.removeAllViews()
@@ -730,7 +777,7 @@ class GameFragment: Fragment() {
                 else ->draw5
             }
             if(player!=""){
-                val key="${gameData["current_set"]}_$player"
+                val key="${setAux}_$player"
                 //check if user has drawn
                 if(gameSetData[key]!![1]!="")
                     displayCardsInDraw(gameSetData[key]!![1], player, draw)
@@ -805,7 +852,7 @@ class GameFragment: Fragment() {
             for((c,card) in cardList.withIndex()){
                 if(c!=pos && c!=cardPos) //add previous cards and rest of card, but moved card
                     cards.add(card)
-                else if(c==pos){ // if position to move, add card
+                else if(c==pos && cardPos<cardList.count()){ // if position to move, add card
                     cards.add(card)
                     cards.add(cardList[cardPos])
                 }
@@ -836,30 +883,36 @@ class GameFragment: Fragment() {
             }
         }
         // fixes for sorting depending on numbers or color
-        private fun fixSort(data:MutableList<String>, start:Boolean, color:Boolean):MutableList<String>{
+        private fun fixSort(data:MutableList<String>, start: Boolean, color:Boolean):MutableList<String>{
             //first change to fix numeric sort
             if(start)
-                for (i in 0 until data.count())
-                    data[i]=when(data[i][0]){
-                        'A' -> "Y"+data[i][1]
-                        'K' -> "R"+data[i][1]
-                        '0' -> "B"+data[i][1]
-                        'X' -> "Z"+data[i][1]
+                for (i in 0 until data.count()) {
+                    data[i] = when (data[i][0]) {
+                        'A' -> "Y" + data[i][1]
+                        'K' -> "R" + data[i][1]
+                        '0' -> "H" + data[i][1]
+                        'X' -> "Z" + data[i][1]
                         else -> data[i]
                     }
-            //if sorting by color put colors first, or restore back
+                }
+            //if sorting by color put colors letter first, or restore back
             if(color)
                 for (i in 0 until data.count())
-                    data[i] = data[i][1].toString() + data[i][0].toString()
+                    data[i] = when{
+                        data[i][1].toString()=="D"-> "B" + data[i][0].toString()
+                        data[i][0].toString()=="B"-> data[i][1].toString()+"D"
+                        else -> data[i][1].toString() + data[i][0].toString()
+                    }
             if(!start)
-                for (i in 0 until data.count())
-                    data[i]=when(data[i][0]){
-                        'Y' -> "A"+data[i][1]
-                        'R' -> "K"+data[i][1]
-                        'B' -> "0"+data[i][1]
-                        'Z' -> "X"+data[i][1]
+                for (i in 0 until data.count()) {
+                    data[i] = when (data[i][0]) {
+                        'Y' -> "A" + data[i][1]
+                        'R' -> "K" + data[i][1]
+                        'H' -> "0" + data[i][1]
+                        'Z' -> "X" + data[i][1]
                         else -> data[i]
                     }
+                }
             return data
         }
 
@@ -1182,6 +1235,7 @@ class GameFragment: Fragment() {
         }
         //users deal the cards
         private fun dealCards(){
+            cards.removeAllViews()
             FetchData(arrayListOf(),this).updateData("dealCards", "",cache = false, addParams = hashMapOf("gameId" to gameData["id"].toString())) {
                     result ->
                 val res = result.split("|")
@@ -1283,6 +1337,13 @@ class GameFragment: Fragment() {
                     loadingGame.isVisible=false
                 }
                 else->{
+                    //check if discard card is twice, then remove the position selected and save to fixDiscardDouble
+                    var fixCardTwice=""
+                    if(gameSetData[keySetUser]!![0].split(outCard).count()==3){
+                        for ((c,cc) in gameSetData[keySetUser]!![0].split(",").withIndex())
+                            if(c!=cardPos)
+                                fixCardTwice+="$cc,"
+                    }
                     //discard card
                     FetchData(arrayListOf(), this).updateData(
                         "discardCard",
@@ -1299,12 +1360,21 @@ class GameFragment: Fragment() {
                         if(res.count()==2){
                             msg=res[1]
                             moveCardToDiscard()
+                            if(fixCardTwice!="")
+                                reorderCardsAfterDiscardTwice(fixCardTwice)
                         }
                         MyTools().toast(requireContext(),msg)
                         loadingGame.isVisible=false
                     }
                 }
             }
+        }
+    }
+    //reorder cards when discard is twice
+    private fun reorderCardsAfterDiscardTwice(cards:String){
+        doAsync {
+            FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
+                addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards))
         }
     }
 
@@ -1476,13 +1546,22 @@ class GameFragment: Fragment() {
             else
                 text_game_flow.scrollTo(0, 0)
         }catch (ex:Exception){}
+        text_game_flow.isVisible=true
+        doAsync {
+            sleep(5000)
+            uiThread {
+                try {
+                    text_game_flow.isVisible = false
+                }catch (ex:IllegalStateException){}
+            }
+        }
     }
 
     //put a message in the messages area
     @SuppressLint("SimpleDateFormat")
     private fun putMsg(msg:String, date:String, userId:String=""):SpannableString{
         return try{
-            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter = SimpleDateFormat("HH:mm:ss")
             val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
             val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: $msg\n")

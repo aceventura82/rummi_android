@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private var processId=0
+    private var login=false
 
     override fun attachBaseContext(newBase: Context?) {
         prefs = newBase!!.getSharedPreferences(PREF_FILE, 0)
@@ -48,8 +49,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         prefs = getSharedPreferences(PREF_FILE, 0)
         setContentView(R.layout.activity_main)
+        //start notifications
         prefs!!.edit().putString("check_turn", "ON").apply()
         processId= (1..99999999).random()
+        login=prefs!!.getString("appKey", "") !== ""
         checkTurn(processId)
         //set the app theme
         when(prefs!!.getString("THEME","System")){
@@ -72,7 +75,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
         navView.setNavigationItemSelectedListener(this)
         notificationChannels()
-        hideShowMenuItems(prefs!!.getString("appKey", "") !== "")
+        hideShowMenuItems(login)
         drawerData()
     }
 
@@ -229,16 +232,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     //check turn for notifications
     private fun checkTurn(pId:Int){
         doAsync {
-            while(processId==pId) {
+            while(processId==pId && login) {
                 if (prefs!!.getString("check_turn", "") == "ON") {
                     //check remote if my turn only if app in background and game started and not ended
                     FetchData(arrayListOf(), nav_host_fragment).updateData("myTurn", "", cache = false) { result ->
-                        if (result != "") {
+                        if (result != "" && result != "--") {
                             val res = result.split(",")
                             //send notification
                             for (gameId in res)
                                 checkGameName(gameId)
-                            prefs!!.edit().putString("check_turn", "").apply()
                         }
                     }
                 }
@@ -248,11 +250,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun checkGameName(gameId:String){
+        //notify if user not in current game
         if(prefs!!.getString("current_game","")!=gameId)
         FetchData(arrayListOf(),nav_host_fragment).updateData("gameInfo", "",cache = false,addParams = hashMapOf("gameId" to gameId)) { result ->
             val data = MyTools().stringListToJSON(result)
-            if (data.count() > 0)
+            //notify if game is started
+            if (data.count() > 0 && data[0]["started"]=="1"){
                 Notifications().create(this@MainActivity, getString(R.string.your_turn), getString(R.string.notif_turn_game, data[0]["name"]), gameId)
+                //pause notification until user click on notification or open app
+                prefs!!.edit().putString("check_turn", "").apply()
+            }
         }
     }
 }

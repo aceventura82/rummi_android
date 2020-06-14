@@ -13,7 +13,7 @@ import java.util.*
 class Notifications{
 
     fun create(context: Context, title:String, content:String, gameId:String="", channel:String="MAIN"): Int {
-        val id=Calendar.getInstance().timeInMillis.toInt()
+        val id=Integer.parseInt(gameId)
         val builder = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_baseline_alert)
             .setContentTitle(title)

@@ -104,7 +104,7 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
         if(!login)
             return
             //get my games
-        val fetchGame=FetchData(arrayListOf("id", "name", "date", "private", "fullDraw", "speed", "maxPlayers",
+        val fetchGame=FetchData(arrayListOf("id", "name", "date", "private", "started", "fullDraw", "speed", "maxPlayers",
             "code", "current_set", "current_stack", "current_discarded", "userId_id",
             "playersPos", "currentPlayerPos"), this)
         fetchGame.updateData("viewMyGames", "game","`started` ASC, `date` DESC"){

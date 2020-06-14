@@ -81,10 +81,10 @@
     <string name="leave_game">Abandonar Juego</string>
     <string name="message_leave_game">COnfirma abandonar juego?</string>
     <string name="left_game">Has abandonado el juego</string>
-    <string name="waiting_for_player">Esperando por jugadores</string>
+    <string name="waiting_for_player">Esperando por jugadores\nCodigo del juego: %1$s</string>
     <string name="loading">Cargando…</string>
     <string name="message_start_game">Listo para iniciar el juego? No se pueden unir mas usuarios luego de iniciado el juego</string>
-    <string name="waiting_for_deal">Esperando que se repartan las cartas</string>
+    <string name="waiting_for_deal">Esperando que %1$s reparta las cartas</string>
     <string name="your_turn">Es tu turno!</string>
     <string name="deal_cards">Repartir cartas</string>
     <string name="waiting_for_player_move">Esperando que %1$s juegue</string>
@@ -148,4 +148,5 @@
     <string name="flow_visible">Mensajes del juego visibles</string>
     <string name="flow_auto_hide">Auto ocultar mensajes del juego</string>
     <string name="notif_turn_game">It\'s your turn to play in game %1$s</string>
+    <string name="player_cards">%1$s %2$s</string>
 </resources>
