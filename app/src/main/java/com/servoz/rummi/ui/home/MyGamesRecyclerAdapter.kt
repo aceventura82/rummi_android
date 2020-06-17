@@ -61,14 +61,25 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
             }
             //listener leave game
             itemView.buttonLeaveGame.setOnClickListener{
-                leaveGame(fragment, Integer.parseInt(data[0]), fragment.loadingMyGames)
+                //if game is not started try to delete it, else hide from app
+                if(data[4]=="0")
+                    leaveGame(fragment, Integer.parseInt(data[0]), fragment.loadingMyGames)
+                else
+                    hideGame(fragment, Integer.parseInt(data[0]))
             }
             //check if is player turn
-            if(data[13].split(",")[Integer.parseInt(data[14])]==userId && data[4]=="1")
-                if(Build.VERSION.SDK_INT<=22)
-                    itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().resources.getColor(R.color.game_turn))
-                else
-                    itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().getColor(R.color.game_turn))
+            when{
+                data[13].split(",")[Integer.parseInt(data[14])]==userId && data[4]=="1" ->
+                    setColor(fragment, R.color.game_turn)
+                data[4]=="2" ->setColor(fragment, R.color.game_ended)
+            }
+        }
+
+        private fun setColor(fragment: Fragment, color:Int){
+            if(Build.VERSION.SDK_INT<=22)
+                itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().resources.getColor(color))
+            else
+                itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().getColor(color))
         }
 
         private fun leaveGame(fragment: Fragment,gameId:Int, loadingMyGames: View){
@@ -103,6 +114,26 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
             alert.setTitle(fragment.requireContext().getString(R.string.leave_game))
             alert.show()
         }
+
+        private fun hideGame(fragment: Fragment,gameId:Int){
+            val dialogBuilder = AlertDialog.Builder(fragment.requireContext())
+            dialogBuilder.setMessage(fragment.requireContext().getString(R.string.message_hide_game))
+                // if the dialog is cancelable
+                .setCancelable(true)
+                // positive button text and action
+                .setPositiveButton(fragment.requireContext().getString(R.string.hide)) { _, _ ->
+                    val prefs=fragment.requireContext().getSharedPreferences(PREF_FILE, 0)
+                    prefs!!.edit().putString("hidden_games", prefs.getString("hidden_games", "")+gameId+",").apply()
+                }
+                // negative button text and action
+                .setNegativeButton(fragment.requireContext().getString(R.string.cancel)) { dialog, _ ->
+                    dialog.cancel()
+                }
+            val alert = dialogBuilder.create()
+            alert.setTitle(fragment.requireContext().getString(R.string.leave_game))
+            alert.show()
+        }
+
     }
 }
 

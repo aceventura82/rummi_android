@@ -88,6 +88,7 @@ class Db(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenH
         if (cursor.moveToFirst()) {
             db.delete(table, where, arrayOf())
             cursor.close()
+            db.close()
             return true
         }
         db.close()
@@ -110,6 +111,7 @@ class Db(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenH
             cursor.close()
             result = true
         }
+        db.close()
         return result
     }
 }

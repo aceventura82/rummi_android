@@ -1,6 +1,8 @@
 package com.servoz.rummi.ui.login
 
 import android.content.SharedPreferences
+import android.net.Uri.decode
+import android.net.Uri.encode
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +25,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.collections.ArrayList
 
 class ProfileFragment : Fragment() {
 
@@ -108,13 +111,12 @@ class ProfileFragment : Fragment() {
 
     private fun putInfo(userInfo:JSONObject){
         //Profile Info
-        editProfileName.setText(userInfo["name"].toString())
-        editProfileLastName.setText(userInfo["lastname"].toString())
-        editProfileNickName.setText(userInfo["nickname"].toString())
-        editProfileEmail.setText(FetchData(ArrayList(),nav_host_fragment).getUser())
-        editProfileCountry.setText(userInfo["country"].toString())
-        editProfileCity.setText(userInfo["city"].toString())
-        editProfileBirthDate.setText(userInfo["birthDate"].toString())
+        editProfileName.setText(decode(userInfo["name"].toString()))
+        editProfileLastName.setText(decode(userInfo["lastname"].toString()))
+        editProfileNickName.setText(decode(userInfo["nickname"].toString()))
+        editProfileEmail.setText(decode(FetchData(ArrayList(),nav_host_fragment).getUser()))
+        editProfileCountry.setText(decode(userInfo["country"].toString()))
+        editProfileCity.setText(decode(userInfo["city"].toString()))
         //Gender spinner
         val titles= arrayListOf(getString(R.string.gender),getString(R.string.male),getString(R.string.female))
         val arrayAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, titles)
@@ -138,11 +140,10 @@ class ProfileFragment : Fragment() {
     private fun updProfile(userId:String){
         loadingSaveProfile.isVisible=true
         val params= hashMapOf(
-            "name" to editProfileName.text.toString(),"lastname" to editProfileLastName.text.toString(),
-            "nickname" to editProfileNickName.text.toString(), "email" to editProfileEmail.text.toString(),
-            "country" to editProfileCountry.text.toString(), "city" to editProfileCity.text.toString(),
-            "birthDate" to editProfileBirthDate.text.toString(), "extension" to ".jpg",
-            "gender" to genderOpc, "userId" to userId
+            "name" to encode(editProfileName.text.toString()),"lastname" to encode(editProfileLastName.text.toString()),
+            "nickname" to encode(editProfileNickName.text.toString()), "email" to editProfileEmail.text.toString(),
+            "country" to encode(editProfileCountry.text.toString()), "city" to encode(editProfileCity.text.toString()),
+            "extension" to ".jpg", "gender" to genderOpc, "userId" to userId
             
         )
         FetchData(arrayListOf(),this).updateData("editProfile", "",cache = false, addParams = params){

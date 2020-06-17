@@ -56,7 +56,7 @@
     <string name="full_draw_games">FullDraw Games</string>
     <string name="speed">Speed</string>
     <string name="max_players">Max players</string>
-    <string name="gameCodeInfo">Join Code: %1$s\nJoin URL: https://rummi.servoz.tk/joinGame/%1$s</string>
+    <string name="gameCodeInfo">Join Code: %1$s\nJoin URL: https://rummi.servoz.tk/joinGame/%1$s/</string>
     <string name="menu_add_game">Create Game</string>
     <string name="publicStr">Public</string>
     <string name="number_players">Max Players: %1$s</string>
@@ -146,4 +146,9 @@
     <string name="flow_auto_hide">Auto hide Game flow messages</string>
     <string name="notif_turn_game">It\'s your turn to play in game %1$s</string>
     <string name="player_cards">%1$s %2$s</string>
+    <string name="pick_start">Picked cards placed at %1$s</string>
+    <string name="beginnig">Beginning</string>
+    <string name="end">End</string>
+    <string name="message_hide_game">Game will be hidden in the app</string>
+    <string name="hide">Hide</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.servoz.rummi.ui.game
 
 import android.content.Intent
+import android.net.Uri.decode
+import android.net.Uri.encode
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +40,7 @@ class EditGameFragment: Fragment() {
         val gameData = dbHandler.getData("`game`","`id`=${arguments?.getInt("gameId")}")[0]
         checkBoxPrivate.isChecked= gameData[3].toBoolean()
         textGameCodeInfo.text=getString(R.string.gameCodeInfo, gameData[8])
-        editGameName.setText(gameData[1])
+        editGameName.setText(decode(gameData[1]))
         checkBoxFD1.isChecked = gameData[5][0] == '1'
         checkBoxFD2.isChecked = gameData[5][1] == '1'
         checkBoxFD3.isChecked = gameData[5][2] == '1'
@@ -66,7 +68,7 @@ class EditGameFragment: Fragment() {
         }
         checkAdmin(gameData[12])
         //readOnly
-        editGameNameR.text = gameData[1]
+        editGameNameR.text = decode(gameData[1])
         gameSpeedR.text=gameData[6]
         gameMaxPlayersR.text=gameData[7]
 
@@ -125,7 +127,7 @@ class EditGameFragment: Fragment() {
                     (if(checkBoxFD5.isChecked)"1" else "0")+
                     (if(checkBoxFD6.isChecked)"1" else "0")
             hashMapOf("gameId" to gameData[0], "private" to if(checkBoxPrivate.isChecked) "1" else "0",
-                "fullDraw" to fd, "name" to editGameName.text.toString(), "speed" to speedOpc.toString(), "maxPlayers" to maxPlayers.toString()
+                "fullDraw" to fd, "name" to encode(editGameName.text.toString()), "speed" to speedOpc.toString(), "maxPlayers" to maxPlayers.toString()
             )
         }
         FetchData(arrayListOf(),this).updateData(oper, "",cache = false, addParams = params) {

@@ -60,7 +60,7 @@
     <string name="full_draw_games">Juegos obligados</string>
     <string name="speed">Velocidad</string>
     <string name="max_players">Max jugadores</string>
-    <string name="gameCodeInfo">Codigo para unirse: %1$s\nURL unirse: https://rummi.servoz.tk/joinGame/%1$s</string>
+    <string name="gameCodeInfo">Codigo para unirse: %1$s\nURL unirse: https://rummi.servoz.tk/joinGame/%1$s/</string>
     <string name="menu_add_game">Crear juego</string>
     <string name="publicStr">Publico</string>
     <string name="number_players">Max Jugadores: %1$s</string>
@@ -147,6 +147,11 @@
     <string name="sort_number">Ordenar por numero</string>
     <string name="flow_visible">Mensajes del juego visibles</string>
     <string name="flow_auto_hide">Auto ocultar mensajes del juego</string>
-    <string name="notif_turn_game">It\'s your turn to play in game %1$s</string>
+    <string name="notif_turn_game">Es tu turno de mover en el juego %1$s</string>
     <string name="player_cards">%1$s %2$s</string>
+    <string name="pick_start">Las cartas recogidas se ponen al %1$s</string>
+    <string name="beginnig">Inicio</string>
+    <string name="end">Fin</string>
+    <string name="message_hide_game">El juego será ocultado de la aplicación</string>
+    <string name="hide">Ocultar</string>
 </resources>

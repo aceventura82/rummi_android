@@ -1,6 +1,7 @@
 package com.servoz.rummi.ui.game
 
 import android.content.Context
+import android.net.Uri.encode
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -69,7 +70,7 @@ class AddGameFragment: Fragment() {
             (if(checkBoxFD6.isChecked)"1" else "0")
         val params=hashMapOf(
             "private" to if(checkBoxPrivate.isChecked) "1" else "0", "fullDraw" to fd,
-            "name" to editGameName.text.toString(), "speed" to speedOpc.toString(), "maxPlayers" to maxPlayers.toString()
+            "name" to encode(editGameName.text.toString()), "speed" to speedOpc.toString(), "maxPlayers" to maxPlayers.toString()
         )
         FetchData(arrayListOf(),this).updateData("addGame", "",cache = false, addParams = params) {
             result ->
