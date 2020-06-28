@@ -154,4 +154,9 @@
     <string name="end">Fin</string>
     <string name="message_hide_game">El juego será ocultado de la aplicación</string>
     <string name="hide">Ocultar</string>
+    <string name="won_set">Ganó la mano</string>
+    <string name="won_game">Ganó el Juego</string>
+    <string name="created_game">Creó el juego</string>
+    <string name="joined_game">Se unió al juego</string>
+    <string name="drawn">Bajó el juego</string>
 </resources>

@@ -62,7 +62,7 @@ class AddGameFragment: Fragment() {
 
     private fun addGame(){
         loadingEditGame.isVisible=true
-        val fd=if(checkBoxFD1.isChecked)"1" else "0"+
+        val fd=(if(checkBoxFD1.isChecked)"1" else "0")+
             (if(checkBoxFD2.isChecked)"1" else "0")+
             (if(checkBoxFD3.isChecked)"1" else "0")+
             (if(checkBoxFD4.isChecked)"1" else "0")+

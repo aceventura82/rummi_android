@@ -241,7 +241,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             //send notification
                             for (gameId in res)
                                 checkGameName(gameId)
-                        }
+                        }else
+                            processId=-1
                     }
                 }
                 Thread.sleep(30000)

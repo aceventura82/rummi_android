@@ -9,6 +9,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.media.RingtoneManager
 import android.net.Uri
+import android.net.Uri.decode
+import android.net.Uri.encode
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
@@ -250,7 +252,7 @@ class GameFragment: Fragment() {
                             }
                         }
                 }
-                2 -> {
+                2 -> { //add flow message
                     if(dbHandler.getData("flow", "`id`=${dataSet["id"]}").count()==0)
                     dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
                         "gameId_id" to dataSet["gameId_id"].toString(),
@@ -350,7 +352,7 @@ class GameFragment: Fragment() {
         try{
             //check if set just ended and show summary windows
             if(set!="-1" && gameData["current_set"]!=set)
-                displaySetSummary("set")
+                displaySetSummary("set", bg)
             set=gameData["current_set"].toString()
             text_game_set_number.text = when(set){
                 "1" ->getString(R.string.first)
@@ -386,6 +388,7 @@ class GameFragment: Fragment() {
                     //play sound if first time
                     if(!myTurn)
                         playNotification()
+                    myTurn=true
                 }
                 //is started but no dealt yet?
                 gameData["current_stack"]=="" ->{
@@ -444,21 +447,29 @@ class GameFragment: Fragment() {
             val h = image!!.intrinsicHeight
             val w = image.intrinsicWidth
             image.setBounds(0, 0, w, h)
-            gameP1.setCompoundDrawables(null,image, null, null)
             // show player icons & draws
-            when{
-                playersNames[1]!="" -> gameP2.setCompoundDrawables(null, image, null, null)
-                playersNames[2]!="" -> gameP3.setCompoundDrawables(null, image, null, null)
-                playersNames[3]!="" -> gameP4.setCompoundDrawables(null, image, null, null)
-                playersNames[4]!="" -> gameP5.setCompoundDrawables(null, image, null, null)
+
+            if(playersNames[1]!=""){
+                gameP2.setCompoundDrawables(null, image, null, null)
+                gameP2.isVisible=true
+            }
+            if(playersNames[2]!=""){
+                gameP3.setCompoundDrawables(null, image, null, null)
+                gameP3.isVisible=true
+            }
+            if(playersNames[3]!=""){
+                gameP4.setCompoundDrawables(null, image, null, null)
+                gameP4.isVisible=true
+            }
+            if(playersNames[4]!=""){
+                gameP5.setCompoundDrawables(null, image, null, null)
+                gameP5.isVisible=true
             }
             //hide unused draws
-            when{
-                playersNames[1]=="" -> draw2.visibility=GONE
-                playersNames[2]=="" -> draw3.visibility=GONE
-                playersNames[3]=="" -> draw4.visibility=GONE
-                playersNames[4]=="" -> draw5.visibility=GONE
-            }
+            if(playersNames[1]=="")draw2.visibility=GONE
+            if(playersNames[2]=="")draw3.visibility=GONE
+            if(playersNames[3]=="")draw4.visibility=GONE
+            if(playersNames[4]=="")draw5.visibility=GONE
             //show needed discards
             if(playersNames[1]!="" && (players[2]!="" || players[3]!="" || players[4]!=""))
                 discard3.visibility=VISIBLE
@@ -577,8 +588,9 @@ class GameFragment: Fragment() {
         }
         if(msgText!="") {
             windowView.summaryWinnerText.text = msgText
-            if(bg) //add flow message if game/set just ended
-                sendFlow(msgText)
+            //add flow message if game/set just ended
+            if(!bg && opc == "set") sendFlow(8, playersNames[winnerUser])
+            else if(!bg && opc == "game") sendFlow(9, playersNames[winnerUser])
         }else
             windowView.summaryWinnerText.isVisible=false
 
@@ -681,6 +693,7 @@ class GameFragment: Fragment() {
     private var currentCards=arrayListOf<String>()
     private fun showMyCards(force:Boolean=false){
         var setAux= gameData["current_set"]
+        //show last set info if game just ended and haven't dealt yet
         if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
             setAux=Integer.parseInt(gameData["current_set"].toString())-1
         val myCards= gameSetData["${setAux}_$userId"]?.get(0)!!.trim(',').split(",").toMutableList() as ArrayList<String>
@@ -1069,7 +1082,7 @@ class GameFragment: Fragment() {
     }
     //call dragCard from deck to preview card
     private fun moveCardFromStack(drawCard:String){
-        sendFlow("${playersNames[0]}: ${getString(R.string.picked_card_stack)}")
+        sendFlow(3)
         dragCard(moveCardFromStack,deck,moveCardFromStack1){
             moveCardFromStack.isVisible=false
             moveCardFromStack1.isVisible=true
@@ -1086,7 +1099,7 @@ class GameFragment: Fragment() {
 
     //call dragCard from discard1 to last cards
     private fun moveCardFromDiscard(drawCard:String){
-        sendFlow("${playersNames[0]}: ${getString(R.string.picked_card_discard)}: ${getCardName(drawCard)}")
+        sendFlow(4, getCardName(drawCard))
         moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
         dragCard(moveCardFromDiscard,discard1,moveCardFromStack1){
             moveCardFromDiscard.isVisible=false
@@ -1104,7 +1117,7 @@ class GameFragment: Fragment() {
 
     //call dragCard from raised card to discard 2
     private fun moveCardToDiscard(){
-        sendFlow("${playersNames[0]}: ${getString(R.string.discarded_card)}: ${getCardName(outCard)}")
+        sendFlow(5, getCardName(outCard))
         dragCard(cardViewPos,cardViewPos,discard2){
             cardViewPos.isVisible=false
             moveCardFromStack1.isVisible=false
@@ -1116,7 +1129,7 @@ class GameFragment: Fragment() {
 
     //call dragCard from raised card to drawn
     private fun moveCardToDraw(view:View){
-        sendFlow("${playersNames[0]}: ${getString(R.string.draw_over_card)}: ${getCardName(outCard)}")
+        sendFlow(6, getCardName(outCard))
         dragCard(cardViewPos,cardViewPos,view){
             cardViewPos.isVisible=false
             moveCardFromStack1.isVisible=false
@@ -1305,7 +1318,7 @@ class GameFragment: Fragment() {
                                 text_game_info.text = getString(R.string.loading)
                                 mainButton.isVisible = false
                                 initialView()
-                                sendFlow("${playersNames[0]}: ${getString(R.string.start_game)}")
+                                sendFlow(1)
                             }
                             MyTools().toast(requireContext(), msg)
                         }
@@ -1334,7 +1347,7 @@ class GameFragment: Fragment() {
                         text_game_info.text = getString(R.string.loading)
                         mainButton.isVisible=false
                         initialView()
-                        sendFlow("${playersNames[0]}: ${getString(R.string.deal_cards)}")
+                        sendFlow(2, set)
                     }
                     MyTools().toast(requireContext(),msg)
                 }
@@ -1361,6 +1374,8 @@ class GameFragment: Fragment() {
                         FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1", "start" to pickStart)) { result ->
                             doRequest=0
+                            doRequestBg=0
+                            remoteData(true) //get new data
                             val res = result.split("|")
                             var msg=result
                             if(res.count()==2){
@@ -1401,6 +1416,8 @@ class GameFragment: Fragment() {
                        FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1", "start" to pickStart)) { result ->
                            doRequest=0
+                           doRequestBg=0
+                           remoteData(true) //get new data
                             val res = result.split("|")
                            var msg=result
                            if(res.count()==2){
@@ -1451,6 +1468,8 @@ class GameFragment: Fragment() {
                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "out" to outCard)
                         ) { result ->
                             doRequest=0
+                            doRequestBg=0
+                            remoteData(true) //get new data
                             val res = result.split("|")
                             var msg=result
                             if(res.count()==2){
@@ -1462,7 +1481,8 @@ class GameFragment: Fragment() {
                                         FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to fixCardTwice))
                                     }
-                            }
+                            }else
+                                loadingGame.isVisible=false
                             MyTools().toast(requireContext(),msg)
                         }
                     }
@@ -1480,7 +1500,7 @@ class GameFragment: Fragment() {
         //sort by color
         buttonLauncherSortC.setOnClickListener{sortCards(true)}
         //show positions view
-        buttonLauncherStanding.setOnClickListener { displaySetSummary() }
+        buttonLauncherStanding.setOnClickListener { displaySetSummary("", true) }
         //show info view
         buttonLauncherInfo.setOnClickListener { displayGameInfo() }
         //show hide messages
@@ -1540,7 +1560,7 @@ class GameFragment: Fragment() {
                         text_draw_info.removeAllViews()
                         addGameDrawButton.text=getString(R.string.add_draw_game)
                         initialView()
-                        sendFlow("${playersNames[0]}: ${getString(R.string.draw)}")
+                        sendFlow(7)
                     }
                     MyTools().toast(requireContext(),msg)
                     loadingGame.isVisible=false
@@ -1671,10 +1691,11 @@ class GameFragment: Fragment() {
     //put a message in the messages area
     private fun putMsg(msg:String, date:String, userId:String=""):SpannableString{
         return try{
+            val text=if(userId!="")decode(msg) else getFlowMsg(msg)
             val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
             val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
-            val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: $msg\n")
+            val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: ${text}\n")
             ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size
             ss1.setSpan(ForegroundColorSpan(Color.LTGRAY), user.count(), user.count()+9, 0) // set color
             ss1
@@ -1685,22 +1706,40 @@ class GameFragment: Fragment() {
 
     //add new message in the server
     private fun sendMessage(){
-        if(messages_text.text.toString().count()>0){
+        if(messages_text.text.toString().count()>0)
             if(doRequest==0) {
                     doRequest++
                 FetchData(arrayListOf(),this).updateData("addMessage", "", cache=false,
-                    addParams = hashMapOf("gameId" to gameId, "msg" to messages_text.text.toString())){doRequest=0}
+                    addParams = hashMapOf("gameId" to gameId, "msg" to encode(messages_text.text.toString()))){doRequest=0}
                 messages_text.setText("")
             }
-        }
     }
 
     //add new message in the server
-    private fun sendFlow(msg:String){
-        if(doRequest==0) {
-            doRequest++
-            FetchData(arrayListOf(),this).updateData("addToFlow", "", cache=false,
-                addParams = hashMapOf("gameId" to gameId, "msg" to msg)){doRequest=0}
+    private fun sendFlow(msgId:Int, aux:String=""){
+        doAsync{
+            FetchData(arrayListOf(),this@GameFragment).updateData("addToFlow", "", cache=false,
+                addParams = hashMapOf("gameId" to gameId, "msg" to "${playersNames[0]}||--||$msgId||--||$aux"))
+        }
+    }
+
+    private fun getFlowMsg(msg:String):String{
+        val msgData=msg.split("||--||")
+        if(msgData.count()!=3)
+            return msg
+        return when(msgData[1]){
+            "1"->getString(R.string.start_game)
+            "2"->"-------------------\n${getString(R.string.set)} ${msgData[2]}, ${msgData[0]}: ${getString(R.string.deal_cards)}"
+            "3"->"${msgData[0]}: ${getString(R.string.picked_card_stack)}"
+            "4"->"${msgData[0]}: ${getString(R.string.picked_card_discard)}:${msgData[2]}"
+            "5"->"${msgData[0]}: ${getString(R.string.discarded_card)}:${msgData[2]}"
+            "6"->"${msgData[0]}: ${getString(R.string.draw_over_card)}:${msgData[2]}"
+            "7"->"${msgData[0]}: ${getString(R.string.drawn)}"
+            "8"->"${msgData[0]}: ${getString(R.string.won_set)}"
+            "9"->"${msgData[0]}: ${getString(R.string.won_game)}"
+            "10"->"${msgData[0]}: ${getString(R.string.created_game)}"
+            "11"->"${msgData[0]}: ${getString(R.string.joined_game)}"
+            else -> msg
         }
     }
 

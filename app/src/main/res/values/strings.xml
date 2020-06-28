@@ -151,4 +151,9 @@
     <string name="end">End</string>
     <string name="message_hide_game">Game will be hidden in the app</string>
     <string name="hide">Hide</string>
+    <string name="won_set">Won the set</string>
+    <string name="won_game">Won Game</string>
+    <string name="created_game">Created Game</string>
+    <string name="joined_game">Joined the game</string>
+    <string name="drawn">Drawn the game</string>
 </resources>
