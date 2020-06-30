@@ -229,6 +229,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/gameP1" />
 
+    <TextView
+        android:id="@+id/text_game_last_upd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/deck"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <Button
         android:id="@+id/mainButton"
@@ -405,7 +416,6 @@
         android:background="@drawable/transparent_borders"
         android:orientation="vertical"
         android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/move_message"
         app:layout_constraintStart_toEndOf="@+id/text_game_info"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -444,17 +454,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/move_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:contentDescription="@string/messages"
-        android:padding="0dp"
-        android:src="@drawable/ic_move"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

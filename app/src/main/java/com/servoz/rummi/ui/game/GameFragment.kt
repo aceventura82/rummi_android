@@ -44,6 +44,8 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -79,6 +81,7 @@ class GameFragment: Fragment() {
     private var doRequest=0
     private var doRequestBg=0
     private var ranId=-2
+    private lateinit var lastUpd:LocalDateTime
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -89,16 +92,15 @@ class GameFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         super.onCreate(savedInstanceState)
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
         //check user config
         if(prefs!!.getString("MESSAGES","")=="ON")
             switchMessageView()
         pickStart=if(prefs!!.getString("PICK_START","")=="ON") "1" else ""
-
         try{
-            gameId= arguments?.getString("gameId")!!
+            gameId= arguments?.getInt("gameId")!!.toString()
             //cancel notification if exists
             with(NotificationManagerCompat.from(requireContext())) {
                 cancel(Integer.parseInt(gameId))
@@ -112,18 +114,8 @@ class GameFragment: Fragment() {
             remoteData(false)
             //set listeners
             setListeners()
+            checkLasUpd()
         }catch (ex:NullPointerException){}
-    }
-
-    companion object {
-
-        fun newInstance(gameId: String): GameFragment {
-            val args = Bundle()
-            args.putString("gameId", gameId)
-            val fragment = GameFragment()
-            fragment.arguments = args
-            return fragment
-        }
     }
 
     override fun onPause() {
@@ -149,6 +141,24 @@ class GameFragment: Fragment() {
             }
         }
     }
+    private fun checkLasUpd(){
+        doAsync {
+            GlobalScope.launch(context = Dispatchers.Main) {
+                while(true){
+                    delay(5000)
+                    uiThread {
+                        try{
+                            val tt = Duration.between(lastUpd, LocalDateTime.now()).seconds
+                            if(!myTurn)
+                                text_game_last_upd.text= "$tt sec"
+                            if(!myTurn && tt>20)
+                                text_game_last_upd.setBackgroundResource(R.drawable.red_box)
+                        }catch (ex:Exception){}
+                    }
+                }
+            }
+        }
+    }
 
     private fun remoteData(bg:Boolean){
         val dbHandler=Db(requireContext(),null)
@@ -169,6 +179,7 @@ class GameFragment: Fragment() {
                 addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
                     "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
                 doRequestBg=0
+                lastUpd= LocalDateTime.now()
                 if(result!="OK"){
                     val data = MyTools().stringListToJSON(result)
                     if (data.count() > 0) {
@@ -1023,7 +1034,6 @@ class GameFragment: Fragment() {
         private fun switchMessageView(){
             val newVal=!message_layout.isVisible
             message_layout.isVisible=newVal
-            move_message.isVisible=newVal
             requireContext().getSharedPreferences(PREF_FILE, 0).edit().putString("MESSAGES", if(message_layout.isVisible) "ON" else "").apply()
             MyTools().toast(requireContext(),getString(if(newVal)R.string.message_visible else R.string.message_hidden))
         }
@@ -1622,7 +1632,6 @@ class GameFragment: Fragment() {
                 uiThread {
                     try {
                         message_layout.isVisible=false
-                        move_message.isVisible=false
                     }catch (ex:IllegalStateException){}
                 }
             }
@@ -1667,7 +1676,7 @@ class GameFragment: Fragment() {
     }
 
     private fun textEnterListener(){
-        messages_input.setOnKeyListener(View.OnKeyListener { _, keyCode, event ->
+        messages_input.setOnKeyListener(OnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_UP) {
                 sendMessage()
                 return@OnKeyListener true

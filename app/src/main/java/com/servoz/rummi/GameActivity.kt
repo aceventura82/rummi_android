@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.tools.PREF_FILE
-import com.servoz.rummi.ui.game.GameFragment
+import com.servoz.rummi.ui.home.HomeFragmentDirections
+import kotlinx.android.synthetic.main.content_main.*
 
 
 class GameActivity : AppCompatActivity() {
@@ -17,15 +19,10 @@ class GameActivity : AppCompatActivity() {
         window!!.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         setContentView(R.layout.activity_game)
         //start notifications if user came from notification
         getSharedPreferences(PREF_FILE, 0).edit().putString("check_turn", "ON").apply()
-
-        val gameFragment = GameFragment.newInstance(intent.getStringExtra("gameId")!!)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.general_preference, gameFragment, intent.getStringExtra("gameId")!!)
-            .commit()
+        if(savedInstanceState == null)
+            NavHostFragment.findNavController(nav_host_fragment).navigate(HomeFragmentDirections.actionGlobalToGame(Integer.parseInt(intent.getStringExtra("gameId")!!)))
     }
 }

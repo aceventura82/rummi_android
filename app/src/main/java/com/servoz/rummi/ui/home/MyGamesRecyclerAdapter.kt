@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.servoz.rummi.GameActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_my_games_layout.view.*
 
@@ -122,8 +123,13 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                 .setCancelable(true)
                 // positive button text and action
                 .setPositiveButton(fragment.requireContext().getString(R.string.hide)) { _, _ ->
-                    val prefs=fragment.requireContext().getSharedPreferences(PREF_FILE, 0)
-                    prefs!!.edit().putString("hidden_games", prefs.getString("hidden_games", "")+gameId+",").apply()
+                    FetchData(arrayListOf(),fragment).updateData("hideGame", "",cache = false, addParams = hashMapOf("gameId" to gameId.toString())) { result ->
+                        val res = result.split("|")
+                        if(res. count() ==2)
+                            NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_home, Bundle())
+                        else
+                            MyTools().toast(fragment.requireContext(), result)
+                    }
                 }
                 // negative button text and action
                 .setNegativeButton(fragment.requireContext().getString(R.string.cancel)) { dialog, _ ->
