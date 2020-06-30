@@ -239,20 +239,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/view" />
 
-    <TextView
-        android:id="@+id/text_game_flow"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/transparent_borders"
-        android:maxHeight="200dp"
-        android:padding="5dp"
-        android:scrollbars="vertical"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-
-        app:layout_constraintTop_toTopOf="parent" />
     <!--Layout for draw info-->
     <LinearLayout
         android:id="@+id/draw_info_layout"
@@ -381,15 +367,6 @@
                 android:textColor="#fff" />
 
             <ImageView
-                android:id="@+id/buttonLauncherFlow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="@string/messages"
-                android:src="@drawable/ic_game_flow"
-                android:textColor="#fff" />
-
-            <ImageView
                 android:id="@+id/buttonLauncherStanding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -424,30 +401,25 @@
     <LinearLayout
         android:id="@+id/message_layout"
         android:layout_width="200dp"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:background="@drawable/transparent_borders"
-        android:minHeight="150dp"
         android:orientation="vertical"
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/move_message"
+        app:layout_constraintStart_toEndOf="@+id/text_game_info"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ScrollView
-            android:id="@+id/message_scroll"
+        <TextView
+            android:id="@+id/messages_input"
             android:layout_width="match_parent"
-            android:layout_height="150dp">
-
-            <TextView
-                android:id="@+id/messages_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white" />
-
-        </ScrollView>
+            android:layout_height="160dp"
+            android:layout_margin="5dp"
+            android:gravity="bottom"
+            android:textColor="@color/white" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:orientation="horizontal">
 
             <EditText
