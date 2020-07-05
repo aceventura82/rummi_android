@@ -156,4 +156,67 @@
     <string name="created_game">Created Game</string>
     <string name="joined_game">Joined the game</string>
     <string name="drawn">Drawn the game</string>
+    <string name="rules1">
+        GAME RULES\n\n\n
+        Rummi is a cards game, it is played with two decks of 52-card poker + 4 jokers, 
+        Rummi has several game modes, the mode used in this application is 6-handed game, 
+        6 different hands or sets are played and the Player with the least total points is the winner of the game\n\n
+        PLAYS:\n
+        During the game two types of Plays can be assembled: Triples And Straights\n
+        Triplets:\n
+        A Triplet, consists of 3 or more letters of the same number or letter regardless of the color, 
+        In this version of Rummi, there can be 2 numbers of the same color in a triplet\n
+        Straight:\n
+        A Straight consists of 4 or more cards in ascending order and of the same color.
+        In this version of Rummi, when you reach the top of the straight, you can continue from the bottom, 
+        that is, if the straight ends in Ace, you can continue with the number 2\n\n
+        PLAYS TO ASSEMBLE IN EACH GAME:\n
+        1. A Triplet and a Straight\n
+        2. Three Triplets\n
+        3. Two Triplets and One Straight\n
+        4. Two Straights\n
+        5. Two Straights and a Triplet\n
+        6. Three Straights\n\n\n
+        HAND OR SET OPTIONS\n
+        A hand or set can be played in two ways, simple or full draw\n
+        FULL DRAW:\n
+        A full draw hand or set means the player must put together the plays of the hand
+        with all the cards he has plus the card that he has left over to discard\n
+        SINGLE:\n
+        In a single hand or set, the player can draw at any time when he makes the necessary plays of the hand,
+        and continue eliminating cards discarding in games every turn\n\n
+        OBJECTIVE:
+        The objective of the game is to make the least amount of points in the 6 hands or sets,\n
+        for this, the player must try to run out of cards or with the least amount of points in each hand\n\n
+        GAME PREPARATION:
+        * Before starting the game, the player who deals the first game, decides which of the 6 hands or sets are full draw\n\n
+        * The 108 cards are shuffled (including the 4 jokers)
+        * Cards are dealt equally to each player\n
+        For the games from the first to the fourth, 13 cards are dealt, for the fifth and sixth, 15 cards are dealt
+        * The rest of the cards are face down in the middle of the table\n\n
+        GAME RULES\n
+        * Start the player who dealt the cards by taking a card from the deck\n\n
+        * The player must get rid of a card that is placed in the discard to the right\n\n
+        * The next player to the right has the option to take that card or take a card from the deck,
+        In this version of Rummi, each player can only take cards from the discard on their left\n\n
+        * The player discards a card and all the players continue the same way\n\n
+        * When a player has made the necessary games to draw his game, when he is on his turn and after taking a card,
+        either discard or deck, he can draw the cards\n\n
+        * Once the game is drawn, discard a card.\n\n
+        * If a player has already drawn the game, he can being on his turn without taking a card,
+        discard a card in a drawn game, can be his game or another player\'s game\n\n
+        * If the player takes a card from the deck and can draw it into another player\'s game, he can draw it immediately and then discard a card\n\n
+        * Once a player has drawn the game, can NOT take cards from the discard again, he can only take from the deck.\n\n
+        * Before starting the game, the player who deals the first game, decides which of the 6 hands or sets are full draw\n\n
+        * If a player takes a card from discard, he cannot discard that card in the same turn\n\n\n
+        JOKER:\n\n
+        The joker replaces any card either on a triplet or on a straight\n
+        A game, be it triplet or straight, cannot be discarded only with jokers, it must have at least one card other than the joker\n\n
+        CARD VALUE:\n\n
+        * The numbers between 2 and 10, regardless of the color, have the value that the number represents\n
+        * Ace of clubs or spades has a value of 15 points\n
+        * Ace of Diamonds or Hearts has a one point value\n
+        * The letters J, Q, K have a value of 10 points, regardless of the color.\n
+        * The Joker has a value of 100 Points\n\n\n
+        </string>
 </resources>

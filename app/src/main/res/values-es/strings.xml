@@ -28,7 +28,7 @@
     <string name="name">Nombre</string>
     <string name="lastName">Apellido</string>
     <string name="nickName">Alias</string>
-    <string name="country">Pais</string>
+    <string name="country">País</string>
     <string name="city">Ciudad</string>
     <string name="birthDate">Fecha de Nacimiento</string>
     <string name="male">Masculino</string>
@@ -159,4 +159,67 @@
     <string name="created_game">Creó el juego</string>
     <string name="joined_game">Se unió al juego</string>
     <string name="drawn">Bajó el juego</string>
+    <string name="rules1">
+        REGLAS DE JUEGO\n\n\n
+        Rummi es un Juego de cartas, se juega con dos barajas de poker de 52 cartas + 4 comodines,
+        El Rummi tiene varias modalidades de juego, la modalidad usada en esta aplicación es Juego a 6 manos,
+        Se Juegan 6 manos o sets diferentes y el Jugador con menos puntos en total es el ganador del juego\n\n
+        JUGADAS:\n
+        Durante el juego se pueden armar dos tipos de Jugadas: Ternas Y Escaleras\n
+        Ternas:\n
+        Un Terna, consiste en 3 o mas cartas del mismo número o letra sin importar la pinta,
+        En esta versión de Rummi, en una terna pueden haber 2 números de la misma pinta\n
+        Escalera:\n
+        Una Escalera consiste de 4 o mas cartas en orden ascendente y que sean de la misma pinta
+        En esta version de Rummi, al llegar al tope de la escalera, se puede continuar desde el inicio,
+        es decir, si la escalera termina en As, se puede continuar con el número 2\n\n
+        JUGADAS A ARMAR EN CADA JUEGO:\n
+        1. Una Terna y Una Escalera\n
+        2. Tres Ternas\n
+        3. Dos Ternas y Una Escalera\n
+        4. Dos Escaleras\n
+        5. Dos Escaleras y Una Terna\n
+        6. Tres Escaleras\n\n\n
+        OPCIONES DE MANO O SET\n
+        Una mano o set se puede jugar de dos formas, sencilla u obligada\n
+        OBLIGADA:\n
+        Una mano o set obligado, quiere decir que el jugador debe armar las jugadas de la mano
+        con la totalidad de las cartas que tiene mas la careta que le sobra para descartar\n
+        SENCILLA:\n
+        En una mano o set sencillo, el jugador se puede bajar en cualquier momento que arme las jugadas necesarias de la mano,
+        y continuar eliminando cartas descartando en los juegos en cada turno\n\n
+        OBJETIVO:
+        El objetivo del juego es hacer la menor cantidad de puntos en las 6 manos o sets,\n
+        para esto, el jugador debe tratar de quedar sin cartas o con la menor cantidad de puntos en cada mano\n\n
+        PREPARACION DEL JUEGO:
+        * Antes de iniciar el juego, el jugador que reparte el primer juego, decide cuales de las 6 manos o sets son obligadas\n\n
+        * Se barajan las 108 cartas (incluidos los 4 comodines)
+        * Se reparten las cartas por igual a cada jugador\n
+        Para los juegos desde el primero al cuarto se reparten 13 cartas, para el quinto y Sexto se reparten 15 cartas\n\n
+        * El resto de las cartas quedan boca abajo en pila en el centro de la mesa\n\n
+        REGLAS DEL JUEGO\n
+        * Inicia el jugador que repartio las cartas tomando una carta de la baraja\n\n
+        * El jugador se debe deshacer de una carta que es colocada en el descarte a la derecha\n\n
+        * El siguiente jugador a la derecha tiene la opción de tomar esa carta o tomar una carta de la baraja,
+        En esta version de Rummi, Cada Jugador solo puede tomar cartas del descarte que se encuentra a su izquierda\n\n
+        * El jugador descarta una carta y así continúan todos los jugadores\n\n
+        * Cuando un jugador haya armado las jugadas necesarias para bajar su juego, cuando este en su turno y luego de tomar una carta,
+        ya sea del descarte o de la baraja, puede bajar las cartas de su juego\n\n
+        * Una vez bajado el juego descarta una carta.\n\n
+        * Si un jugador ya ha bajado sus jugadas, puede en su turno sin necesidad de tomar carta,
+        descartar una carta en un juego bajado, sea su juego o el juego de otro jugador\n\n
+        * Si el jugador toma una carta de la baraja y la puede poner en un juego de otro jugador, la puede poner inmediatamente y luego botar una carta\n\n
+        * Una vez un jugador haya bajado su juego, NO puede volver a tomar cartas del descarte, solo puede tomar de la baraja.\n\n
+        * Antes de iniciar el juego, el jugador que reparte el primer juego, decide cuales de las 6 manos o sets son obligadas\n\n
+        * Si un jugador toma una carta del descarte, no puede descartar esa carta en el mismo turno\n\n\n
+        COMODIN:\n\n
+        El comodin reemplaza cualquier carta ya sea en una terna o en una escalera\n
+        Un juego, sea terna o escalera, no se puede descartar solo con Comodines, debe tener al menos una carta diferente a un comodin\n\n
+        VALOR DE LAS CARTAS:\n\n
+        * Los numeros entre el 2 y el 10, sin importar la pintan tienen el valor que el número representa\n
+        * El As de treboles o de picas tiene valor de 15 puntos\n
+        * el As de Diamantes o de Corazones tiene valor de un punto\n
+        * Las Letras J, Q, K tienen valor de 10 puntos, sin importar la pinta.\n
+        * El Comodin Tiene valor de 100 Puntos\n\n\n
+    </string>
 </resources>
