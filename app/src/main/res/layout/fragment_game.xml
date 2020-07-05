@@ -59,7 +59,7 @@
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/text_game_last_upd"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -229,14 +229,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/gameP1" />
 
-    <TextView
+    <View
         android:id="@+id/text_game_last_upd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@+id/deck"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/circle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -413,10 +410,10 @@
         android:id="@+id/message_layout"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:background="@drawable/transparent_borders"
+        android:background="@drawable/black_borders"
         android:orientation="vertical"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/text_game_info"
+        app:layout_constraintEnd_toStartOf="@+id/text_game_info"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -438,7 +435,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:autofillHints="@string/messages"
-                android:background="@color/game_text_bg"
                 android:inputType="text"
                 android:maxLines="1"
                 tools:ignore="LabelFor" />

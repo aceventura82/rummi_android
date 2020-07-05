@@ -18,7 +18,7 @@ class FetchData(private var fields: ArrayList<String>, private val fragment: Fra
                    cache:Boolean=true, where:String="", code: (result:String)->Unit = {}){
         val params = hashMapOf(
             "apiKey" to MyTools().genKey(fragment, key == "login"), "usernameUser" to getUser(),
-            "oper" to key,
+            "oper" to key, "version" to "1.20",
             "lang" to fragment.requireContext().getSharedPreferences(PREF_FILE, 0)!!
                 .getString("lang", LANG)!!
         )

@@ -44,10 +44,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
-import java.time.Duration
-import java.time.LocalDateTime
 import java.util.*
 
+
+/*
+* PENDING:
+* */
 
 val Int.dp: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
@@ -81,7 +83,7 @@ class GameFragment: Fragment() {
     private var doRequest=0
     private var doRequestBg=0
     private var ranId=-2
-    private lateinit var lastUpd:LocalDateTime
+    private var lastUpd:Long = 0
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -148,11 +150,22 @@ class GameFragment: Fragment() {
                     delay(5000)
                     uiThread {
                         try{
-                            val tt = Duration.between(lastUpd, LocalDateTime.now()).seconds
-                            if(!myTurn)
-                                text_game_last_upd.text= "$tt sec"
-                            if(!myTurn && tt>20)
-                                text_game_last_upd.setBackgroundResource(R.drawable.red_box)
+                            val tt = (System.currentTimeMillis()-lastUpd).div(1000)
+                            when {
+                                !myTurn && tt > 20 -> {
+                                    text_game_last_upd.setBackgroundResource(R.drawable.circle_red)
+                                    ranId=(0..6000).random()
+                                    doRequestBg=0
+                                    bgSync(ranId)
+                                }
+                                !myTurn && tt > 5 -> {
+                                    text_game_last_upd.setBackgroundResource(R.drawable.circle_yellow)
+                                    ranId=(0..6000).random()
+                                    doRequestBg=0
+                                    bgSync(ranId)
+                                }
+                                else -> text_game_last_upd.setBackgroundResource(R.drawable.circle)
+                            }
                         }catch (ex:Exception){}
                     }
                 }
@@ -179,7 +192,7 @@ class GameFragment: Fragment() {
                 addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
                     "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
                 doRequestBg=0
-                lastUpd= LocalDateTime.now()
+                lastUpd= System.currentTimeMillis()
                 if(result!="OK"){
                     val data = MyTools().stringListToJSON(result)
                     if (data.count() > 0) {
@@ -205,77 +218,79 @@ class GameFragment: Fragment() {
     }
     //set game Data in variables
     private fun setGameData(data:ArrayList<JSONObject>){
-        gameData=data[0]
-        playersCount=0
-        inCard=""
-        players=gameData["playersPos"].toString().split(",")
-        // get Players names
-        playersNames=arrayListOf("","","","","")
-        for( (c,p) in players.withIndex())
-            if(p!="")
-                for (dataSet in data)
-                    if (dataSet.has("messages") && dataSet["messages"] == 1) // stop when get to messages section
-                        break
-                    else if(dataSet["set_userId_id"]==p){
-                        playersNames[c]=dataSet["name"].toString()
-                        continue
+        try{
+            gameData=data[0]
+            playersCount=0
+            inCard=""
+            players=gameData["playersPos"].toString().split(",")
+            // get Players names
+            playersNames=arrayListOf("","","","","")
+            for( (c,p) in players.withIndex())
+                if(p!="")
+                    for (dataSet in data)
+                        if (dataSet.has("messages") && dataSet["messages"] == 1) // stop when get to messages section
+                            break
+                        else if(dataSet["set_userId_id"]==p){
+                            playersNames[c]=dataSet["name"].toString()
+                            continue
+                        }
+            userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
+            keySetUser="${gameData["current_set"]}_$userId"
+            //check if new deal
+            var recordType=0
+            for(dataSet in data) {
+                if (dataSet.has("messages") && dataSet["messages"] == 1) {//add messages
+                    recordType = 1
+                    continue
+                }
+                else if (dataSet.has("flow") && dataSet["flow"] == 1) {//add flow messages
+                    recordType = 2
+                    continue
+                }
+                val dbHandler=Db(requireContext(),null)
+                when(recordType){ // adding game set data
+                    0-> {gameSetData["${dataSet["set_set"]}_${dataSet["set_userId_id"]}"] = arrayListOf(dataSet["set_current_cards"].toString(), dataSet["set_drawn"].toString(), dataSet["set_points"].toString())
+                        if (dataSet["set_set"] == "1") playersCount++
                     }
-        userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
-        keySetUser="${gameData["current_set"]}_$userId"
-        //check if new deal
-        var recordType=0
-        for(dataSet in data) {
-            if (dataSet.has("messages") && dataSet["messages"] == 1) {//add messages
-                recordType = 1
-                continue
-            }
-            else if (dataSet.has("flow") && dataSet["flow"] == 1) {//add flow messages
-                recordType = 2
-                continue
-            }
-            val dbHandler=Db(requireContext(),null)
-            when(recordType){ // adding game set data
-                0-> {gameSetData["${dataSet["set_set"]}_${dataSet["set_userId_id"]}"] = arrayListOf(dataSet["set_current_cards"].toString(), dataSet["set_drawn"].toString(), dataSet["set_points"].toString())
-                    if (dataSet["set_set"] == "1") playersCount++
-                }
-                1 -> {
-                    if(dbHandler.getData("messages", "`id`=${dataSet["id"]}").count()==0)
-                    dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
-                        "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
-                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                    ))
-                    messagesLastId=Integer.parseInt(dataSet["id"].toString())
-                    try {
-                        messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), dataSet["userId_id"].toString()))
-                    }catch (ex:Exception){}
-                    //play notification and show messages windows
-                    if(userId.toString()!=dataSet["userId_id"].toString())
-                        playNotification()
-                    scrollTVDown()
-                }
-                2 -> { //add flow message
-                    if(dbHandler.getData("flow", "`id`=${dataSet["id"]}").count()==0)
-                    dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
-                        "gameId_id" to dataSet["gameId_id"].toString(),
-                        "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
-                    ))
-                    flowLastId=Integer.parseInt(dataSet["id"].toString())
-                    try{
-                        messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), flow = true))
+                    1 -> {
+                        if(dbHandler.getData("messages", "`id`=${dataSet["id"]}").count()==0)
+                        dbHandler.addData("messages", hashMapOf("id" to dataSet["id"].toString(),
+                            "userId_id" to dataSet["userId_id"].toString(), "gameId_id" to dataSet["gameId_id"].toString(),
+                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                        ))
+                        messagesLastId=Integer.parseInt(dataSet["id"].toString())
+                        try {
+                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), dataSet["userId_id"].toString()))
+                        }catch (ex:Exception){}
+                        //play notification and show messages windows
+                        if(userId.toString()!=dataSet["userId_id"].toString())
+                            playNotification()
                         scrollTVDown()
-                    }catch (ex:Exception){}
+                    }
+                    2 -> { //add flow message
+                        if(dbHandler.getData("flow", "`id`=${dataSet["id"]}").count()==0)
+                        dbHandler.addData("flow", hashMapOf("id" to dataSet["id"].toString(),
+                            "gameId_id" to dataSet["gameId_id"].toString(),
+                            "msg" to dataSet["msg"].toString(), "date" to dataSet["date"].toString()
+                        ))
+                        flowLastId=Integer.parseInt(dataSet["id"].toString())
+                        try{
+                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), flow = true))
+                            scrollTVDown()
+                        }catch (ex:Exception){}
+                    }
                 }
             }
-        }
-        //get inCard if returning user to game
-        if("2345".indexOf(gameData["moveStatus"].toString())!=-1){
-            val cardsAux= gameSetData[keySetUser]!![0].trim(',').split(',')
-            if(cardsAux.count()>0) {
-                inCard = cardsAux[cardsAux.count() - 1]
+            //get inCard if returning user to game
+            if("2345".indexOf(gameData["moveStatus"].toString())!=-1){
+                val cardsAux= gameSetData[keySetUser]!![0].trim(',').split(',')
+                if(cardsAux.count()>0) {
+                    inCard = cardsAux[cardsAux.count() - 1]
+                }
             }
-        }
-        // order info starting with me
-        orderInfo()
+            // order info starting with me
+            orderInfo()
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
         // order info starting with me
         private fun orderInfo(){
@@ -328,12 +343,14 @@ class GameFragment: Fragment() {
             playersInfo(true)
             //put my cards
             showMyCards()
+            //check started value just to verify data
              try {
                 gameData["started"] == ""
             } catch (ex: JSONException) {
                 false
             }
         }catch (ex:Exception){
+            sendError("orderInfo:${ex.getStackTraceString()}")
             ex.printStackTrace()
             false
         }
@@ -444,7 +461,7 @@ class GameFragment: Fragment() {
             gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[3])
             gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
             // just update image before game start
-            if(bg)
+            if(bg && gameData["started"] != "0")
                 return
             val image = getDrawable(requireContext(),R.drawable.ic_account_box_white_80dp)
             val h = image!!.intrinsicHeight
@@ -487,206 +504,216 @@ class GameFragment: Fragment() {
     // set ended summary window
     private fun displaySetSummary(opc:String="", bg: Boolean=false){
         try{
-            if(summaryWindow.isShowing)
+            try{
+                if(summaryWindow.isShowing)
+                    return
+            }catch(ex:UninitializedPropertyAccessException){}
+            if(opc=="game" && bg)
                 return
-        }catch(ex:UninitializedPropertyAccessException){}
-        if(opc=="game" && bg)
-            return
-        val windowView=LayoutInflater.from(context).inflate(R.layout.set_summary, layoutProfile, false)
-        if(Build.VERSION.SDK_INT<=22){
-            summaryWindow= PopupWindow(windowView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            summaryWindow.isOutsideTouchable=false
-            summaryWindow.elevation = 5.0f
-        }else
-            summaryWindow= PopupWindow(requireContext())
-        summaryWindow.contentView=windowView
-        summaryWindow.isFocusable=true
-        summaryWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
-        windowView.summaryGrid.columnCount=playersCount+1
-        windowView.setSummaryLayout.setOnClickListener{
-            summaryWindow.dismiss()
-        }
-        //add set title
-        addGrid(windowView,getString(R.string.set),0,0,60.dp, true)
-        var col=1
-        //find cell width
-        val ww=(windowView.width-60.dp).div(playersCount)
-        //add each player name
-        for(player in playersNames)
-            if(player!=""){
-                addGrid(windowView,player,col,0,ww, true)
-                col++
+            val windowView=LayoutInflater.from(context).inflate(R.layout.set_summary, layoutProfile, false)
+            if(Build.VERSION.SDK_INT<=22){
+                summaryWindow= PopupWindow(windowView,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                summaryWindow.isOutsideTouchable=false
+                summaryWindow.elevation = 5.0f
+            }else
+                summaryWindow= PopupWindow(requireContext())
+            summaryWindow.contentView=windowView
+            summaryWindow.isFocusable=true
+            summaryWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
+            windowView.summaryGrid.columnCount=playersCount+1
+            windowView.setSummaryLayout.setOnClickListener{
+                summaryWindow.dismiss()
             }
-        //add info for each set
-        var lastWinner=""
-        val total=IntArray(playersCount)
-        for(i in 1..Integer.parseInt(set)){
-            //add each set number
-            val setStr=if(gameData["fullDraw"].toString()[i-1]=='1') "1" else ""
-            addGrid(windowView,i.toString(),0,i,60.dp, winner = setStr)
-            col=1
-            //get each player points per set
-            for ((c,player) in players.withIndex()) {
-                var winner=""
-                //check  player set points except current set
-                if(player!="" && (i.toString()!=gameData["current_set"] || gameData["current_set"]=="6")){
-                    val points=gameSetData["${i}_$player"]!![2]
-                    //check set Winner
-                    if(gameSetData["${i}_$player"]!![0]==""){
-                        //put 1 if current user is the winner, else name
-                        winner=playersNames[c]
-                        if(player==userId.toString())
-                            winner="1"
-                        lastWinner=winner
-                    }
-                    // check if draw cell as winner
-                    val winG=when{
-                        winner == "" -> ""
-                        winner != "" && gameData["fullDraw"].toString()[i-1]=='1' -> "1"
-                        else -> "2"
-                    }
-                    addGrid(windowView, points, col, i, ww,winner = winG)
-                    total[col-1]+=Integer.parseInt(points)
+            //add set title
+            addGrid(windowView,getString(R.string.set),0,0,60.dp, true)
+            var col=1
+            //find cell width
+            val ww=(windowView.width-60.dp).div(playersCount)
+            //add each player name
+            for(player in playersNames)
+                if(player!=""){
+                    addGrid(windowView,player,col,0,ww, true)
                     col++
                 }
+            //add info for each set
+            var lastWinner=""
+            val total=IntArray(playersCount)
+            for(i in 1..Integer.parseInt(set)){
+                //add each set number
+                val setStr=if(gameData["fullDraw"].toString()[i-1]=='1') "1" else ""
+                addGrid(windowView,i.toString(),0,i,60.dp, winner = setStr)
+                col=1
+                //get each player points per set
+                for ((c,player) in players.withIndex()) {
+                    var winner=""
+                    //check  player set points except current set
+                    if(player!="" && (i.toString()!=gameData["current_set"] || gameData["current_set"]=="6")){
+                        val points=gameSetData["${i}_$player"]!![2]
+                        //check set Winner
+                        if(gameSetData["${i}_$player"]!![0]==""){
+                            //put 1 if current user is the winner, else name
+                            winner=playersNames[c]
+                            if(player==userId.toString())
+                                winner="1"
+                            lastWinner=winner
+                        }
+                        // check if draw cell as winner
+                        val winG=when{
+                            winner == "" -> ""
+                            winner != "" && gameData["fullDraw"].toString()[i-1]=='1' -> "1"
+                            else -> "2"
+                        }
+                        addGrid(windowView, points, col, i, ww,winner = winG)
+                        total[col-1]+=Integer.parseInt(points)
+                        col++
+                    }
+                }
             }
-        }
-        // add empty sets
-        for(i in Integer.parseInt(set)..6) {
-            val setStr=if(gameData["fullDraw"].toString()[i-1]=='1') "1" else ""
-            addGrid(windowView,i.toString(),0,i,60.dp, winner = setStr)
-        }
-        //add total row
-        addGrid(windowView,getString(R.string.total),0,7,60.dp, true)
-        //add each player total
-        var winnerUser=0
-        var winAux=total[0]
-        for((c,tot) in total.withIndex()) {
-            addGrid(windowView, tot.toString(), c + 1, 7, ww, true)
-            if(tot<winAux){
-                winnerUser=c
-                winAux=tot
+            // add empty sets
+            for(i in Integer.parseInt(set)..6) {
+                val setStr=if(gameData["fullDraw"].toString()[i-1]=='1') "1" else ""
+                addGrid(windowView,i.toString(),0,i,60.dp, winner = setStr)
             }
-        }
-        //get the user name
-        var posAux=0
-        for ((c,name) in playersNames.withIndex()) {
-            if(posAux==winnerUser && name != ""){
-                winnerUser=c
-                break
+            //add total row
+            addGrid(windowView,getString(R.string.total),0,7,60.dp, true)
+            //add each player total
+            var winnerUser=0
+            var winAux=total[0]
+            for((c,tot) in total.withIndex()) {
+                addGrid(windowView, tot.toString(), c + 1, 7, ww, true)
+                if(tot<winAux){
+                    winnerUser=c
+                    winAux=tot
+                }
             }
-            if (name != "")
-                posAux++
-        }
+            //get the user name
+            var posAux=0
+            for ((c,name) in playersNames.withIndex()) {
+                if(posAux==winnerUser && name != ""){
+                    winnerUser=c
+                    break
+                }
+                if (name != "")
+                    posAux++
+            }
 
-        val msgText=when{
-            opc == "set" && lastWinner=="1" -> getString(R.string.summary_congrats)
-            opc == "set" -> getString(R.string.summary_lost, lastWinner)
-            opc == "game" && winnerUser==0 -> getString(R.string.summary_congrats_game)
-            opc == "game" -> getString(R.string.summary_lost_game, playersNames[winnerUser])
-            else -> ""
-        }
-        if(msgText!="") {
-            windowView.summaryWinnerText.text = msgText
-            //add flow message if game/set just ended
-            if(winnerUser == 0 && !bg)
-                if(opc == "set") sendFlow(8, playersNames[winnerUser])
-                else sendFlow(9, playersNames[winnerUser])
-        }else
-            windowView.summaryWinnerText.isVisible=false
-
+            val msgText=when{
+                opc == "set" && lastWinner=="1" -> getString(R.string.summary_congrats)
+                opc == "set" -> getString(R.string.summary_lost, lastWinner)
+                opc == "game" && winnerUser==0 -> getString(R.string.summary_congrats_game)
+                opc == "game" -> getString(R.string.summary_lost_game, playersNames[winnerUser])
+                else -> ""
+            }
+            if(msgText!="") {
+                windowView.summaryWinnerText.text = msgText
+                //add flow message if game/set just ended
+                if(winnerUser == 0 && !bg)
+                    if(opc == "set") sendFlow(8, playersNames[winnerUser])
+                    else sendFlow(9, playersNames[winnerUser])
+            }else
+                windowView.summaryWinnerText.isVisible=false
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
         //add each player points cell
         private fun addGrid(windowView:View,text:String,c:Int,r:Int,w:Int,bold:Boolean=false,winner:String=""){
-            val tv=TextView(requireContext())
-            tv.text=text
-            tv.gravity= Gravity.CENTER_HORIZONTAL
-            tv.textSize = 24F
-            tv.maxLines=1
-            if(bold)
-                tv.setTypeface(null, Typeface.BOLD)
-            if(winner=="1"){ // winner Full Draw
-                tv.setTypeface(null, Typeface.BOLD)
-                tv.setTextColor( Color.BLUE)
-            }else if(winner=="2"){ // winner
-                tv.setTypeface(null, Typeface.BOLD)
-                tv.setTextColor( Color.RED)
-            }
-            tv.layoutParams=
-                GridLayout.LayoutParams(ViewGroup.LayoutParams(w, GridLayout.LayoutParams.WRAP_CONTENT)).apply {
-                columnSpec= GridLayout.spec(c)
-                rowSpec= GridLayout.spec(r)
-                setMargins(20,0,20,0)
-            }
-            windowView.summaryGrid.addView(tv)
+            try{
+                val tv=TextView(requireContext())
+                tv.text=text
+                tv.gravity= Gravity.CENTER_HORIZONTAL
+                tv.textSize = 24F
+                tv.maxLines=1
+                if(bold)
+                    tv.setTypeface(null, Typeface.BOLD)
+                if(winner=="1"){ // winner Full Draw
+                    tv.setTypeface(null, Typeface.BOLD)
+                    tv.setTextColor( Color.BLUE)
+                }else if(winner=="2"){ // winner
+                    tv.setTypeface(null, Typeface.BOLD)
+                    tv.setTextColor( Color.RED)
+                }
+                tv.layoutParams=
+                    GridLayout.LayoutParams(ViewGroup.LayoutParams(w, GridLayout.LayoutParams.WRAP_CONTENT)).apply {
+                    columnSpec= GridLayout.spec(c)
+                    rowSpec= GridLayout.spec(r)
+                    setMargins(20,0,20,0)
+                }
+                windowView.summaryGrid.addView(tv)
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
     // show game info window
     private fun displayGameInfo(){
-        val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
-        val gameWindow:PopupWindow
-        if(Build.VERSION.SDK_INT<=22){
-            gameWindow= PopupWindow(windowView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            gameWindow.isOutsideTouchable=false
-            gameWindow.elevation = 5.0f
-        }else
-            gameWindow= PopupWindow(requireContext())
-        //val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
-        gameWindow.contentView=windowView
-        gameWindow.isFocusable=true
-        gameWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
-        windowView.gameInfoLayout.setOnClickListener{
-            gameWindow.dismiss()
-        }
-        val setN:String
-        val setG:String
-        val fulD=if(gameData["fullDraw"].toString()[Integer.parseInt(gameData["current_set"].toString())-1]=='0') " "+getString(R.string.not_upper) else ""
-        when(gameData["current_set"]){
-            "1" ->{
-                setN=getString(R.string.first)
-                setG=getString(R.string.game_set_info, getString(R.string.straightN, "1"), ", "+getString(R.string.toakN, "1"))
+        try{
+            val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
+            val gameWindow:PopupWindow
+            if(Build.VERSION.SDK_INT<=22){
+                gameWindow= PopupWindow(windowView,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                gameWindow.isOutsideTouchable=false
+                gameWindow.elevation = 5.0f
+            }else
+                gameWindow= PopupWindow(requireContext())
+            //val windowView=LayoutInflater.from(context).inflate(R.layout.game_info, drawPreview, false)
+            gameWindow.contentView=windowView
+            gameWindow.isFocusable=true
+            gameWindow.showAtLocation(text_game_info, Gravity.CENTER, 0 ,0)
+            windowView.gameInfoLayout.setOnClickListener{
+                gameWindow.dismiss()
             }
-            "2" ->{
-                setN=getString(R.string.second)
-                setG=getString(R.string.game_set_info, getString(R.string.toakN, "3"), "")
-            }
-            "3" ->{
-                setN=getString(R.string.third)
-                setG=getString(R.string.game_set_info, getString(R.string.straightN, "1"), ", "+getString(R.string.toakN, "2"))
-            }
-            "4" ->{
-                setN=getString(R.string.fourth)
-                setG=getString(R.string.game_set_info, getString(R.string.straightN, "2"), "")
-            }
-            "5" ->{
-                setN=getString(R.string.fifth)
-                setG=getString(R.string.game_set_info, getString(R.string.straightN, "2"), ", "+getString(R.string.toakN, "1"))
-            }
-            else ->{
-                setN=getString(R.string.sixth)
-                setG=getString(R.string.game_set_info, getString(R.string.straightN, "3"), "")
-            }
+            val setN:String
+            val setG:String
+            val fulD=if(gameData["fullDraw"].toString()[Integer.parseInt(gameData["current_set"].toString())-1]=='0') " "+getString(R.string.not_upper) else ""
+            when(gameData["current_set"]){
+                "1" ->{
+                    setN=getString(R.string.first)
+                    setG=getString(R.string.game_set_info, getString(R.string.straightN, "1"), ", "+getString(R.string.toakN, "1"))
+                }
+                "2" ->{
+                    setN=getString(R.string.second)
+                    setG=getString(R.string.game_set_info, getString(R.string.toakN, "3"), "")
+                }
+                "3" ->{
+                    setN=getString(R.string.third)
+                    setG=getString(R.string.game_set_info, getString(R.string.straightN, "1"), ", "+getString(R.string.toakN, "2"))
+                }
+                "4" ->{
+                    setN=getString(R.string.fourth)
+                    setG=getString(R.string.game_set_info, getString(R.string.straightN, "2"), "")
+                }
+                "5" ->{
+                    setN=getString(R.string.fifth)
+                    setG=getString(R.string.game_set_info, getString(R.string.straightN, "2"), ", "+getString(R.string.toakN, "1"))
+                }
+                else ->{
+                    setN=getString(R.string.sixth)
+                    setG=getString(R.string.game_set_info, getString(R.string.straightN, "3"), "")
+                }
 
-        }
-        windowView.text_game_info.text=getString(R.string.desc_game_info, setN, fulD, setG)
+            }
+            windowView.text_game_info.text=getString(R.string.desc_game_info, setN, fulD, setG)
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
     //get card name
     private fun getCardName(card:String):String{
-        val color=when(card[1]){
-            'S' -> getString(R.string.spades)
-            'H' -> getString(R.string.hearts)
-            'D' -> getString(R.string.diamonds)
-            'C' -> getString(R.string.clubs)
-            else -> getString(R.string.joker)
+        return try{
+            val color=when(card[1]){
+                'S' -> getString(R.string.spades)
+                'H' -> getString(R.string.hearts)
+                'D' -> getString(R.string.diamonds)
+                'C' -> getString(R.string.clubs)
+                else -> getString(R.string.joker)
+            }
+            if(card=="XX") color else if(card[0]=='0') "10 $color" else "${card[0]} $color"
+        }catch(ex:Exception){
+            sendError("orderInfo:${ex.getStackTraceString()}")
+            card
         }
-        return if(card=="XX") color else if(card[0]=='0') "10 $color" else "${card[0]} $color"
     }
 
     //*********** INFO
@@ -696,25 +723,27 @@ class GameFragment: Fragment() {
     //show user cards in hand
     private var currentCards=arrayListOf<String>()
     private fun showMyCards(force:Boolean=false){
-        var setAux= gameData["current_set"]
-        //show last set info if game just ended and haven't dealt yet
-        if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
-            setAux=Integer.parseInt(gameData["current_set"].toString())-1
-        val myCards= gameSetData["${setAux}_$userId"]?.get(0)!!.trim(',').split(",").toMutableList() as ArrayList<String>
-        if(currentCards.count()!=myCards.count() || force){
-            currentCards=myCards
-            try{
-                cards.removeAllViews()
-                //get cards in hand
-                cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
-                if(cardsSpace>50.dp)
-                    cardsSpace=50.dp
-                //display each card
-                for ((c,card) in myCards.withIndex())
-                    if(card!="")
-                        addMyCard(card, c)
-            }catch(ex:Exception){sendError("showMyCards:${ex.getStackTraceString()}")}
-        }
+        try{
+            var setAux= gameData["current_set"]
+            //show last set info if game just ended and haven't dealt yet
+            if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
+                setAux=Integer.parseInt(gameData["current_set"].toString())-1
+            val myCards= gameSetData["${setAux}_$userId"]?.get(0)!!.trim(',').split(",").toMutableList() as ArrayList<String>
+            if(currentCards!=myCards || force){
+                currentCards=myCards
+                try{
+                    cards.removeAllViews()
+                    //get cards in hand
+                    cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
+                    if(cardsSpace>50.dp)
+                        cardsSpace=50.dp
+                    //display each card
+                    for ((c,card) in myCards.withIndex())
+                        if(card!="")
+                            addMyCard(card, c)
+                }catch(ex:Exception){sendError("showMyCards:${ex.getStackTraceString()}")}
+            }
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
         //called by showMyCards to add each card
         private fun addMyCard(card:String, pos:Int){
@@ -802,20 +831,22 @@ class GameFragment: Fragment() {
             }catch(ex:Exception){sendError("displayCardInDiscard:${ex.getStackTraceString()}")}
         }
         private fun previewDiscards(){
-            //find the last active discard
-            var posDiscard=-1
-            for(i in 0..4)
-                if(players[i]!="")
-                    posDiscard=i
-            previewDiscardsListeners(posDiscard,discard1)
-            var myPos=players.indexOf(userId.toString())
-            previewDiscardsListeners(myPos,discard2)
-            myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
-            previewDiscardsListeners(myPos,discard3)
-            myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
-            previewDiscardsListeners(myPos,discard4)
-            myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
-            previewDiscardsListeners(myPos,discard5)
+            try{
+                //find the last active discard
+                var posDiscard=-1
+                for(i in 0..4)
+                    if(players[i]!="")
+                        posDiscard=i
+                previewDiscardsListeners(posDiscard,discard1)
+                var myPos=players.indexOf(userId.toString())
+                previewDiscardsListeners(myPos,discard2)
+                myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
+                previewDiscardsListeners(myPos,discard3)
+                myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
+                previewDiscardsListeners(myPos,discard4)
+                myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
+                previewDiscardsListeners(myPos,discard5)
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
 
@@ -899,33 +930,39 @@ class GameFragment: Fragment() {
 
     //show the selected draw in the preview layout
     private fun showDrawPreview(playerId: String){
-        var setAux= gameData["current_set"]
-        if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
-            setAux=Integer.parseInt(gameData["current_set"].toString())-1
-        drawPreview.removeAllViews()
-        drawPreview.isVisible=true
-        val showCards=gameSetData["${setAux}_$playerId"]!![1]
-        MyTools().toast(requireContext(),getString(R.string.touch_preview_close))
-        displayCardsInDraw(showCards, playerId, drawPreview, true)
+        try{
+            var setAux= gameData["current_set"]
+            if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
+                setAux=Integer.parseInt(gameData["current_set"].toString())-1
+            drawPreview.removeAllViews()
+            drawPreview.isVisible=true
+            val showCards=gameSetData["${setAux}_$playerId"]!![1]
+            MyTools().toast(requireContext(),getString(R.string.touch_preview_close))
+            displayCardsInDraw(showCards, playerId, drawPreview, true)
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
         //raise a card in the hand
         private fun raiseCardFromHand(view: View, pos:Int){
-            val params = RelativeLayout.LayoutParams(60.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
-            params.topMargin= 0
-            params.leftMargin=pos
-            view.layoutParams=params
-            //get raised card info
-            cardViewPos = view
-            cardPos=pos/cardsSpace
+            try{
+                val params = RelativeLayout.LayoutParams(60.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
+                params.topMargin= 0
+                params.leftMargin=pos
+                view.layoutParams=params
+                //get raised card info
+                cardViewPos = view
+                cardPos=pos/cardsSpace
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
         //lower a card in the hand
         private fun lowerCardFromHand(view: View, pos:Int){
-            val params = RelativeLayout.LayoutParams(60.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
-            params.topMargin= 30.dp
-            params.leftMargin=pos
-            view.layoutParams=params
+            try{
+                val params = RelativeLayout.LayoutParams(60.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
+                params.topMargin= 30.dp
+                params.leftMargin=pos
+                view.layoutParams=params
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
         //move a card in the hand
@@ -959,83 +996,94 @@ class GameFragment: Fragment() {
 
         //order cards, 0: same number, 1: same color
         private fun sortCards(color:Boolean=false){
-            if(gameSetData[keySetUser]!![0].count()<=3)
-                return
-            var cardList= gameSetData[keySetUser]!![0].trim(',').split(",").toMutableList()
-            //fix to keep numeric sort
-            cardList=fixSort(cardList,true,color)
-            var cards= cardList.sorted() as MutableList<String>
-            cards=fixSort(cards,false,color)
-            gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
-            showMyCards(true)
-            MyTools().toast(requireContext(),getString(if(color)R.string.sort_color else R.string.sort_number))
-            doAsync {
-                FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
-                    addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
-            }
+            try{
+                if(gameSetData[keySetUser]!![0].count()<=3)
+                    return
+                var cardList= gameSetData[keySetUser]!![0].trim(',').split(",").toMutableList()
+                //fix to keep numeric sort
+                cardList=fixSort(cardList,true,color)
+                var cards= cardList.sorted() as MutableList<String>
+                cards=fixSort(cards,false,color)
+                gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
+                showMyCards(true)
+                MyTools().toast(requireContext(),getString(if(color)R.string.sort_color else R.string.sort_number))
+                doAsync {
+                    FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
+                        addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
+                }
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
         // fixes for sorting depending on numbers or color
         private fun fixSort(data:MutableList<String>, start: Boolean, color:Boolean):MutableList<String>{
-            //first change to fix numeric sort
-            if(start)
-                for (i in 0 until data.count()) {
-                    data[i] = when (data[i][0]) {
-                        'A' -> "Y" + data[i][1]
-                        'K' -> "R" + data[i][1]
-                        '0' -> "H" + data[i][1]
-                        'X' -> "Z" + data[i][1]
-                        else -> data[i]
+            try{
+                //first change to fix numeric sort
+                if(start)
+                    for (i in 0 until data.count()) {
+                        data[i] = when (data[i][0]) {
+                            'A' -> "Y" + data[i][1]
+                            'K' -> "R" + data[i][1]
+                            '0' -> "H" + data[i][1]
+                            'X' -> "Z" + data[i][1]
+                            else -> data[i]
+                        }
                     }
-                }
-            //if sorting by color put colors letter first, or restore back
-            if(color)
-                for (i in 0 until data.count())
-                    data[i] = when{
-                        data[i][1].toString()=="D"-> "B" + data[i][0].toString()
-                        data[i][0].toString()=="B"-> data[i][1].toString()+"D"
-                        else -> data[i][1].toString() + data[i][0].toString()
+                //if sorting by color put colors letter first, or restore back
+                if(color)
+                    for (i in 0 until data.count())
+                        data[i] = when{
+                            data[i][1].toString()=="D"-> "B" + data[i][0].toString()
+                            data[i][0].toString()=="B"-> data[i][1].toString()+"D"
+                            else -> data[i][1].toString() + data[i][0].toString()
+                        }
+                if(!start)
+                    for (i in 0 until data.count()) {
+                        data[i] = when (data[i][0]) {
+                            'Y' -> "A" + data[i][1]
+                            'R' -> "K" + data[i][1]
+                            'H' -> "0" + data[i][1]
+                            'Z' -> "X" + data[i][1]
+                            else -> data[i]
+                        }
                     }
-            if(!start)
-                for (i in 0 until data.count()) {
-                    data[i] = when (data[i][0]) {
-                        'Y' -> "A" + data[i][1]
-                        'R' -> "K" + data[i][1]
-                        'H' -> "0" + data[i][1]
-                        'Z' -> "X" + data[i][1]
-                        else -> data[i]
-                    }
-                }
-            return data
+                return data
+            }catch(ex:Exception){
+                sendError("orderInfo:${ex.getStackTraceString()}")
+                return data
+            }
         }
 
         //animate options menu
         private fun animateMenu(){
-            val p1:Float
-            val p2:Float
-            if(!configLayout.isVisible){
-                p1=configLayout.width.toFloat()
-                p2=0f
-                configLayout.visibility= VISIBLE
-                buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_forward_ios_24))
-            }
-            else{
-                p1=0f
-                p2=configLayout.width.toFloat()
-                configLayout.visibility= INVISIBLE
-                buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_back_ios_24))
-            }
-            val animate = TranslateAnimation(p1, p2, 0f, 0f)
-            animate.duration = 500
-            //animate.fillAfter = true
-            configLayout.startAnimation(animate)
+            try{
+                val p1:Float
+                val p2:Float
+                if(!configLayout.isVisible){
+                    p1=configLayout.width.toFloat()
+                    p2=0f
+                    configLayout.visibility= VISIBLE
+                    buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_forward_ios_24))
+                }
+                else{
+                    p1=0f
+                    p2=configLayout.width.toFloat()
+                    configLayout.visibility= INVISIBLE
+                    buttonLauncherMenu.setImageDrawable(requireActivity().getDrawable(R.drawable.ic_baseline_arrow_back_ios_24))
+                }
+                val animate = TranslateAnimation(p1, p2, 0f, 0f)
+                animate.duration = 500
+                //animate.fillAfter = true
+                configLayout.startAnimation(animate)
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
         // show/hide the message view
         private fun switchMessageView(){
-            val newVal=!message_layout.isVisible
-            message_layout.isVisible=newVal
-            requireContext().getSharedPreferences(PREF_FILE, 0).edit().putString("MESSAGES", if(message_layout.isVisible) "ON" else "").apply()
-            MyTools().toast(requireContext(),getString(if(newVal)R.string.message_visible else R.string.message_hidden))
+            try{
+                val newVal=!message_layout.isVisible
+                message_layout.isVisible=newVal
+                requireContext().getSharedPreferences(PREF_FILE, 0).edit().putString("MESSAGES", if(message_layout.isVisible) "ON" else "").apply()
+                MyTools().toast(requireContext(),getString(if(newVal)R.string.message_visible else R.string.message_hidden))
+            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
     // ************ END DISPLAY CARDS FUNCTIONS
@@ -1044,92 +1092,104 @@ class GameFragment: Fragment() {
 
     //drag a card from one view to another
     private fun dragCard(moveView:View, fromView:View, toView:View, code: ()->Unit = {}){
-        val location = IntArray(2)
-        fromView.getLocationOnScreen(location)
-        val location2 = IntArray(2)
-        toView.getLocationOnScreen(location2)
-        moveView.isVisible=true
-        setAllParentsClip(moveView)
-        val animate = TranslateAnimation(
-            0f, location2[0].toFloat()-location[0].toFloat(),
-            0f,location2[1].toFloat()-location[1].toFloat())
-        animate.duration = 500
-        moveView.startAnimation(animate)
-        animate.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(arg0: Animation) {}
-            override fun onAnimationRepeat(arg0: Animation) {}
-            override fun onAnimationEnd(arg0: Animation) {
-                code()
-                loadingGame.isVisible=false
-            }
-        })
+        try{
+            val location = IntArray(2)
+            fromView.getLocationOnScreen(location)
+            val location2 = IntArray(2)
+            toView.getLocationOnScreen(location2)
+            moveView.isVisible=true
+            setAllParentsClip(moveView)
+            val animate = TranslateAnimation(
+                0f, location2[0].toFloat()-location[0].toFloat(),
+                0f,location2[1].toFloat()-location[1].toFloat())
+            animate.duration = 500
+            moveView.startAnimation(animate)
+            animate.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(arg0: Animation) {}
+                override fun onAnimationRepeat(arg0: Animation) {}
+                override fun onAnimationEnd(arg0: Animation) {
+                    code()
+                    loadingGame.isVisible=false
+                }
+            })
+        }catch(ex:Exception){sendError("DragCard:${ex.getStackTraceString()}")}
     }
     //allow to move view outside the parents boundaries
     private fun setAllParentsClip(viewIn: View) {
-        var view = viewIn
-        while (view.parent != null && view.parent is ViewGroup) {
-            val viewGroup = view.parent as ViewGroup
-            viewGroup.clipChildren = false
-            viewGroup.clipToPadding = false
-            view = viewGroup
-        }
+        try{
+            var view = viewIn
+            while (view.parent != null && view.parent is ViewGroup) {
+                val viewGroup = view.parent as ViewGroup
+                viewGroup.clipChildren = false
+                viewGroup.clipToPadding = false
+                view = viewGroup
+            }
+        }catch(ex:Exception){sendError("SetParentClip:${ex.getStackTraceString()}")}
     }
     //call dragCard from deck to preview card
     private fun moveCardFromStack(drawCard:String){
-        sendFlow(3)
-        dragCard(moveCardFromStack,deck,moveCardFromStack1){
-            moveCardFromStack.isVisible=false
-            moveCardFromStack1.isVisible=true
-            moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-            doAsync {
-                sleep(1000)
-                uiThread {
-                    moveCardFromStack1.isVisible=false
-                    initialView()
+        try{
+            sendFlow(3)
+            dragCard(moveCardFromStack,deck,moveCardFromStack1){
+                moveCardFromStack.isVisible=false
+                moveCardFromStack1.isVisible=true
+                moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+                doAsync {
+                    sleep(1000)
+                    uiThread {
+                        moveCardFromStack1.isVisible=false
+                        initialView()
+                    }
                 }
             }
-        }
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from discard1 to last cards
     private fun moveCardFromDiscard(drawCard:String){
-        sendFlow(4, drawCard)
-        moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-        dragCard(moveCardFromDiscard,discard1,moveCardFromStack1){
-            moveCardFromDiscard.isVisible=false
-            moveCardFromStack1.isVisible=true
-            moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-            doAsync {
-                sleep(1000)
-                uiThread {
-                    moveCardFromStack1.isVisible=false
-                    initialView()
+        try{
+            sendFlow(4, drawCard)
+            moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+            dragCard(moveCardFromDiscard,discard1,moveCardFromStack1){
+                moveCardFromDiscard.isVisible=false
+                moveCardFromStack1.isVisible=true
+                moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+                doAsync {
+                    sleep(1000)
+                    uiThread {
+                        moveCardFromStack1.isVisible=false
+                        initialView()
+                    }
                 }
             }
-        }
+        }catch(ex:Exception){sendError("MoveCardFromDiscard:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from raised card to discard 2
     private fun moveCardToDiscard(){
-        sendFlow(5, outCard)
-        dragCard(cardViewPos,cardViewPos,discard2){
-            cardViewPos.isVisible=false
-            moveCardFromStack1.isVisible=false
-            inCard = ""
-            outCard = ""
-        }
-        initialView()
+        try{
+            sendFlow(5, outCard)
+            dragCard(cardViewPos,cardViewPos,discard2){
+                cardViewPos.isVisible=false
+                moveCardFromStack1.isVisible=false
+                inCard = ""
+                outCard = ""
+            }
+            initialView()
+        }catch(ex:Exception){sendError("MoveCardToDiscard:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from raised card to drawn
     private fun moveCardToDraw(view:View){
-        sendFlow(6, outCard)
-        dragCard(cardViewPos,cardViewPos,view){
-            cardViewPos.isVisible=false
-            moveCardFromStack1.isVisible=false
-            outCard = ""
-        }
-        initialView()
+        try{
+            sendFlow(6, outCard)
+            dragCard(cardViewPos,cardViewPos,view){
+                cardViewPos.isVisible=false
+                moveCardFromStack1.isVisible=false
+                outCard = ""
+            }
+            initialView()
+        }catch(ex:Exception){sendError("MoveCardToDraw:${ex.getStackTraceString()}")}
     }
 
     // ************ MOVE CARDS FUNCTIONS
@@ -1229,10 +1289,14 @@ class GameFragment: Fragment() {
                         )
                     ) { result ->
                         doRequest=0
+                        inCard="1"
                         val res = result.split("|")
                         var msg = result
                         if (res.count() == 2) {
                             msg = res[1]
+                            doRequest=0
+                            doRequestBg=0
+                            remoteData(true) //get new data
                             moveCardToDraw(view)
                         }else
                             loadingGame.isVisible=false
@@ -1464,9 +1528,6 @@ class GameFragment: Fragment() {
                             "discardCard", "", cache = false,
                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "out" to outCard)
                         ) { result ->
-                            doRequest=0
-                            doRequestBg=0
-                            remoteData(true) //get new data
                             val res = result.split("|")
                             var msg=result
                             if(res.count()==2){
@@ -1474,12 +1535,16 @@ class GameFragment: Fragment() {
                                 moveCardToDiscard()
                                 //reorder cards when discard is twice
                                 if(fixCardTwice!="")
+                                    currentCards=arrayListOf()
                                     doAsync {
                                         FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to fixCardTwice))
                                     }
                             }else
                                 loadingGame.isVisible=false
+                            doRequest=0
+                            doRequestBg=0
+                            remoteData(true) //get new data
                             MyTools().toast(requireContext(),msg)
                         }
                     }
@@ -1600,14 +1665,14 @@ class GameFragment: Fragment() {
 
     //get message from db when first load
     private fun getStoredMessages(getId:Boolean=false){
-        val dbHandler=Db(requireContext(),null)
-        val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
-        messagesLastId=try{
-            Integer.parseInt(lastId[0][0])
-        }catch(ex:java.lang.NumberFormatException){ 0 }
-        if(getId)
-            return
         try {
+            val dbHandler=Db(requireContext(),null)
+            val lastId=dbHandler.getData("messages", "`gameId_id`=$gameId", "max(`id`)")
+            messagesLastId=try{
+                Integer.parseInt(lastId[0][0])
+            }catch(ex:java.lang.NumberFormatException){ 0 }
+            if(getId)
+                return
             for(message in dbHandler.getData("messages", "`gameId_id`=$gameId"))
                 messages_input.append(putMsg(message[1], message[2], message[3]))
         }catch(ex:Exception){sendError(ex.toString())}
@@ -1615,26 +1680,26 @@ class GameFragment: Fragment() {
 
     //get flow message from db when first load
     private fun getStoredFlow(getId:Boolean=false) {
-        val dbHandler=Db(requireContext(),null)
-        val lastId = dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
-        flowLastId = try { Integer.parseInt(lastId[0][0]) } catch (ex: java.lang.NumberFormatException) { 0 }
-        if (getId)
-            return
         try {
-            for (message in dbHandler.getData("flow", "`gameId_id`=$gameId"))
-                messages_input.append(putMsg(message[1], message[2], flow = true))
-        }catch(ex:Exception){sendError(ex.toString())}
-        if(messages_input.text!="")
-            messages_input.isVisible=true
-        if(prefs!!.getString("MESSAGES","")=="")
-            doAsync {
-                sleep(10000)
-                uiThread {
-                    try {
-                        message_layout.isVisible=false
-                    }catch (ex:IllegalStateException){}
+            val dbHandler=Db(requireContext(),null)
+            val lastId = dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
+            flowLastId = try { Integer.parseInt(lastId[0][0]) } catch (ex: java.lang.NumberFormatException) { 0 }
+            if (getId)
+                return
+                for (message in dbHandler.getData("flow", "`gameId_id`=$gameId"))
+                    messages_input.append(putMsg(message[1], message[2], flow = true))
+            if(messages_input.text!="")
+                messages_input.isVisible=true
+            if(prefs!!.getString("MESSAGES","")=="")
+                doAsync {
+                    sleep(10000)
+                    uiThread {
+                        try {
+                            message_layout.isVisible=false
+                        }catch (ex:IllegalStateException){}
+                    }
                 }
-            }
+        }catch(ex:Exception){sendError(ex.toString())}
     }
 
     //put a message in the messages area
@@ -1650,6 +1715,7 @@ class GameFragment: Fragment() {
                 ss1.setSpan(ForegroundColorSpan(Color.GRAY), 0, ss1.count(), 0) // set color
             ss1
         }catch (ex:Exception){
+            sendError(ex.toString())
             SpannableString(msg)
         }
     }
@@ -1661,18 +1727,18 @@ class GameFragment: Fragment() {
                 messages_input.scrollTo(0, scrollAmount)
             else
                 messages_input.scrollTo(0, 0)
-        }catch (ex:Exception){}
-        message_layout.isVisible=true
-        //auto hide if user has windows hidden
-        if(prefs!!.getString("MESSAGES","")=="")
-            doAsync {
-                sleep(5000)
-                uiThread {
-                    try {
-                        message_layout.isVisible=false
-                    }catch (ex:IllegalStateException){}
+            message_layout.isVisible=true
+            //auto hide if user has windows hidden
+            if(prefs!!.getString("MESSAGES","")=="")
+                doAsync {
+                    sleep(5000)
+                    uiThread {
+                        try {
+                            message_layout.isVisible=false
+                        }catch (ex:IllegalStateException){}
+                    }
                 }
-            }
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
     private fun textEnterListener(){
@@ -1698,29 +1764,36 @@ class GameFragment: Fragment() {
 
     //add new message in the server
     private fun sendFlow(msgId:Int, aux:String=""){
-        doAsync{
-            FetchData(arrayListOf(),this@GameFragment).updateData("addToFlow", "", cache=false,
-                addParams = hashMapOf("gameId" to gameId, "msg" to "${playersNames[0]}||--||$msgId||--||$aux"))
-        }
+        try{
+            doAsync{
+                FetchData(arrayListOf(),this@GameFragment).updateData("addToFlow", "", cache=false,
+                    addParams = hashMapOf("gameId" to gameId, "msg" to "${playersNames[0]}||--||$msgId||--||$aux"))
+            }
+        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
     private fun getFlowMsg(msg:String):String{
-        val msgData=msg.split("||--||")
-        if(msgData.count()!=3)
+        try{
+            val msgData=msg.split("||--||")
+            if(msgData.count()!=3)
+                return msg
+            return when(msgData[1]){
+                "1"->getString(R.string.start_game)
+                "2"->"-------------------\n${getString(R.string.set)} ${msgData[2]}, ${msgData[0]}: ${getString(R.string.deal_cards)}"
+                "3"->"${msgData[0]}: ${getString(R.string.picked_card_stack)}"
+                "4"->"${msgData[0]}: ${getString(R.string.picked_card_discard)}:${getCardName(msgData[2])}"
+                "5"->"${msgData[0]}: ${getString(R.string.discarded_card)}:${getCardName(msgData[2])}"
+                "6"->"${msgData[0]}: ${getString(R.string.draw_over_card)}:${getCardName(msgData[2])}"
+                "7"->"${msgData[0]}: ${getString(R.string.drawn)}"
+                "8"->"${msgData[0]}: ${getString(R.string.won_set)}"
+                "9"->"${msgData[0]}: ${getString(R.string.won_game)}"
+                "10"->"${msgData[0]}: ${getString(R.string.created_game)}"
+                "11"->"${msgData[0]}: ${getString(R.string.joined_game)}"
+                else -> msg
+            }
+        }catch(ex:Exception){
+            sendError("orderInfo:${ex.getStackTraceString()}")
             return msg
-        return when(msgData[1]){
-            "1"->getString(R.string.start_game)
-            "2"->"-------------------\n${getString(R.string.set)} ${msgData[2]}, ${msgData[0]}: ${getString(R.string.deal_cards)}"
-            "3"->"${msgData[0]}: ${getString(R.string.picked_card_stack)}"
-            "4"->"${msgData[0]}: ${getString(R.string.picked_card_discard)}:${getCardName(msgData[2])}"
-            "5"->"${msgData[0]}: ${getString(R.string.discarded_card)}:${getCardName(msgData[2])}"
-            "6"->"${msgData[0]}: ${getString(R.string.draw_over_card)}:${getCardName(msgData[2])}"
-            "7"->"${msgData[0]}: ${getString(R.string.drawn)}"
-            "8"->"${msgData[0]}: ${getString(R.string.won_set)}"
-            "9"->"${msgData[0]}: ${getString(R.string.won_game)}"
-            "10"->"${msgData[0]}: ${getString(R.string.created_game)}"
-            "11"->"${msgData[0]}: ${getString(R.string.joined_game)}"
-            else -> msg
         }
     }
 

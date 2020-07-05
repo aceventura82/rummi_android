@@ -1,17 +1,26 @@
 package com.servoz.rummi
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import com.servoz.rummi.tools.LANG
 import com.servoz.rummi.tools.PREF_FILE
 import com.servoz.rummi.ui.home.HomeFragmentDirections
 import kotlinx.android.synthetic.main.content_main.*
 
 
 class GameActivity : AppCompatActivity() {
+
+    override fun attachBaseContext(newBase: Context?) {
+        val prefs = newBase!!.getSharedPreferences(PREF_FILE, 0)
+        super.attachBaseContext(ApplicationLanguageHelper.wrap(newBase,
+            prefs!!.getString("language", LANG)!!))
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
