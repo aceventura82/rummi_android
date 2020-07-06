@@ -1,0 +1,12 @@
+package com.servoz.rummi.tools
+
+//const val URL ="http://192.168.111.189"
+const val URL ="https://rummi.servoz.tk"
+const val API_URL ="$URL/API/app/fetch/"
+//change this to an unique string to crypt the data, most be the same of Server
+const val API_KEY="(6yAJ(7q(R)rebws(54lRzshyE%WFH&V*tJ9O=-&7zamPTreg=gjxENRh-9qipvUtB5DFgPU3aNq)uUMtVj58SsyoXTd/TsEoERFH=wgm)y9bb-UiCEaycpQuc_mKKJV"
+const val TIMEZONE="America/Bogota"
+const val PREF_FILE="com.servoz.rummi.prefs"
+const val DB_NAME="rummi.db"
+const val LANG="en"
+const val DATE_FORMAT="yyyy-MM-dd HH:mm:ss"
