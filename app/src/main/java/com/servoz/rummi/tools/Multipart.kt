@@ -21,9 +21,9 @@ class Multipart
 constructor(url: URL) {
 
     companion object {
-        private val LINE_FEED = "\r\n"
-        private val maxBufferSize = 1024 * 1024
-        private val charset = "UTF-8"
+        private const val LINE_FEED = "\r\n"
+        private const val maxBufferSize = 1024 * 1024
+        private const val charset = "UTF-8"
     }
 
     // creates a unique boundary based on time stamp
@@ -37,8 +37,8 @@ constructor(url: URL) {
         httpConnection.setRequestProperty("Accept-Charset", "UTF-8")
         httpConnection.setRequestProperty("Connection", "Keep-Alive")
         httpConnection.setRequestProperty("Cache-Control", "no-cache")
-        httpConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary)
-        httpConnection.setChunkedStreamingMode(maxBufferSize)
+        httpConnection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+//        httpConnection.setChunkedStreamingMode(maxBufferSize)
         httpConnection.doInput = true
         httpConnection.doOutput = true    // indicates POST method
         httpConnection.useCaches = false
@@ -55,7 +55,7 @@ constructor(url: URL) {
     fun addFormField(name: String, value: String) {
         writer.append("--").append(boundary).append(LINE_FEED)
         writer.append("Content-Disposition: form-data; name=\"").append(name).append("\"")
-                .append(LINE_FEED)
+            .append(LINE_FEED)
         writer.append(LINE_FEED)
         writer.append(value).append(LINE_FEED)
         writer.flush()
@@ -72,8 +72,8 @@ constructor(url: URL) {
     @Throws(IOException::class)
     fun addFilePart(fieldName: String, uploadFile: File, fileName: String, fileType: String) {
         writer.append("--").append(boundary).append(LINE_FEED)
-        writer.append("Content-Disposition: file; name=\"").append(fieldName)
-                .append("\"; filename=\"").append(fileName).append("\"").append(LINE_FEED)
+        writer.append("Content-Disposition: form-data; name=\"").append(fieldName)
+            .append("\"; filename=\"").append(fileName).append("\"").append(LINE_FEED)
         writer.append("Content-Type: ").append(fileType).append(LINE_FEED)
         writer.append(LINE_FEED)
         writer.flush()
@@ -94,7 +94,7 @@ constructor(url: URL) {
      * @param value - value of the header field
      */
     fun addHeaderField(name: String, value: String) {
-        writer.append(name + ": " + value).append(LINE_FEED)
+        writer.append("$name: $value").append(LINE_FEED)
         writer.flush()
     }
 
@@ -108,7 +108,7 @@ constructor(url: URL) {
     fun upload(onFileUploadedListener: OnFileUploadedListener?) {
         writer.append(LINE_FEED).flush()
         writer.append("--").append(boundary).append("--")
-                .append(LINE_FEED)
+            .append(LINE_FEED)
         writer.close()
 
         try {
@@ -116,7 +116,7 @@ constructor(url: URL) {
             val status = httpConnection.responseCode
             if (status == HttpURLConnection.HTTP_OK) {
                 val reader = BufferedReader(InputStreamReader(httpConnection
-                        .inputStream))
+                    .inputStream))
                 val response = reader.use(BufferedReader::readText)
                 httpConnection.disconnect()
                 onFileUploadedListener?.onFileUploadingSuccess(response)

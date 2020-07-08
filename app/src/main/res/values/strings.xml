@@ -219,4 +219,5 @@
         * The letters J, Q, K have a value of 10 points, regardless of the color.\n
         * The Joker has a value of 100 Points\n\n\n
         </string>
+    <string name="no_mic">No Microphone Found</string>
 </resources>

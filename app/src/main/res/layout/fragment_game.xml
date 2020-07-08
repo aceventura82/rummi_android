@@ -22,7 +22,7 @@
         android:drawableTop="@drawable/ic_account_box_white_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="@+id/buttonLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/cards"
         app:layout_constraintStart_toEndOf="@+id/discard1" />
 
@@ -59,7 +59,7 @@
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@+id/text_game_last_upd"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -99,7 +99,7 @@
         android:layout_height="80dp"
         android:background="@drawable/transparent_borders"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <RelativeLayout
         android:id="@+id/discard3"
@@ -140,7 +140,7 @@
         android:src="@drawable/red_deck"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/discard4" />
+        app:layout_constraintTop_toBottomOf="@id/discard4" />
 
     <!--the five draw positions-->
     <RelativeLayout
@@ -228,24 +228,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/gameP1" />
-
     <View
         android:id="@+id/text_game_last_upd"
         android:layout_width="20dp"
         android:layout_height="20dp"
+        android:translationZ="90dp"
         android:background="@drawable/circle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/text_game_set_number" />
 
     <Button
         android:id="@+id/mainButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/view" />
+        app:layout_constraintStart_toEndOf="@+id/text_game_info"
+        app:layout_constraintTop_toBottomOf="@+id/deck" />
 
     <!--Layout for draw info-->
     <LinearLayout
@@ -255,14 +253,14 @@
         android:orientation="vertical"
         android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/text_game_info"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/buttonLayout">
 
-         <LinearLayout
-             android:id="@+id/text_draw_info"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:background="@color/game_text_bg"
-             android:orientation="vertical" />
+        <LinearLayout
+            android:id="@+id/text_draw_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/game_text_bg"
+            android:orientation="vertical" />
 
         <Button
             android:id="@+id/addGameDrawButton"
@@ -276,7 +274,7 @@
 
     <!--Card animation from stack-->
     <ImageView
-        android:id="@+id/moveCardFromStack"
+        android:id="@+id/moveCardFromDeck"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:src="@drawable/red_back"
@@ -288,7 +286,7 @@
 
     <!--Card animation for preview-->
     <ImageView
-        android:id="@+id/moveCardFromStack1"
+        android:id="@+id/moveCardPreviewHand"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_margin="30dp"
@@ -318,15 +316,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/playAudio"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/messages" />
+
     <!--Top Menu-->
     <LinearLayout
         android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_gravity="end|bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moveCardFromDeck">
 
         <LinearLayout
             android:id="@+id/configLayout"
@@ -343,7 +352,8 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/sort"
                 android:src="@drawable/ic_colors"
-                android:textColor="#fff" />
+                android:textColor="#fff"
+                tools:ignore="NestedWeights" />
 
             <ImageView
                 android:id="@+id/buttonLauncherSortN"
@@ -388,8 +398,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:contentDescription="@string/standing"
+                android:contentDescription="@string/game_info"
                 android:src="@drawable/ic_baseline_info_24"
+                android:textColor="#fff" />
+
+            <ImageView
+                android:id="@+id/buttonLauncherRecord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/messages"
+                android:src="@drawable/ic_baseline_mic_24"
                 android:textColor="#fff" />
 
         </LinearLayout>
@@ -400,7 +419,6 @@
             android:layout_height="wrap_content"
             android:background="@color/game_text_bg"
             android:contentDescription="@string/menu"
-            android:textColor="#fff"
             app:srcCompat="@drawable/ic_baseline_arrow_back_ios_24" />
 
     </LinearLayout>
@@ -413,8 +431,8 @@
         android:background="@drawable/black_borders"
         android:orientation="vertical"
         android:visibility="invisible"
-        app:layout_constraintEnd_toStartOf="@+id/text_game_info"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/cards"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/messages_input"

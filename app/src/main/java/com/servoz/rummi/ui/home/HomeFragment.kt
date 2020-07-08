@@ -46,8 +46,10 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
             return
         super.onViewCreated(view, savedInstanceState)
         recyclerViewMyGames.layoutManager = GridLayoutManager(context,1)
-        requireActivity().toolbar.searchV.isVisible=true
-        requireActivity().toolbar.buttonChangePass.isVisible=false
+        try {
+            requireActivity().toolbar.searchV.isVisible = true
+            requireActivity().toolbar.buttonChangePass.isVisible = false
+        }catch (ex:Exception){}
         prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
         val login = prefs!!.getString("appKey", "") !== ""
 
@@ -63,9 +65,11 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
             }
             searchAdapter = MyGamesRecyclerAdapter(objSearch, JSONObject(prefs!!.getString("userInfo","")!!)["userId_id"].toString())
             uiThread {
-                recyclerViewMyGames.adapter = searchAdapter
-                requireActivity().toolbar.searchV.setOnQueryTextListener(this@HomeFragment)
-                loadingMyGames.isVisible = false
+                try{
+                    recyclerViewMyGames.adapter = searchAdapter
+                    requireActivity().toolbar.searchV.setOnQueryTextListener(this@HomeFragment)
+                    loadingMyGames.isVisible = false
+                }catch (ex:Exception){}
             }
         }
         swipe_containerHome.setOnRefreshListener {

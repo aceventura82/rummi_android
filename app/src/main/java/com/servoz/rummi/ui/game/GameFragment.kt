@@ -1,8 +1,10 @@
 package com.servoz.rummi.ui.game
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
@@ -48,7 +50,8 @@ import java.util.*
 
 
 /*
-* PENDING:
+* ROAD MAP:
+* Move Chat Windows
 * */
 
 val Int.dp: Int
@@ -84,6 +87,7 @@ class GameFragment: Fragment() {
     private var doRequestBg=0
     private var ranId=-2
     private var lastUpd:Long = 0
+    private lateinit var audioRecObj:AudioRecord
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -111,7 +115,7 @@ class GameFragment: Fragment() {
             prefs!!.edit().putString("current_game", gameId).apply()
             //get stored messages from Db
             getStoredMessages(true)
-            getStoredFlow(true)
+            getStoredFlowId()
             //get remote data and set all UI when user enters the game
             remoteData(false)
             //set listeners
@@ -207,10 +211,10 @@ class GameFragment: Fragment() {
                     if(!bg){
                         //get stored messages
                         getStoredMessages()
-                        getStoredFlow()
                         playersInfo()
                         previewDiscards()
                         loadingGame.isVisible=false
+                        audioRecObj.prepareRec(userId.toString(),gameId)
                     }
                 }
             }
@@ -223,6 +227,7 @@ class GameFragment: Fragment() {
             playersCount=0
             inCard=""
             players=gameData["playersPos"].toString().split(",")
+            val firstRun=userId ==-1
             // get Players names
             playersNames=arrayListOf("","","","","")
             for( (c,p) in players.withIndex())
@@ -260,12 +265,8 @@ class GameFragment: Fragment() {
                         ))
                         messagesLastId=Integer.parseInt(dataSet["id"].toString())
                         try {
-                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), dataSet["userId_id"].toString()))
+                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), dataSet["userId_id"].toString(), ini=firstRun))
                         }catch (ex:Exception){}
-                        //play notification and show messages windows
-                        if(userId.toString()!=dataSet["userId_id"].toString())
-                            playNotification()
-                        scrollTVDown()
                     }
                     2 -> { //add flow message
                         if(dbHandler.getData("flow", "`id`=${dataSet["id"]}").count()==0)
@@ -275,7 +276,7 @@ class GameFragment: Fragment() {
                         ))
                         flowLastId=Integer.parseInt(dataSet["id"].toString())
                         try{
-                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), flow = true))
+                            messages_input.append(putMsg(dataSet["msg"].toString(), dataSet["date"].toString(), flow = true, ini = firstRun))
                             scrollTVDown()
                         }catch (ex:Exception){}
                     }
@@ -332,7 +333,9 @@ class GameFragment: Fragment() {
     //get initial view after each movement
     private fun initialView(bg:Boolean=false):Boolean{
         return try {
-            mainButton.isVisible = false
+            try {
+                mainButton.isVisible = false
+            }catch (ex:IllegalStateException){}
             //check Game status, set controls if open or in game
             gameStatus(bg)
             //show discards
@@ -391,7 +394,6 @@ class GameFragment: Fragment() {
                 gameData["started"].toString()== "2"->{
                     text_game_info.text = getString(R.string.ended)
                     displaySetSummary("game", bg)
-                    ranId=-1
                 }
                 //if not dealt yet and is dealing player, show deal button
                 gameData["current_stack"]=="" && currentUser==userId ->{
@@ -401,7 +403,6 @@ class GameFragment: Fragment() {
                     //play sound if first time
                     if(!myTurn) {
                         playNotification()
-                        ranId=-1
                     }
                     myTurn=true
                 }
@@ -441,7 +442,6 @@ class GameFragment: Fragment() {
             ranId=(0..6000).random()
             bgSync(ranId)
         }
-        if(myTurn && currentCards.count()>0) ranId=-1
     }
 
     //************ END CONTROL FUNCTIONS
@@ -1130,14 +1130,14 @@ class GameFragment: Fragment() {
     private fun moveCardFromStack(drawCard:String){
         try{
             sendFlow(3)
-            dragCard(moveCardFromStack,deck,moveCardFromStack1){
-                moveCardFromStack.isVisible=false
-                moveCardFromStack1.isVisible=true
-                moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+            dragCard(moveCardFromDeck,deck,moveCardPreviewHand){
+                moveCardFromDeck.isVisible=false
+                moveCardPreviewHand.isVisible=true
+                moveCardPreviewHand.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
                 doAsync {
                     sleep(1000)
                     uiThread {
-                        moveCardFromStack1.isVisible=false
+                        moveCardPreviewHand.isVisible=false
                         initialView()
                     }
                 }
@@ -1150,14 +1150,14 @@ class GameFragment: Fragment() {
         try{
             sendFlow(4, drawCard)
             moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-            dragCard(moveCardFromDiscard,discard1,moveCardFromStack1){
+            dragCard(moveCardFromDiscard,discard1,moveCardPreviewHand){
                 moveCardFromDiscard.isVisible=false
-                moveCardFromStack1.isVisible=true
-                moveCardFromStack1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+                moveCardPreviewHand.isVisible=true
+                moveCardPreviewHand.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
                 doAsync {
                     sleep(1000)
                     uiThread {
-                        moveCardFromStack1.isVisible=false
+                        moveCardPreviewHand.isVisible=false
                         initialView()
                     }
                 }
@@ -1171,7 +1171,7 @@ class GameFragment: Fragment() {
             sendFlow(5, outCard)
             dragCard(cardViewPos,cardViewPos,discard2){
                 cardViewPos.isVisible=false
-                moveCardFromStack1.isVisible=false
+                moveCardPreviewHand.isVisible=false
                 inCard = ""
                 outCard = ""
             }
@@ -1185,7 +1185,7 @@ class GameFragment: Fragment() {
             sendFlow(6, outCard)
             dragCard(cardViewPos,cardViewPos,view){
                 cardViewPos.isVisible=false
-                moveCardFromStack1.isVisible=false
+                moveCardPreviewHand.isVisible=false
                 outCard = ""
             }
             initialView()
@@ -1228,6 +1228,12 @@ class GameFragment: Fragment() {
                 getString(R.string.beginnig)
             }
             MyTools().toast(requireContext(), getString(R.string.pick_start, posH))
+        }
+        audioRecObj = AudioRecord(requireActivity(), buttonLauncherRecord, playAudio)
+        playAudio.setOnClickListener {
+            if(audioRecObj.isRecording){
+                audioRecObj.stopAudio("","", false)
+            }
         }
     }
 
@@ -1673,21 +1679,12 @@ class GameFragment: Fragment() {
             }catch(ex:java.lang.NumberFormatException){ 0 }
             if(getId)
                 return
-            for(message in dbHandler.getData("messages", "`gameId_id`=$gameId"))
-                messages_input.append(putMsg(message[1], message[2], message[3]))
-        }catch(ex:Exception){sendError(ex.toString())}
-    }
+            for(message in dbHandler.getMessages(gameId)){
+                if(message[3] == "" && message[0].count() > 9 && message[0].substring(0,9) == "::AUDIO::" && message[0].split("::").count()==4)
+                    continue
+                messages_input.append(putMsg(message[0], message[1], message[2], message[3] =="FLOW", true))
 
-    //get flow message from db when first load
-    private fun getStoredFlow(getId:Boolean=false) {
-        try {
-            val dbHandler=Db(requireContext(),null)
-            val lastId = dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
-            flowLastId = try { Integer.parseInt(lastId[0][0]) } catch (ex: java.lang.NumberFormatException) { 0 }
-            if (getId)
-                return
-                for (message in dbHandler.getData("flow", "`gameId_id`=$gameId"))
-                    messages_input.append(putMsg(message[1], message[2], flow = true))
+            }
             if(messages_input.text!="")
                 messages_input.isVisible=true
             if(prefs!!.getString("MESSAGES","")=="")
@@ -1702,13 +1699,38 @@ class GameFragment: Fragment() {
         }catch(ex:Exception){sendError(ex.toString())}
     }
 
+    //get flow message from db when first load
+    private fun getStoredFlowId() {
+        try {
+            val dbHandler=Db(requireContext(),null)
+            val lastId = dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
+            flowLastId = try { Integer.parseInt(lastId[0][0]) } catch (ex: java.lang.NumberFormatException) { 0 }
+        }catch(ex:Exception){sendError(ex.toString())}
+    }
+
     //put a message in the messages area
-    private fun putMsg(msg:String, date:String, userId:String="", flow:Boolean=false):SpannableString{
+    private fun putMsg(msg:String, date:String, userIdMsg:String="", flow:Boolean=false, ini:Boolean=false):SpannableString{
+        if(!ini){
+            //if Audio play it
+            if(msg.count() > 9 && msg.substring(0,9) == "::AUDIO::" && msg.split("::").count()==4) {
+                val userIdAudio = msg.split("::")[2]
+                if(userIdAudio != userId.toString())
+                    audioRecObj.playAudio(playAudio, userIdAudio, gameId)
+            }else{
+                //play notification and show messages windows
+                if(userId.toString()!=userIdMsg){
+                    playNotification()
+                    scrollTVDown()
+                }
+            }
+        }
+        if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
+            return SpannableString("")
         return try{
-            val text=if(userId!="")decode(msg) else getFlowMsg(msg)
+            val text=if(userIdMsg!="")decode(msg) else getFlowMsg(msg)
             val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
-            val user = if(userId!="")playersNames[players.indexOf(userId)] else ""
+            val user = if(userIdMsg!="")playersNames[players.indexOf(userIdMsg)] else ""
             val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: ${text}\n")
             ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size
             if(flow)
@@ -1815,6 +1837,22 @@ class GameFragment: Fragment() {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            101 -> { //RECORD_REQUEST_CODE
 
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    buttonLauncherRecord.isVisible = false
+                } else
+                    audioRecObj.requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 102)
+                return
+            }
+            102 -> { //STORAGE_REQUEST_CODE
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED)
+                    buttonLauncherRecord.isVisible = false
+                return
+            }
+        }
+    }
     // *********** END MESSAGES
 }

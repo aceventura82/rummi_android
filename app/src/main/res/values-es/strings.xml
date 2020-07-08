@@ -222,4 +222,5 @@
         * Las Letras J, Q, K tienen valor de 10 puntos, sin importar la pinta.\n
         * El Comodin Tiene valor de 100 Puntos\n\n\n
     </string>
+    <string name="no_mic">No Se encontró microfono</string>
 </resources>

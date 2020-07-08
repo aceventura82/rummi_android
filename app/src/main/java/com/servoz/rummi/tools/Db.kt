@@ -65,6 +65,23 @@ class Db(context: Context, factory: SQLiteDatabase.CursorFactory?) : SQLiteOpenH
         return rows
     }
 
+    fun getMessages(gameId:String=""):ArrayList<ArrayList<String>>{
+        val query = "SELECT * FROM (SELECT msg,date,userId_id, '' FROM messages WHERE gameId_id=$gameId UNION ALL SELECT msg,date, '', 'FLOW' from flow  WHERE gameId_id=$gameId)A ORDER BY date ASC"
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query, null)
+        val rows = arrayListOf<ArrayList<String>>()
+        while (cursor.moveToNext()){
+            val row= arrayListOf<String>()
+            for(c in 0 until cursor.columnCount){
+                row.add(cursor.getString(c))
+            }
+            rows.add(row)
+        }
+        cursor.close()
+        db.close()
+        return rows
+    }
+
     /*fun deleteById(table:String,id: Int): Boolean {
         val query = "SELECT * FROM $table WHERE id = $id"
         val db = this.writableDatabase
