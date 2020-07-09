@@ -220,4 +220,5 @@
         * The Joker has a value of 100 Points\n\n\n
         </string>
     <string name="no_mic">No Microphone Found</string>
+    <string name="speaking">Speaking</string>
 </resources>

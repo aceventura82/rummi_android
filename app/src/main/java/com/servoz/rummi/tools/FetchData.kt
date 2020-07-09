@@ -3,6 +3,7 @@ package com.servoz.rummi.tools
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
+import com.servoz.rummi.BuildConfig
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.IllegalStateException
@@ -18,7 +19,7 @@ class FetchData(private var fields: ArrayList<String>, private val fragment: Fra
                    cache:Boolean=true, where:String="", code: (result:String)->Unit = {}){
         val params = hashMapOf(
             "apiKey" to MyTools().genKey(fragment, key == "login"), "usernameUser" to getUser(),
-            "oper" to key, "version" to "1.20",
+            "oper" to key, "version" to BuildConfig.VERSION_NAME,
             "lang" to fragment.requireContext().getSharedPreferences(PREF_FILE, 0)!!
                 .getString("lang", LANG)!!
         )

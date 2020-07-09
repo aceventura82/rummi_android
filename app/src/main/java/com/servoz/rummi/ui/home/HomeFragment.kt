@@ -3,11 +3,13 @@ package com.servoz.rummi.ui.home
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -41,10 +43,14 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        requireActivity().window!!.setFlags(
+            WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
         // if intent with URL stop processing, as will not show this fragment
         if(handleIntent(requireActivity().intent))
             return
-        super.onViewCreated(view, savedInstanceState)
         recyclerViewMyGames.layoutManager = GridLayoutManager(context,1)
         try {
             requireActivity().toolbar.searchV.isVisible = true

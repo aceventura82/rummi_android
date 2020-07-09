@@ -27,6 +27,24 @@
         app:layout_constraintStart_toEndOf="@+id/discard1" />
 
     <TextView
+        android:id="@+id/bubble_p1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="20dp"
+        android:maxWidth="300dp"
+        android:visibility="invisible"
+        android:textColor="@color/black"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/cards"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="RtlSymmetry" />
+
+    <TextView
         android:id="@+id/gameP2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -39,6 +57,24 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
+        android:id="@+id/bubble_p2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        android:maxWidth="300dp"
+        android:visibility="invisible"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/cards"
+        app:layout_constraintEnd_toStartOf="@id/gameP2"
+        tools:ignore="RtlSymmetry" />
+
+    <TextView
         android:id="@+id/gameP3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,7 +84,25 @@
         android:textColor="@color/white"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonLayout" />
+
+    <TextView
+        android:id="@+id/bubble_p3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="5dp"
+        android:maxWidth="300dp"
+        android:visibility="invisible"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="10dp"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toStartOf="@id/gameP3"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlSymmetry" />
 
     <TextView
         android:id="@+id/gameP4"
@@ -63,6 +117,24 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/bubble_p4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="5dp"
+        android:maxWidth="300dp"
+        android:visibility="invisible"
+        android:paddingTop="10dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/gameP4"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlSymmetry" />
+
+    <TextView
         android:id="@+id/gameP5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,6 +145,24 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discard1"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/bubble_p5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginStart="5dp"
+        android:maxWidth="300dp"
+        android:visibility="invisible"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
+        android:textSize="24sp"
+        android:paddingBottom="10dp"
+        android:paddingStart="20dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/cards"
+        app:layout_constraintStart_toEndOf="@id/gameP5"
+        tools:ignore="RtlSymmetry" />
 
     <!--Layout for user cards-->
     <RelativeLayout
@@ -431,8 +521,9 @@
         android:background="@drawable/black_borders"
         android:orientation="vertical"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/cards"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/messages_input"

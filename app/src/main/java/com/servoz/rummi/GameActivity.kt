@@ -1,9 +1,8 @@
 package com.servoz.rummi
 
 import android.content.Context
-import android.content.pm.ActivityInfo
+import android.content.Intent
 import android.os.Bundle
-import android.view.Window
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
@@ -24,7 +23,6 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
         window!!.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -33,5 +31,12 @@ class GameActivity : AppCompatActivity() {
         getSharedPreferences(PREF_FILE, 0).edit().putString("check_turn", "ON").apply()
         if(savedInstanceState == null)
             NavHostFragment.findNavController(nav_host_fragment).navigate(HomeFragmentDirections.actionGlobalToGame(Integer.parseInt(intent.getStringExtra("gameId")!!)))
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, MainActivity::class.java)
+        finish()
+        startActivity(intent)
+        super.onBackPressed()
     }
 }

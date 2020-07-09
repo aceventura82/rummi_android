@@ -223,4 +223,5 @@
         * El Comodin Tiene valor de 100 Puntos\n\n\n
     </string>
     <string name="no_mic">No Se encontró microfono</string>
+    <string name="speaking">Hablando</string>
 </resources>

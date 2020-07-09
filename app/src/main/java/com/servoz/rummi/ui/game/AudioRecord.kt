@@ -9,6 +9,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
+import com.servoz.rummi.BuildConfig
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -100,7 +101,7 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
             val requestObj = Multipart(URL(API_URL))
             val prefs = activity.baseContext.getSharedPreferences(PREF_FILE, 0)
             requestObj.addFormField("oper", "addAudio")
-            requestObj.addFormField("version", "1.20")
+            requestObj.addFormField("version", BuildConfig.VERSION_NAME)
             requestObj.addFormField("gameId", gameId)
             requestObj.addFormField("file", "${userId}_${gameId}")
             requestObj.addFormField("msg", "::AUDIO::${userId}::")

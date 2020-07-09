@@ -51,7 +51,8 @@ import java.util.*
 
 /*
 * ROAD MAP:
-* Move Chat Windows
+* LongClick user, Mute
+* Mute All Audios
 * */
 
 val Int.dp: Int
@@ -485,6 +486,11 @@ class GameFragment: Fragment() {
                 gameP5.setCompoundDrawables(null, image, null, null)
                 gameP5.isVisible=true
             }
+            bubble_p1.setBackgroundResource(R.drawable.bubble_bottom)
+            bubble_p2.setBackgroundResource(R.drawable.bubble_right_bottom)
+            bubble_p3.setBackgroundResource(R.drawable.bubble_right_top)
+            bubble_p4.setBackgroundResource(R.drawable.bubble_left_top)
+            bubble_p5.setBackgroundResource(R.drawable.bubble_left_bottom)
             //hide unused draws
             if(playersNames[1]=="")draw2.visibility=GONE
             if(playersNames[2]=="")draw3.visibility=GONE
@@ -1079,10 +1085,8 @@ class GameFragment: Fragment() {
         // show/hide the message view
         private fun switchMessageView(){
             try{
-                val newVal=!message_layout.isVisible
-                message_layout.isVisible=newVal
+                message_layout.isVisible= prefs!!.getString("MESSAGES" ,"") == ""
                 requireContext().getSharedPreferences(PREF_FILE, 0).edit().putString("MESSAGES", if(message_layout.isVisible) "ON" else "").apply()
-                MyTools().toast(requireContext(),getString(if(newVal)R.string.message_visible else R.string.message_hidden))
             }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
 
@@ -1685,17 +1689,6 @@ class GameFragment: Fragment() {
                 messages_input.append(putMsg(message[0], message[1], message[2], message[3] =="FLOW", true))
 
             }
-            if(messages_input.text!="")
-                messages_input.isVisible=true
-            if(prefs!!.getString("MESSAGES","")=="")
-                doAsync {
-                    sleep(10000)
-                    uiThread {
-                        try {
-                            message_layout.isVisible=false
-                        }catch (ex:IllegalStateException){}
-                    }
-                }
         }catch(ex:Exception){sendError(ex.toString())}
     }
 
@@ -1710,7 +1703,7 @@ class GameFragment: Fragment() {
 
     //put a message in the messages area
     private fun putMsg(msg:String, date:String, userIdMsg:String="", flow:Boolean=false, ini:Boolean=false):SpannableString{
-        if(!ini){
+        if(!flow && !ini){
             //if Audio play it
             if(msg.count() > 9 && msg.substring(0,9) == "::AUDIO::" && msg.split("::").count()==4) {
                 val userIdAudio = msg.split("::")[2]
@@ -1723,6 +1716,10 @@ class GameFragment: Fragment() {
                     scrollTVDown()
                 }
             }
+            if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
+                showBubble(getString(R.string.speaking), userIdMsg)
+            else
+                showBubble(msg, userIdMsg)
         }
         if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
             return SpannableString("")
@@ -1733,12 +1730,36 @@ class GameFragment: Fragment() {
             val user = if(userIdMsg!="")playersNames[players.indexOf(userIdMsg)] else ""
             val ss1 = SpannableString("$user ${formatter.format(parser.parse(date)!!)}: ${text}\n")
             ss1.setSpan(RelativeSizeSpan(0.5f), user.count(), user.count()+9, 0) // set size
-            if(flow)
+            if(flow) {
                 ss1.setSpan(ForegroundColorSpan(Color.GRAY), 0, ss1.count(), 0) // set color
+                if(!myTurn && !ini)
+                    MyTools().toast(requireContext(),ss1.substring(10, ss1.toString().count()))
+            }
             ss1
         }catch (ex:Exception){
             sendError(ex.toString())
             SpannableString(msg)
+        }
+    }
+
+    private fun showBubble(msg:String,userIdM:String){
+        val playersAux=reOrderArray(players as ArrayList<String>, myPos)
+        val bubble = when(playersAux.indexOf(userIdM)){
+            0->bubble_p1
+            1->bubble_p2
+            2->bubble_p3
+            3->bubble_p4
+            else->bubble_p5
+        }
+        bubble.isVisible=true
+        bubble.text=msg
+        doAsync {
+            sleep(5000)
+            uiThread {
+                try {
+                    bubble.isVisible=false
+                }catch (ex:IllegalStateException){}
+            }
         }
     }
 
@@ -1749,17 +1770,6 @@ class GameFragment: Fragment() {
                 messages_input.scrollTo(0, scrollAmount)
             else
                 messages_input.scrollTo(0, 0)
-            message_layout.isVisible=true
-            //auto hide if user has windows hidden
-            if(prefs!!.getString("MESSAGES","")=="")
-                doAsync {
-                    sleep(5000)
-                    uiThread {
-                        try {
-                            message_layout.isVisible=false
-                        }catch (ex:IllegalStateException){}
-                    }
-                }
         }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
 
