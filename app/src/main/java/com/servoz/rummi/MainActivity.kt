@@ -5,16 +5,17 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -24,6 +25,7 @@ import com.google.android.material.navigation.NavigationView
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONException
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         notificationChannels()
         hideShowMenuItems(login)
         drawerData()
+        checkUpdate()
     }
 
     override fun onPause() {
@@ -130,6 +133,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main, menu)
+        if(prefs!!.getString("LANDSCAPE", "ON") =="OFF")
+            menu.findItem(R.id.settings_landscape_menu).title=getString(R.string.portrait)
+        if(prefs!!.getString("FULLSCREEN", "ON") =="OFF")
+            menu.findItem(R.id.settings_full_screen_menu).title="${getString(R.string.full_screen)} ${getString(R.string.off)}"
+        else
+            menu.findItem(R.id.settings_full_screen_menu).title="${getString(R.string.full_screen)} ${getString(R.string.on)}"
+        if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF")
+            menu.findItem(R.id.settings_mute_audios_menu).title="${getString(R.string.audios)} ${getString(R.string.off)}"
+        else
+            menu.findItem(R.id.settings_mute_audios_menu).title="${getString(R.string.audios)} ${getString(R.string.on)}"
+        if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF")
+            menu.findItem(R.id.settings_mute_notifications_menu).title="${getString(R.string.notifications)} ${getString(R.string.off)}"
+        else
+            menu.findItem(R.id.settings_mute_notifications_menu).title="${getString(R.string.notifications)} ${getString(R.string.on)}"
         return true
     }
 
@@ -162,6 +179,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.settings_en_menu -> {
                 changeLanguage("en")
+                true
+            }
+            R.id.settings_full_screen_menu -> {
+                changeFullScreen()
+                true
+            }
+            R.id.settings_landscape_menu -> {
+                changeOrientation()
+                true
+            }
+            R.id.settings_mute_notifications_menu -> {
+                muteNotifications()
+                true
+            }
+            R.id.settings_mute_audios_menu -> {
+                muteAudios()
                 true
             }
             R.id.settings_exit_menu -> {
@@ -203,6 +236,50 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun updateTheme(themeStr: String) {
         prefs!!.edit().putString("THEME", themeStr).apply()
         Toast.makeText(this, "$themeStr ${getString(R.string.themeAct)}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun changeOrientation() {
+        val current = if(prefs!!.getString("LANDSCAPE", "ON") =="OFF") "ON" else "OFF"
+        prefs!!.edit().putString("LANDSCAPE", current).apply()
+        if(current == "OFF")
+            toolbar.menu.findItem(R.id.settings_landscape_menu).title=getString(R.string.portrait)
+        else
+            toolbar.menu.findItem(R.id.settings_landscape_menu).title=getString(R.string.landscape)
+        Toast.makeText(this, "${getString(R.string.landscape)} ${getString(if(current =="OFF") R.string.off else R.string.on)}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun changeFullScreen() {
+        val current = if(prefs!!.getString("FULLSCREEN", "ON") =="OFF") "ON" else "OFF"
+        prefs!!.edit().putString("FULLSCREEN", current).apply()
+        if(current == "OFF")
+            toolbar.menu.findItem(R.id.settings_full_screen_menu).title="${getString(R.string.full_screen)} ${getString(R.string.off)}"
+        else
+            toolbar.menu.findItem(R.id.settings_full_screen_menu).title="${getString(R.string.full_screen)} ${getString(R.string.on)}"
+        Toast.makeText(this, "${getString(R.string.full_screen)} ${getString(if(current =="OFF") R.string.off else R.string.on)}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun muteNotifications() {
+        val current = if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF") "ON" else "OFF"
+        prefs!!.edit().putString("MUTE_NOTIFICATIONS", current).apply()
+        if(current == "OFF"){
+            toolbar.menu.findItem(R.id.settings_mute_notifications_menu).title="${getString(R.string.notifications)} ${getString(R.string.off)}"
+            processId=-1
+        }else{
+            toolbar.menu.findItem(R.id.settings_mute_notifications_menu).title="${getString(R.string.notifications)} ${getString(R.string.on)}"
+            processId= (1..99999999).random()
+            checkTurn(processId)
+        }
+        Toast.makeText(this, "${getString(R.string.notifications)} ${getString(if(current =="OFF") R.string.off else R.string.on)}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun muteAudios() {
+        val current = if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF") "ON" else "OFF"
+        prefs!!.edit().putString("MUTE_AUDIOS", current).apply()
+        if(current == "OFF")
+            toolbar.menu.findItem(R.id.settings_mute_audios_menu).title="${getString(R.string.audios)} ${getString(R.string.off)}"
+        else
+            toolbar.menu.findItem(R.id.settings_mute_audios_menu).title="${getString(R.string.audios)} ${getString(R.string.on)}"
+        Toast.makeText(this, "${getString(R.string.audios)} ${getString(if(current =="OFF") R.string.off else R.string.on)}", Toast.LENGTH_SHORT).show()
     }
 
     private fun changeLanguage(lang:String){
@@ -251,7 +328,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    //check app update
+    private fun checkUpdate(){
+        doAsync {
+            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
+                if (result != "OK") {
+                    textUpdate.isVisible=true
+                    textUpdateLink.isVisible=true
+                    textUpdateLink.setOnClickListener {
+                         val openURL = Intent(Intent.ACTION_VIEW)
+                         openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
+                         startActivity(openURL)
+                    }
+                    textUpdate.text=getString(R.string.update, result)
+                }
+            }
+        }
+    }
+
     private fun checkGameName(gameId:String){
+        if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF")
+            return
         //notify if user not in current game
         if(prefs!!.getString("current_game","")!=gameId)
         FetchData(arrayListOf(),nav_host_fragment).updateData("gameInfo", "",cache = false,addParams = hashMapOf("gameId" to gameId)) { result ->

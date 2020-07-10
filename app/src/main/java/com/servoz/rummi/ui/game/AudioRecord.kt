@@ -73,6 +73,9 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
     }
 
     fun playAudio(view:ImageView, userId: String, gameId: String) {
+        val prefs = activity.baseContext.getSharedPreferences(PREF_FILE, 0)
+        if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF")
+            return
         GlideApp.with(activity.baseContext).load(R.drawable.playing_audio).into(buttonCancelRecord)
         val mediaPlayer= MediaPlayer()
         try{

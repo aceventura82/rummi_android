@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+    android:id="@+id/mute_audios_menu"
+    android:orderInCategory="104"
+    android:title="@string/audios" />
+    <item
+    android:id="@+id/mute_messages_menu"
+    android:orderInCategory="104"
+    android:title="@string/messages" />
+</menu>

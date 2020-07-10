@@ -332,7 +332,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/text_game_info"
+        app:layout_constraintEnd_toStartOf="@+id/text_game_info"
         app:layout_constraintTop_toBottomOf="@+id/deck" />
 
     <!--Layout for draw info-->

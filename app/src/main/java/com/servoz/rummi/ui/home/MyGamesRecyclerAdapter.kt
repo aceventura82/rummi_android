@@ -2,6 +2,7 @@ package com.servoz.rummi.ui.home
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri.decode
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.servoz.rummi.GameActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_my_games_layout.view.*
 
@@ -45,7 +45,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
 
         fun bindItems(data: ArrayList<String>, fragment: Fragment) {
             //set info
-            itemView.textItemMyGameName.text = data[1]
+            itemView.textItemMyGameName.text = decode(data[1])
             //change the icon if vew only
             if(data[12] != userId)
                 itemView.buttonItemMyGamesEdit.setImageResource(R.drawable.ic_baseline_remove_red_eye_24)

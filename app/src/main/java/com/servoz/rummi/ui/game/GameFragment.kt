@@ -47,12 +47,11 @@ import org.json.JSONObject
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 /*
 * ROAD MAP:
-* LongClick user, Mute
-* Mute All Audios
 * */
 
 val Int.dp: Int
@@ -89,6 +88,7 @@ class GameFragment: Fragment() {
     private var ranId=-2
     private var lastUpd:Long = 0
     private lateinit var audioRecObj:AudioRecord
+    private var currentCards=arrayListOf<String>()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -100,14 +100,19 @@ class GameFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+
         prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
+        if(prefs!!.getString("LANDSCAPE","ON")=="ON")
+            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         //check user config
         if(prefs!!.getString("MESSAGES","")=="ON")
             switchMessageView()
         pickStart=if(prefs!!.getString("PICK_START","")=="ON") "1" else ""
         try{
             gameId= arguments?.getInt("gameId")!!.toString()
+            if(prefs!!.getString("CARDS$gameId","")!="")
+                currentCards=prefs!!.getString("CARDS$gameId","")!!.split(",") as ArrayList<String>
             //cancel notification if exists
             with(NotificationManagerCompat.from(requireContext())) {
                 cancel(Integer.parseInt(gameId))
@@ -118,7 +123,9 @@ class GameFragment: Fragment() {
             getStoredMessages(true)
             getStoredFlowId()
             //get remote data and set all UI when user enters the game
-            remoteData(false)
+            doAsync {
+                remoteData(false)
+            }
             //set listeners
             setListeners()
             checkLasUpd()
@@ -179,15 +186,19 @@ class GameFragment: Fragment() {
     }
 
     private fun remoteData(bg:Boolean){
-        val dbHandler=Db(requireContext(),null)
+        var dbHandler:Db
         val updDate=try{
+            dbHandler=Db(requireContext(),null)
             val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter1 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             formatter1.timeZone = TimeZone.getTimeZone(TIMEZONE)
             if(bg)
                 formatter1.format(parser.parse(dbHandler.getData("remote_data", "`gameId_id`=$gameId")[0][1])!!)
             else ""
+        }catch (ex:java.lang.IllegalStateException){
+            return
         }catch (ex:java.lang.IndexOutOfBoundsException){
+            dbHandler=Db(requireContext(),null)
             dbHandler.addData("remote_data", hashMapOf("gameId_id" to gameId, "date" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())))
             ""
         }
@@ -214,6 +225,7 @@ class GameFragment: Fragment() {
                         getStoredMessages()
                         playersInfo()
                         previewDiscards()
+                        showMyCards(true)
                         loadingGame.isVisible=false
                         audioRecObj.prepareRec(userId.toString(),gameId)
                     }
@@ -469,28 +481,31 @@ class GameFragment: Fragment() {
             val w = image.intrinsicWidth
             image.setBounds(0, 0, w, h)
             // show player icons & draws
-
+            bubble_p1.setBackgroundResource(R.drawable.bubble_bottom)
             if(playersNames[1]!=""){
                 gameP2.setCompoundDrawables(null, image, null, null)
                 gameP2.isVisible=true
+                bubble_p2.setBackgroundResource(R.drawable.bubble_right_bottom)
+                gameP2.setOnClickListener{addPlayerClickListener(gameP2,players[1])}
             }
             if(playersNames[2]!=""){
                 gameP3.setCompoundDrawables(null, image, null, null)
                 gameP3.isVisible=true
+                bubble_p3.setBackgroundResource(R.drawable.bubble_right_top)
+                gameP3.setOnClickListener{addPlayerClickListener(gameP3,players[2])}
             }
             if(playersNames[3]!=""){
                 gameP4.setCompoundDrawables(null, image, null, null)
                 gameP4.isVisible=true
+                bubble_p4.setBackgroundResource(R.drawable.bubble_left_top)
+                gameP4.setOnClickListener{addPlayerClickListener(gameP4,players[3])}
             }
             if(playersNames[4]!=""){
                 gameP5.setCompoundDrawables(null, image, null, null)
                 gameP5.isVisible=true
+                bubble_p5.setBackgroundResource(R.drawable.bubble_left_bottom)
+                gameP5.setOnClickListener{addPlayerClickListener(gameP5,players[4])}
             }
-            bubble_p1.setBackgroundResource(R.drawable.bubble_bottom)
-            bubble_p2.setBackgroundResource(R.drawable.bubble_right_bottom)
-            bubble_p3.setBackgroundResource(R.drawable.bubble_right_top)
-            bubble_p4.setBackgroundResource(R.drawable.bubble_left_top)
-            bubble_p5.setBackgroundResource(R.drawable.bubble_left_bottom)
             //hide unused draws
             if(playersNames[1]=="")draw2.visibility=GONE
             if(playersNames[2]=="")draw3.visibility=GONE
@@ -506,6 +521,45 @@ class GameFragment: Fragment() {
 
         }catch(ex:Exception){sendError("playersInfo:${ex.getStackTraceString()}")}
     }
+        private var muteAudiosIds= arrayListOf<String>()
+        private var muteMsgIds= arrayListOf<String>()
+        private fun addPlayerClickListener(view: View, userClickId:String){
+            val popup = PopupMenu(requireContext(), view)
+            popup.inflate(R.menu.user)
+            val userPos=muteAudiosIds.indexOf(userClickId)
+            if(userPos==-1)
+                popup.menu.findItem(R.id.mute_audios_menu).title = "${getString(R.string.audios)} ${getString(R.string.on)}"
+            else
+                popup.menu.findItem(R.id.mute_audios_menu).title = "${getString(R.string.audios)} ${getString(R.string.off)}"
+            val userMsgPos=muteMsgIds.indexOf(userClickId)
+            if(userMsgPos==-1)
+                popup.menu.findItem(R.id.mute_messages_menu).title = "${getString(R.string.messages)} ${getString(R.string.on)}"
+            else
+                popup.menu.findItem(R.id.mute_messages_menu).title = "${getString(R.string.messages)} ${getString(R.string.off)}"
+            popup.show()
+
+            popup.setOnMenuItemClickListener{ item: MenuItem? ->
+                when (item!!.itemId) {
+                    R.id.mute_audios_menu -> muteUser(userClickId, userPos)
+                    R.id.mute_messages_menu -> muteUser(userClickId, userMsgPos, true)
+                }
+                true
+            }
+        }
+        private fun muteUser(userMId:String, pos:Int, msg:Boolean=false){
+            //add user
+            if(pos==-1){
+                if(msg)
+                    muteMsgIds.add(userMId)
+                else
+                    muteAudiosIds.add(userMId)
+            }else{ //remove user
+                if(msg)
+                    muteMsgIds.remove(userMId)
+                else
+                    muteAudiosIds.remove(userMId)
+            }
+        }
 
     // set ended summary window
     private fun displaySetSummary(opc:String="", bg: Boolean=false){
@@ -727,7 +781,6 @@ class GameFragment: Fragment() {
     //************ DISPLAY CARDS FUNCTIONS
 
     //show user cards in hand
-    private var currentCards=arrayListOf<String>()
     private fun showMyCards(force:Boolean=false){
         try{
             var setAux= gameData["current_set"]
@@ -735,20 +788,23 @@ class GameFragment: Fragment() {
             if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
                 setAux=Integer.parseInt(gameData["current_set"].toString())-1
             val myCards= gameSetData["${setAux}_$userId"]?.get(0)!!.trim(',').split(",").toMutableList() as ArrayList<String>
-            if(currentCards!=myCards || force){
-                currentCards=myCards
+            if(currentCards.sorted()!=myCards.sorted() || force){
+                if(!force)
+                    currentCards=myCards
                 try{
                     cards.removeAllViews()
                     //get cards in hand
-                    cardsSpace=(cards.width-60.dp).div(myCards.count()+1)
+                    cardsSpace=(cards.width-60.dp).div(currentCards.count()+1)
                     if(cardsSpace>50.dp)
                         cardsSpace=50.dp
                     //display each card
-                    for ((c,card) in myCards.withIndex())
+                    for ((c,card) in currentCards.withIndex())
                         if(card!="")
                             addMyCard(card, c)
                 }catch(ex:Exception){sendError("showMyCards:${ex.getStackTraceString()}")}
             }
+            //save cards order locally
+            prefs!!.edit().putString("CARDS$gameId", currentCards.joinToString(",")).apply()
         }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
     }
         //called by showMyCards to add each card
@@ -762,6 +818,10 @@ class GameFragment: Fragment() {
                 cardImg.layoutParams=params
                 cards.addView(cardImg)
                 cardImg.setOnClickListener { setOnHandListener(it, pos*cardsSpace, card) }
+                cardImg.setOnLongClickListener {
+                    MyTools().toast(requireContext(),getCardName(card))
+                    true
+                }
             }catch(ex:Exception){sendError("addMyCard:${ex.getStackTraceString()}")}
         }
 
@@ -904,11 +964,19 @@ class GameFragment: Fragment() {
             try{
                 val games=drawn.split("|")
                 val numCards=drawn.replace("|", "").trim(',').split(',').count()
-                val cardW=(draw.width).div(numCards+(if(games.count()==2)8 else 13))-5
+                var cardW=(draw.width).div(numCards+(if(games.count()==2)8 else 13))-5
+                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview)
+                    cardW*=2
                 //loop each game
                 var p=0
                 var space=0
+                var posH = 0
                 for((c,game) in games.withIndex()){
+                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview) {
+                        posH = draw.height.div(3) * c
+                        p=0
+                        space=0
+                    }
                     //add each card
                     for(card in game.trim(',').split(',')){
                         val cardImg=ImageView(requireContext())
@@ -916,6 +984,7 @@ class GameFragment: Fragment() {
                         val params = RelativeLayout.LayoutParams(cardW*5, LinearLayout.LayoutParams.WRAP_CONTENT)
                         //move right each card (dCardsSpace), plus space to next game
                         params.leftMargin=(p*cardW)+space
+                        params.topMargin = posH
                         cardImg.layoutParams=params
                         if(!preview){ //listener for discard card and show preview
                             cardImg.setOnClickListener {setOnDrawListener(c, cardImg,playerId)}
@@ -929,7 +998,7 @@ class GameFragment: Fragment() {
                         draw.addView(cardImg)
                         p++
                     }
-                    space+=60.dp
+                    space+=cardW*4
                 }
             }catch(ex:Exception){sendError("displayCardsInDraw:${ex.getStackTraceString()}")}
         }
@@ -975,7 +1044,7 @@ class GameFragment: Fragment() {
         private fun moveCard(pos:Int){
             try{
                 var cards= arrayListOf<String>()
-                val cardList=gameSetData[keySetUser]!![0].trim(',').split(",").toMutableList() as ArrayList<String>
+                val cardList=currentCards
                 //check if card to move is next position, move before
                 if(pos+1==cardPos) {
                     val auxCard= cardList[cardPos]
@@ -992,11 +1061,12 @@ class GameFragment: Fragment() {
                         }
                     }
                 gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
+                currentCards=cards
                 showMyCards(true)
-                doAsync {
+                /*doAsync {
                     FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                         addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
-                }
+                }*/
             }catch(ex:Exception){sendError("MoveCard:$ex")}
         }
 
@@ -1005,22 +1075,21 @@ class GameFragment: Fragment() {
             try{
                 if(gameSetData[keySetUser]!![0].count()<=3)
                     return
-                var cardList= gameSetData[keySetUser]!![0].trim(',').split(",").toMutableList()
                 //fix to keep numeric sort
-                cardList=fixSort(cardList,true,color)
-                var cards= cardList.sorted() as MutableList<String>
-                cards=fixSort(cards,false,color)
-                gameSetData[keySetUser]!![0]=cards.joinToString(",")+","
-                showMyCards(true)
+                currentCards= fixSort(currentCards,true,color)
+                currentCards.sort()
+                currentCards= fixSort(currentCards,false,color)
+                gameSetData[keySetUser]!![0]=currentCards.joinToString(",")+","
                 MyTools().toast(requireContext(),getString(if(color)R.string.sort_color else R.string.sort_number))
-                doAsync {
+                showMyCards(true)
+                /*doAsync {
                     FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                         addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
-                }
+                }*/
             }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
         }
         // fixes for sorting depending on numbers or color
-        private fun fixSort(data:MutableList<String>, start: Boolean, color:Boolean):MutableList<String>{
+        private fun fixSort(data:ArrayList<String>, start: Boolean, color:Boolean):ArrayList<String>{
             try{
                 //first change to fix numeric sort
                 if(start)
@@ -1118,8 +1187,8 @@ class GameFragment: Fragment() {
             })
         }catch(ex:Exception){sendError("DragCard:${ex.getStackTraceString()}")}
     }
-    //allow to move view outside the parents boundaries
-    private fun setAllParentsClip(viewIn: View) {
+        //allow to move view outside the parents boundaries
+        private fun setAllParentsClip(viewIn: View) {
         try{
             var view = viewIn
             while (view.parent != null && view.parent is ViewGroup) {
@@ -1307,7 +1376,10 @@ class GameFragment: Fragment() {
                             doRequest=0
                             doRequestBg=0
                             remoteData(true) //get new data
+                            cards.removeViewAt(cardPos)
+                            currentCards.removeAt(cardPos)
                             moveCardToDraw(view)
+                            showMyCards(true)
                         }else
                             loadingGame.isVisible=false
                         MyTools().toast(requireContext(), msg)
@@ -1453,7 +1525,10 @@ class GameFragment: Fragment() {
                                 msg=res[1]
                                 inCard=res[1]
                                 remoteData(true)
+                                addMyCard(inCard, currentCards.count())
+                                currentCards.add(inCard)
                                 moveCardFromStack(res[1])
+                                showMyCards(true)
                             }
                             MyTools().toast(requireContext(),msg)
                         }
@@ -1494,8 +1569,11 @@ class GameFragment: Fragment() {
                            if(res.count()==2){
                                msg=res[1]
                                inCard=res[1]
+                               addMyCard(inCard,currentCards.count())
+                               currentCards.add(inCard)
                                remoteData(true)
                                moveCardFromDiscard(res[1])
+                               showMyCards(true)
                             }
                            MyTools().toast(requireContext(),msg)
                         }
@@ -1525,12 +1603,12 @@ class GameFragment: Fragment() {
                 }
                 else->{
                     //check if discard card is twice, then remove the position selected and save to fixDiscardDouble
-                    var fixCardTwice=""
+                    /*var fixCardTwice=""
                     if(gameSetData[keySetUser]!![0].split(outCard).count()==3){
                         for ((c,cc) in gameSetData[keySetUser]!![0].split(",").withIndex())
                             if(c!=cardPos && cc!="")
                                 fixCardTwice+="$cc,"
-                    }
+                    }*/
                     //discard card
                     if(doRequest==0) {
                         doRequest++
@@ -1543,13 +1621,16 @@ class GameFragment: Fragment() {
                             if(res.count()==2){
                                 msg=res[1]
                                 moveCardToDiscard()
+                                cards.removeViewAt(cardPos)
+                                currentCards.removeAt(cardPos)
+                                showMyCards(true)
                                 //reorder cards when discard is twice
-                                if(fixCardTwice!="")
+                                /*if(fixCardTwice!="")
                                     currentCards=arrayListOf()
                                     doAsync {
                                         FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to fixCardTwice))
-                                    }
+                                    }*/
                             }else
                                 loadingGame.isVisible=false
                             doRequest=0
@@ -1599,7 +1680,7 @@ class GameFragment: Fragment() {
         }
     }
 
-    //check number of game for the current set and add it or show the confirm botton to make the draw
+    //check number of game for the current set and add it or show the confirm button to make the draw
     private fun addGameToDraw(){
         //if more games to add
         if(addGameDrawButton.text!=getString(R.string.confirm_draw)){
@@ -1628,7 +1709,12 @@ class GameFragment: Fragment() {
                         draw_info_layout.isVisible=false
                         mainButton.isVisible=false
                         mainButton.text=getString(R.string.draw)
+                        for (cc in drawCards.trim('|').split("|"))
+                            currentCards.remove(cc)
                         drawCards="-1"
+                        for (cc in drawViewCards)
+                            cards.removeView(cc)
+                        showMyCards(true)
                         text_draw_info.removeAllViews()
                         addGameDrawButton.text=getString(R.string.add_draw_game)
                         initialView()
@@ -1706,19 +1792,24 @@ class GameFragment: Fragment() {
         if(!flow && !ini){
             //if Audio play it
             if(msg.count() > 9 && msg.substring(0,9) == "::AUDIO::" && msg.split("::").count()==4) {
+                if(muteAudiosIds.indexOf(userIdMsg)!=-1) //user muted
+                    return SpannableString("")
                 val userIdAudio = msg.split("::")[2]
                 if(userIdAudio != userId.toString())
                     audioRecObj.playAudio(playAudio, userIdAudio, gameId)
             }else{
+                if(muteMsgIds.indexOf(userIdMsg)!=-1) //user muted
+                    return SpannableString("")
                 //play notification and show messages windows
                 if(userId.toString()!=userIdMsg){
                     playNotification()
                     scrollTVDown()
                 }
             }
-            if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
-                showBubble(getString(R.string.speaking), userIdMsg)
-            else
+            if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::"){
+                if(userId.toString()!=userIdMsg)
+                    showBubble(getString(R.string.speaking), userIdMsg)
+            }else
                 showBubble(msg, userIdMsg)
         }
         if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
@@ -1752,7 +1843,8 @@ class GameFragment: Fragment() {
             else->bubble_p5
         }
         bubble.isVisible=true
-        bubble.text=msg
+        bubble.text=decode(msg)
+
         doAsync {
             sleep(5000)
             uiThread {
@@ -1830,6 +1922,8 @@ class GameFragment: Fragment() {
     }
 
     private fun playNotification(){
+        if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF")
+            return
         try {
             val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val r = RingtoneManager.getRingtone(requireContext().applicationContext, notification)
@@ -1841,6 +1935,7 @@ class GameFragment: Fragment() {
 
     //add new message in the server
     private fun sendError(msg:String){
+        println("ERROR:$msg")
         doAsync {
             FetchData(arrayListOf(),this@GameFragment).updateData("errors", "", cache=false,
                 addParams = hashMapOf("data" to msg))

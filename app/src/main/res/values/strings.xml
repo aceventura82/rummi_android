@@ -221,4 +221,17 @@
         </string>
     <string name="no_mic">No Microphone Found</string>
     <string name="speaking">Speaking</string>
+    <string name="language">Language</string>
+    <string name="full_screen">Full Screen</string>
+    <string name="landscape">Horizontal View</string>
+    <string name="portrait">Vertical View</string>
+    <string name="mute_audios">Mute Audios</string>
+    <string name="mute_notifications">Mute Notifications</string>
+    <string name="off">Off</string>
+    <string name="on">On</string>
+    <string name="notifications">Notifications</string>
+    <string name="audios">Audios</string>
+    <string name="mute_messages">Mute Messages</string>
+    <string name="update">There is a new application update: version %1$s</string>
+    <string name="download">Download</string>
 </resources>

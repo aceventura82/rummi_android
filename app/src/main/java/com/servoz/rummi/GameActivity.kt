@@ -23,6 +23,9 @@ class GameActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val prefs = getSharedPreferences(PREF_FILE, 0)
+        // check if full screen
+        if(prefs!!.getString("FULLSCREEN","ON")=="ON")
         window!!.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -35,6 +38,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         finish()
         startActivity(intent)
         super.onBackPressed()

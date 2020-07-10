@@ -224,4 +224,17 @@
     </string>
     <string name="no_mic">No Se encontró microfono</string>
     <string name="speaking">Hablando</string>
+    <string name="language">Idioma</string>
+    <string name="full_screen">Pantalla completa</string>
+    <string name="landscape">Vista Horizontal</string>
+    <string name="portrait">Vista Vertical</string>
+    <string name="mute_audios">Silenciar Audios</string>
+    <string name="mute_notifications">Silenciar Notificaciones</string>
+    <string name="off">Desactivado</string>
+    <string name="on">Activated</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="audios">Audios</string>
+    <string name="mute_messages">Silenciar Mensajes</string>
+    <string name="update">Hay una nueva actualización disponible: version %1$s</string>
+    <string name="download">Descargar</string>
 </resources>
