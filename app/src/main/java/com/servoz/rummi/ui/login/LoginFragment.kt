@@ -13,6 +13,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.MainActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.FetchData
+import com.servoz.rummi.tools.MyTools
 import com.servoz.rummi.tools.PREF_FILE
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.app_bar_main.view.*
@@ -20,6 +21,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_login.*
 import org.jetbrains.anko.doAsync
 import java.lang.Thread.sleep
+import kotlin.math.log
 
 class LoginFragment : Fragment() {
 
@@ -40,6 +42,64 @@ class LoginFragment : Fragment() {
         }
         login_cancel_button.setOnClickListener {
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+        }
+        login_cancel_reset.setOnClickListener {
+            login_reset_button.text=getString(R.string.forgot_password)
+            editText_email_rL.isVisible=false
+            editText_email_r.setText("")
+            editText_code.setText("")
+            editText_codeL.isVisible=false
+            editText_password1L.isVisible=false
+            editText_password1.setText("")
+            editText_password2.setText("")
+            editText_password2L.isVisible=false
+            login_cancel_reset.isVisible=false
+        }
+        login_reset_button.setOnClickListener {
+            when(login_reset_button.text){
+                getString(R.string.forgot_password)->{
+                    login_reset_button.text=getString(R.string.send_code)
+                    editText_email_rL.isVisible=true
+                    login_cancel_reset.isVisible=true
+                }
+                getString(R.string.send_code)->{
+                    loadingLogin.isVisible=true
+                    FetchData(arrayListOf(),this).updateData("sendEmailPass", "",cache = false, addParams = hashMapOf("usernameUser" to editText_email_r.text.toString())) {
+                        result ->
+                        var msg =result
+                        if(result.split("|").count() == 2){
+                            editText_email_rL.isVisible=false
+                            login_reset_button.text=getString(R.string.reset_password)
+                            editText_codeL.isVisible=true
+                            editText_password1L.isVisible=true
+                            editText_password2L.isVisible=true
+                            msg = result.split("|")[1]
+                        }
+                        MyTools().toast(requireContext(),msg)
+                        loadingLogin.isVisible=false
+                    }
+                }
+                getString(R.string.reset_password)->{
+                    loadingLogin.isVisible=true
+                    FetchData(arrayListOf(),this).updateData("updPasswordCode", "",cache = false,
+                        addParams = hashMapOf("usernameUser" to editText_email_r.text.toString(), "new_password1" to editText_password1.text.toString(),
+                        "new_password2" to editText_password2.text.toString(), "code" to editText_code.text.toString())) {
+                        result ->
+                        var msg =result
+                        if(result.split("|").count() == 2){
+                            login_reset_button.text=getString(R.string.forgot_password)
+                            editText_email_rL.isVisible=false
+                            editText_codeL.isVisible=false
+                            editText_password1L.isVisible=false
+                            editText_password2L.isVisible=false
+                            login_cancel_reset.isVisible=true
+                            msg = result.split("|")[1]
+                        }
+                        MyTools().toast(requireContext(),msg)
+                        loadingLogin.isVisible=false
+                    }
+                }
+            }
         }
     }
 

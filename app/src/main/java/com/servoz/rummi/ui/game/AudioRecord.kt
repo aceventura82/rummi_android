@@ -110,7 +110,7 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
             requestObj.addFormField("msg", "::AUDIO::${userId}::")
             requestObj.addFormField("apiKey", MyTools().genKey(activity.nav_host_fragment))
             requestObj.addFormField("usernameUser", prefs.getString("appKey", "")!!.substringBefore('|'))
-
+            requestObj.addFormField("trash", "")
             requestObj.addFilePart("audio", File(audioFilePath!!), File(audioFilePath!!).name,  "audio/3gp")
             requestObj.upload(
                 object: Multipart.OnFileUploadedListener{

@@ -83,6 +83,7 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
             swipe_containerHome.isRefreshing = false
         }
         loadingMyGames.isVisible=false
+        checkUpdate()
     }
 
     // intent to Join a Game by URL
@@ -141,6 +142,24 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
     private fun search(s: String?) {
         searchAdapter.search(s) {
             Toast.makeText(context, getString(R.string.notFound), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //check app update
+    private fun checkUpdate(){
+        doAsync {
+            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
+                if (result != "OK") {
+                    textUpdate.isVisible=true
+                    textUpdateLink.isVisible=true
+                    textUpdateLink.setOnClickListener {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
+                        startActivity(openURL)
+                    }
+                    textUpdate.text=getString(R.string.update, result)
+                }
+            }
         }
     }
 }

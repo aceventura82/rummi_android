@@ -237,4 +237,7 @@
     <string name="mute_messages">Silenciar Mensajes</string>
     <string name="update">Hay una nueva actualización disponible: version %1$s</string>
     <string name="download">Descargar</string>
+    <string name="forgot_password">Olvide Contraseña</string>
+    <string name="send_code">Enviar Codigo</string>
+    <string name="reset_password">Reiniciar contraseña</string>
 </resources>

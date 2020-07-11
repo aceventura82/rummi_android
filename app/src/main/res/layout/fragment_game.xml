@@ -19,10 +19,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:drawableTop="@drawable/ic_account_box_white_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/cards"
+        app:layout_constraintStart_toEndOf="@+id/discard1" />
+    <ImageView
+        android:id="@+id/gameP1Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="@string/player"
+        android:background="@drawable/ic_account_box_white_80dp"
+        app:layout_constraintBottom_toTopOf="@id/gameP1"
         app:layout_constraintEnd_toEndOf="@+id/cards"
         app:layout_constraintStart_toEndOf="@+id/discard1" />
 
@@ -49,12 +57,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:drawableTop="@drawable/ic_account_box_black_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discard2"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/gameP2Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/gameP2"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/player" />
 
     <TextView
         android:id="@+id/bubble_p2"
@@ -76,15 +92,23 @@
 
     <TextView
         android:id="@+id/gameP3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_gravity="center_horizontal"
-        android:drawableTop="@drawable/ic_account_box_black_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/gameP3Img" />
+
+    <ImageView
+        android:id="@+id/gameP3Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonLayout"  />
 
     <TextView
         android:id="@+id/bubble_p3"
@@ -109,10 +133,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:drawableTop="@drawable/ic_account_box_black_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gameP4" />
+
+    <ImageView
+        android:id="@+id/gameP4Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -139,11 +171,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:drawableTop="@drawable/ic_account_box_black_80dp"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discard1"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/gameP5Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
+        app:layout_constraintBottom_toTopOf="@+id/gameP5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -425,7 +465,7 @@
         android:layout_gravity="end|bottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moveCardFromDeck">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/configLayout"

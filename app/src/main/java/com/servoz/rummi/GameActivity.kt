@@ -2,6 +2,7 @@ package com.servoz.rummi
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,8 @@ class GameActivity : AppCompatActivity() {
         window!!.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        if(prefs.getString("LANDSCAPE","ON")=="ON")
+            requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE
         setContentView(R.layout.activity_game)
         //start notifications if user came from notification
         getSharedPreferences(PREF_FILE, 0).edit().putString("check_turn", "ON").apply()

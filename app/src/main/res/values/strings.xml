@@ -234,4 +234,7 @@
     <string name="mute_messages">Mute Messages</string>
     <string name="update">There is a new application update: version %1$s</string>
     <string name="download">Download</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="send_code">Send Code</string>
+    <string name="reset_password">Reset Password</string>
 </resources>

@@ -3,7 +3,6 @@ package com.servoz.rummi.ui.game
 import android.Manifest
 import android.app.AlertDialog
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
@@ -28,6 +27,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.request.RequestOptions
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.fragment_game.*
@@ -67,6 +67,7 @@ class GameFragment: Fragment() {
     private var userId=-1
     private var keySetUser=""
     private var playersNames=arrayListOf("","","","","")
+    private var playersExt=arrayListOf("","","","","")
     private var inCard=""
     private var myPos=0
     private var outCard=""
@@ -100,18 +101,14 @@ class GameFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
-        if(prefs!!.getString("LANDSCAPE","ON")=="ON")
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         //check user config
         if(prefs!!.getString("MESSAGES","")=="ON")
             switchMessageView()
         pickStart=if(prefs!!.getString("PICK_START","")=="ON") "1" else ""
         try{
             gameId= arguments?.getInt("gameId")!!.toString()
-            if(prefs!!.getString("CARDS$gameId","")!="")
+            if(prefs!!.getString("CARDS$gameId","")!!.count()>3)
                 currentCards=prefs!!.getString("CARDS$gameId","")!!.split(",") as ArrayList<String>
             //cancel notification if exists
             with(NotificationManagerCompat.from(requireContext())) {
@@ -119,11 +116,15 @@ class GameFragment: Fragment() {
             }
             //mark this gameId as current game
             prefs!!.edit().putString("current_game", gameId).apply()
-            //get stored messages from Db
-            getStoredMessages(true)
-            getStoredFlowId()
             //get remote data and set all UI when user enters the game
+            try{
+                resources
+            }catch (ex:IllegalStateException){return}
             doAsync {
+                sleep(1000)
+                //get stored messages from Db
+                getStoredMessages(true)
+                getStoredFlowId()
                 remoteData(false)
             }
             //set listeners
@@ -250,6 +251,7 @@ class GameFragment: Fragment() {
                             break
                         else if(dataSet["set_userId_id"]==p){
                             playersNames[c]=dataSet["name"].toString()
+                            playersExt[c]=dataSet["extension"].toString()
                             continue
                         }
             userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
@@ -322,6 +324,7 @@ class GameFragment: Fragment() {
                     val curUserAux=players[Integer.parseInt(gameData["currentPlayerPos"].toString())]
                     players=reOrderArray(players as ArrayList<String>, myPos)
                     playersNames=reOrderArray(playersNames, myPos)
+                    playersExt=reOrderArray(playersExt, myPos)
                     gameData.put("current_discarded", reOrderArray(gameData["current_discarded"].toString()
                         .split("|") as ArrayList<String>, myPos).joinToString("|"))
                     //get the current playing player based on new order
@@ -469,42 +472,49 @@ class GameFragment: Fragment() {
                         else " ("+gameSetData["${gameData["current_set"]}_${players[i]}"]!![0].trim(',').split(",").count()+")"
 
             gameP1.text=getString(R.string.player_cards,playersNames[0],cardsCount[0])
-            gameP2.text=getString(R.string.player_cards,playersNames[1],cardsCount[1])
-            gameP3.text=getString(R.string.player_cards,playersNames[2],cardsCount[2])
-            gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[3])
-            gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
+            GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[0]}${playersExt[0]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP1Img)
+
             // just update image before game start
             if(bg && gameData["started"] != "0")
                 return
-            val image = getDrawable(requireContext(),R.drawable.ic_account_box_white_80dp)
-            val h = image!!.intrinsicHeight
-            val w = image.intrinsicWidth
-            image.setBounds(0, 0, w, h)
             // show player icons & draws
             bubble_p1.setBackgroundResource(R.drawable.bubble_bottom)
             if(playersNames[1]!=""){
-                gameP2.setCompoundDrawables(null, image, null, null)
+                gameP2.text=getString(R.string.player_cards,playersNames[1],cardsCount[1])
                 gameP2.isVisible=true
+                gameP2Img.isVisible=true
                 bubble_p2.setBackgroundResource(R.drawable.bubble_right_bottom)
                 gameP2.setOnClickListener{addPlayerClickListener(gameP2,players[1])}
+                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[1]}${playersExt[1]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP2Img)
             }
             if(playersNames[2]!=""){
-                gameP3.setCompoundDrawables(null, image, null, null)
+                gameP3.text=getString(R.string.player_cards,playersNames[2],cardsCount[2])
                 gameP3.isVisible=true
+                gameP3Img.isVisible=true
                 bubble_p3.setBackgroundResource(R.drawable.bubble_right_top)
                 gameP3.setOnClickListener{addPlayerClickListener(gameP3,players[2])}
+                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[2]}${playersExt[2]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP3Img)
             }
             if(playersNames[3]!=""){
-                gameP4.setCompoundDrawables(null, image, null, null)
+                gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[2])
+                gameP4Img.isVisible=true
                 gameP4.isVisible=true
                 bubble_p4.setBackgroundResource(R.drawable.bubble_left_top)
                 gameP4.setOnClickListener{addPlayerClickListener(gameP4,players[3])}
+                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[3]}${playersExt[3]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP4Img)
             }
             if(playersNames[4]!=""){
-                gameP5.setCompoundDrawables(null, image, null, null)
+                gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
                 gameP5.isVisible=true
+                gameP5Img.isVisible=true
                 bubble_p5.setBackgroundResource(R.drawable.bubble_left_bottom)
                 gameP5.setOnClickListener{addPlayerClickListener(gameP5,players[4])}
+                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[4]}${playersExt[4]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP5Img)
             }
             //hide unused draws
             if(playersNames[1]=="")draw2.visibility=GONE
@@ -1515,7 +1525,7 @@ class GameFragment: Fragment() {
                     if(doRequest==0) {
                         doRequest++
                         FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
-                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1", "start" to pickStart)) { result ->
+                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1")) { result ->
                             doRequest=0
                             doRequestBg=0
                             remoteData(true) //get new data
@@ -1525,8 +1535,10 @@ class GameFragment: Fragment() {
                                 msg=res[1]
                                 inCard=res[1]
                                 remoteData(true)
-                                addMyCard(inCard, currentCards.count())
-                                currentCards.add(inCard)
+                                if(pickStart=="1")
+                                    currentCards.add(0, inCard)
+                                else
+                                    currentCards.add(inCard)
                                 moveCardFromStack(res[1])
                                 showMyCards(true)
                             }
@@ -1560,7 +1572,7 @@ class GameFragment: Fragment() {
                     if(doRequest==0) {
                         doRequest++
                        FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
-                           addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1", "start" to pickStart)) { result ->
+                           addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1")) { result ->
                            doRequest=0
                            doRequestBg=0
                            remoteData(true) //get new data
@@ -1569,7 +1581,6 @@ class GameFragment: Fragment() {
                            if(res.count()==2){
                                msg=res[1]
                                inCard=res[1]
-                               addMyCard(inCard,currentCards.count())
                                currentCards.add(inCard)
                                remoteData(true)
                                moveCardFromDiscard(res[1])

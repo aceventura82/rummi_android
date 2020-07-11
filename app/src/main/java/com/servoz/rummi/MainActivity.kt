@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -15,17 +14,17 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.view.GravityCompat
-import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.navigation.NavigationView
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONException
@@ -80,7 +79,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         notificationChannels()
         hideShowMenuItems(login)
         drawerData()
-        checkUpdate()
     }
 
     override fun onPause() {
@@ -115,6 +113,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             else -> { FetchData(ArrayList(), nav_host_fragment).getUser() }
         }
+        GlideApp.with(this).load("${URL}/static/playerAvatars/${userData.getString("userId_id")}${userData.getString("extension")}")
+            .signature(ObjectKey(prefs!!.getString("imageSignature", "")!!))
+            .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(navView.getHeaderView(0).imageViewNavHeader)
     }
 
     private fun hideShowMenuItems(showMenu:Boolean){
@@ -324,24 +325,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 }
                 Thread.sleep(30000)
-            }
-        }
-    }
-
-    //check app update
-    private fun checkUpdate(){
-        doAsync {
-            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
-                if (result != "OK") {
-                    textUpdate.isVisible=true
-                    textUpdateLink.isVisible=true
-                    textUpdateLink.setOnClickListener {
-                         val openURL = Intent(Intent.ACTION_VIEW)
-                         openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
-                         startActivity(openURL)
-                    }
-                    textUpdate.text=getString(R.string.update, result)
-                }
             }
         }
     }
