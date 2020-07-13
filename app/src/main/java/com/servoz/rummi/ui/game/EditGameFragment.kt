@@ -13,17 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import com.tiper.MaterialSpinner
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_edit_game.*
 import org.json.JSONObject
 
 class EditGameFragment: Fragment() {
-
-    private var speedOpc=5
-    private var maxPlayers=4
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -34,8 +28,6 @@ class EditGameFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().toolbar.searchV.isVisible=false
-        requireActivity().toolbar.buttonChangePass.isVisible=false
         val dbHandler = Db(requireContext(), null)
         val gameData = dbHandler.getData("`game`","`id`=${arguments?.getInt("gameId")}")[0]
         checkBoxPrivate.isChecked= gameData[3].toBoolean()
@@ -47,30 +39,10 @@ class EditGameFragment: Fragment() {
         checkBoxFD4.isChecked = gameData[5][3] == '1'
         checkBoxFD5.isChecked = gameData[5][4] == '1'
         checkBoxFD6.isChecked = gameData[5][5] == '1'
-        //Speed spinner
-        gameSpeed.adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, arrayListOf(1, 2, 3, 4, 5))
-        gameSpeed.selection=Integer.parseInt(gameData[6])-1
-        gameSpeed.onItemSelectedListener = object : MaterialSpinner.OnItemSelectedListener {
-            override fun onItemSelected(parent: MaterialSpinner, view: View?, position: Int, id: Long) {
-                speedOpc=position+1
-            }
-            override fun onNothingSelected(parent: MaterialSpinner) {}
-        }
-        //Max Players spinner
-        gameMaxPlayers.adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, arrayListOf(2, 3, 4, 5))
-        gameMaxPlayers.selection=Integer.parseInt(gameData[7])-1
 
-        gameMaxPlayers.onItemSelectedListener = object : MaterialSpinner.OnItemSelectedListener {
-            override fun onItemSelected(parent: MaterialSpinner, view: View?, position: Int, id: Long) {
-                maxPlayers=position+2
-            }
-            override fun onNothingSelected(parent: MaterialSpinner) {}
-        }
         checkAdmin(gameData[12])
         //readOnly
         editGameNameR.text = decode(gameData[1])
-        gameSpeedR.text=gameData[6]
-        gameMaxPlayersR.text=gameData[7]
 
         loadingEditGame.isVisible =false
         edit_game_share_button.setOnClickListener {
@@ -102,13 +74,9 @@ class EditGameFragment: Fragment() {
         checkBoxFD4.isClickable=false
         checkBoxFD5.isClickable=false
         checkBoxFD6.isClickable=false
-        gameSpeed.isVisible=false
-        gameMaxPlayers.isVisible=false
 
         editGameNameR.isVisible=true
         editGameNameRL.isVisible=true
-        gameSpeedR.isVisible=true
-        gameMaxPlayersR.isVisible=true
         return false
     }
 
@@ -127,7 +95,7 @@ class EditGameFragment: Fragment() {
                     (if(checkBoxFD5.isChecked)"1" else "0")+
                     (if(checkBoxFD6.isChecked)"1" else "0")
             hashMapOf("gameId" to gameData[0], "private" to if(checkBoxPrivate.isChecked) "1" else "0",
-                "fullDraw" to fd, "name" to encode(editGameName.text.toString()), "speed" to speedOpc.toString(), "maxPlayers" to maxPlayers.toString()
+                "fullDraw" to fd, "name" to encode(editGameName.text.toString()), "speed" to "5", "maxPlayers" to "5"
             )
         }
         FetchData(arrayListOf(),this).updateData(oper, "",cache = false, addParams = params) {

@@ -22,7 +22,6 @@ import android.view.View.*
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.*
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
@@ -52,6 +51,10 @@ import kotlin.collections.ArrayList
 
 /*
 * ROAD MAP:
+* Check Python error
+*     handle1.write(pytz.timezone('America/Bogota').localize(datetime.datetime.now()).strftime("%H:%M:%S") + "|" + message + "\n")
+*  UnicodeEncodeError: 'ascii' codec can't encode character '\xe1' in position 305: ordinal not in range(128)
+Check python API language
 * */
 
 val Int.dp: Int
@@ -147,7 +150,7 @@ class GameFragment: Fragment() {
             GlobalScope.launch(context = Dispatchers.Main) {
                 while(ranId==pId){
                     try{
-                        delay(5000)
+                        delay(3000)
                         if(doRequestBg>3)doRequestBg=0
                         if(doRequest>3)doRequest=0
                         remoteData(true)
@@ -472,46 +475,46 @@ class GameFragment: Fragment() {
                         else " ("+gameSetData["${gameData["current_set"]}_${players[i]}"]!![0].trim(',').split(",").count()+")"
 
             gameP1.text=getString(R.string.player_cards,playersNames[0],cardsCount[0])
-            GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[0]}${playersExt[0]}")
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP1Img)
+            gameP2.text=getString(R.string.player_cards,playersNames[1],cardsCount[1])
+            gameP3.text=getString(R.string.player_cards,playersNames[2],cardsCount[2])
+            gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[2])
+            gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
 
             // just update image before game start
             if(bg && gameData["started"] != "0")
                 return
+            GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[0]}${playersExt[0]}")
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP1Img)
             // show player icons & draws
-            bubble_p1.setBackgroundResource(R.drawable.bubble_bottom)
+            bubble_p1.setBackgroundResource(R.drawable.bubble)
             if(playersNames[1]!=""){
-                gameP2.text=getString(R.string.player_cards,playersNames[1],cardsCount[1])
                 gameP2.isVisible=true
                 gameP2Img.isVisible=true
-                bubble_p2.setBackgroundResource(R.drawable.bubble_right_bottom)
+                bubble_p2.setBackgroundResource(R.drawable.bubble)
                 gameP2.setOnClickListener{addPlayerClickListener(gameP2,players[1])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[1]}${playersExt[1]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP2Img)
             }
             if(playersNames[2]!=""){
-                gameP3.text=getString(R.string.player_cards,playersNames[2],cardsCount[2])
                 gameP3.isVisible=true
                 gameP3Img.isVisible=true
-                bubble_p3.setBackgroundResource(R.drawable.bubble_right_top)
+                bubble_p3.setBackgroundResource(R.drawable.bubble)
                 gameP3.setOnClickListener{addPlayerClickListener(gameP3,players[2])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[2]}${playersExt[2]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP3Img)
             }
             if(playersNames[3]!=""){
-                gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[2])
                 gameP4Img.isVisible=true
                 gameP4.isVisible=true
-                bubble_p4.setBackgroundResource(R.drawable.bubble_left_top)
+                bubble_p4.setBackgroundResource(R.drawable.bubble)
                 gameP4.setOnClickListener{addPlayerClickListener(gameP4,players[3])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[3]}${playersExt[3]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP4Img)
             }
             if(playersNames[4]!=""){
-                gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
                 gameP5.isVisible=true
                 gameP5Img.isVisible=true
-                bubble_p5.setBackgroundResource(R.drawable.bubble_left_bottom)
+                bubble_p5.setBackgroundResource(R.drawable.bubble)
                 gameP5.setOnClickListener{addPlayerClickListener(gameP5,players[4])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[4]}${playersExt[4]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP5Img)
@@ -975,14 +978,14 @@ class GameFragment: Fragment() {
                 val games=drawn.split("|")
                 val numCards=drawn.replace("|", "").trim(',').split(',').count()
                 var cardW=(draw.width).div(numCards+(if(games.count()==2)8 else 13))-5
-                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview)
-                    cardW*=2
+                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && playerId!=userId.toString())
+                    cardW+=(cardW.div(2))
                 //loop each game
                 var p=0
                 var space=0
                 var posH = 0
                 for((c,game) in games.withIndex()){
-                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview) {
+                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && playerId!=userId.toString()) {
                         posH = draw.height.div(3) * c
                         p=0
                         space=0
@@ -1077,7 +1080,10 @@ class GameFragment: Fragment() {
                     FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                         addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
                 }*/
-            }catch(ex:Exception){sendError("MoveCard:$ex")}
+            }catch(ex:Exception){
+                sendError("MoveCard:$ex")
+                showMyCards(true)
+            }
         }
 
         //order cards, 0: same number, 1: same color

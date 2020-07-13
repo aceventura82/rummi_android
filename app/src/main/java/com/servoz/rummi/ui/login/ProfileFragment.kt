@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.Uri.decode
+import android.net.Uri.encode
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -24,8 +25,6 @@ import com.bumptech.glide.signature.ObjectKey
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import com.tiper.MaterialSpinner
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.change_pass.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_profile.*
@@ -54,8 +53,6 @@ class ProfileFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().toolbar.searchV.isVisible=false
-        requireActivity().toolbar.buttonChangePass.isVisible=true
         super.onViewCreated(view, savedInstanceState)
         //get user info
         prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
@@ -67,7 +64,7 @@ class ProfileFragment : Fragment() {
         buttonSaveProfile.setOnClickListener{
             updProfile(userInfo["userId_id"].toString())
         }
-        ImageViewProfile.setOnClickListener{
+        home_image_profile.setOnClickListener{
             launchGallery()
         }
         buttonDelProfile.setOnClickListener{
@@ -86,7 +83,7 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        requireActivity().toolbar.buttonChangePass.setOnClickListener {
+        /*requireActivity().toolbar.buttonChangePass.setOnClickListener {
             val passWindow=PopupWindow(context)
             val windowView=LayoutInflater.from(context).inflate(R.layout.change_pass, layoutProfile, false)
             passWindow.contentView=windowView
@@ -98,7 +95,7 @@ class ProfileFragment : Fragment() {
             windowView.password_change_button.setOnClickListener {
                 changePass(windowView,passWindow)
             }
-        }
+        }*/
     }
 
     // get cached data and display it
@@ -132,7 +129,7 @@ class ProfileFragment : Fragment() {
         //set header
         GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${userInfo["userId_id"]}${userInfo["extension"]}")
             .signature(ObjectKey(prefs!!.getString("imageSignature", "")!!))
-            .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(ImageViewProfile)
+            .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(home_image_profile)
         textViewProfileName.text = when{
             userInfo["nickname"]!=""->{ userInfo["nickname"].toString()}
             userInfo["name"]!=""->{ userInfo["name"].toString()+" "+if(userInfo["lastname"]!="")userInfo["lastname"].toString()else ""}
@@ -143,7 +140,6 @@ class ProfileFragment : Fragment() {
         editProfileName.setText(decode(userInfo["name"].toString()))
         editProfileLastName.setText(decode(userInfo["lastname"].toString()))
         editProfileNickName.setText(decode(userInfo["nickname"].toString()))
-        editProfileEmail.setText(decode(FetchData(ArrayList(),nav_host_fragment).getUser()))
         editProfileCountry.setText(decode(userInfo["country"].toString()))
         editProfileCity.setText(decode(userInfo["city"].toString()))
         //Gender spinner
@@ -181,12 +177,12 @@ class ProfileFragment : Fragment() {
             }else{
                 requestObj.addFormField("oper", "editProfile")
             }
-            requestObj.addFormField("name", editProfileName.text.toString())
-            requestObj.addFormField("lastname", editProfileLastName.text.toString())
-            requestObj.addFormField("nickname", editProfileNickName.text.toString())
-            requestObj.addFormField("email", editProfileEmail.text.toString())
-            requestObj.addFormField("country", editProfileCountry.text.toString())
-            requestObj.addFormField("city", editProfileCity.text.toString())
+            requestObj.addFormField("name", encode(editProfileName.text.toString()))
+            requestObj.addFormField("lastname", encode(editProfileLastName.text.toString()))
+            requestObj.addFormField("nickname", encode(editProfileNickName.text.toString()))
+            requestObj.addFormField("email", encode(FetchData(ArrayList(),nav_host_fragment).getUser()))
+            requestObj.addFormField("country", encode(editProfileCountry.text.toString()))
+            requestObj.addFormField("city", encode(editProfileCity.text.toString()))
             requestObj.addFormField("userId", userId)
             requestObj.addFormField("extension", ".jpg")
             requestObj.addFormField("gender", genderOpc)
@@ -280,7 +276,7 @@ class ProfileFragment : Fragment() {
                     File(getRealPathFromURI(imageURI))
                 }
                 GlideApp.with(requireContext()).load(filePath)
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(ImageViewProfile)
+                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(home_image_profile)
             }
         }
         super.onActivityResult(requestCode, resultCode, data)

@@ -15,13 +15,10 @@ import com.servoz.rummi.R
 import com.servoz.rummi.tools.FetchData
 import com.servoz.rummi.tools.MyTools
 import com.servoz.rummi.tools.PREF_FILE
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_login.*
 import org.jetbrains.anko.doAsync
 import java.lang.Thread.sleep
-import kotlin.math.log
 
 class LoginFragment : Fragment() {
 
@@ -34,8 +31,6 @@ class LoginFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().toolbar.searchV.isVisible=false
-        requireActivity().toolbar.buttonChangePass.isVisible=false
         super.onViewCreated(view, savedInstanceState)
         login_next_button.setOnClickListener {
             login(editText_email.text.toString(), editText_password.text.toString())

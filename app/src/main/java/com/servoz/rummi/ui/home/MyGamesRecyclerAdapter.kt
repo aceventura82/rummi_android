@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.servoz.rummi.GameActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_my_games.*
 import kotlinx.android.synthetic.main.item_my_games_layout.view.*
 
 class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, private val userId:String) : DynamicSearchAdapter<SearchGames>(dataList) {
@@ -51,7 +51,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                 itemView.buttonItemMyGamesEdit.setImageResource(R.drawable.ic_baseline_remove_red_eye_24)
             //listener for the setting button
             itemView.buttonItemMyGamesEdit.setOnClickListener {
-                NavHostFragment.findNavController(fragment).navigate(HomeFragmentDirections.actionMyGamesToEditGame(Integer.parseInt(data[0])))
+                NavHostFragment.findNavController(fragment).navigate(MyGamesFragmentDirections.actionMyGamesToEditGame(Integer.parseInt(data[0])))
             }
             //listener to go to the game
             itemView.gridItemMyGames.setOnClickListener{

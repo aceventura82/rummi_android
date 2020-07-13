@@ -231,7 +231,7 @@
     <string name="mute_audios">Silenciar Audios</string>
     <string name="mute_notifications">Silenciar Notificaciones</string>
     <string name="off">Desactivado</string>
-    <string name="on">Activated</string>
+    <string name="on">Activada</string>
     <string name="notifications">Notificaciones</string>
     <string name="audios">Audios</string>
     <string name="mute_messages">Silenciar Mensajes</string>
@@ -240,4 +240,8 @@
     <string name="forgot_password">Olvide Contraseña</string>
     <string name="send_code">Enviar Codigo</string>
     <string name="reset_password">Reiniciar contraseña</string>
+    <string name="settings">Settings</string>
+    <string name="in_game_options">Opciones durante el juego</string>
+    <string name="general_options">Opciones Generales</string>
+    <string name="orientation">Orientacion</string>
 </resources>

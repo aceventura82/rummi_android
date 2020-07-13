@@ -1,6 +1,5 @@
 package com.servoz.rummi.ui.game
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,13 +8,10 @@ import android.widget.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
-import com.android.volley.Request
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.fragment_find_game.*
+import kotlinx.android.synthetic.main.fragment_search_game.*
 import org.json.JSONException
 
 class SearchGameFragment: Fragment() {
@@ -25,12 +21,10 @@ class SearchGameFragment: Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_find_game, container, false)
+        return inflater.inflate(R.layout.fragment_search_game, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().toolbar.searchV.isVisible=false
-        requireActivity().toolbar.buttonChangePass.isVisible=false
         loadingSearchGame.isVisible =false
         search_game_button.setOnClickListener { findGame(editTextSearchCode.text.toString()) }
     }

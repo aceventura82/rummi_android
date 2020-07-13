@@ -3,13 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/nav_home">
+    app:startDestination="@id/nav_home1">
+
+    <fragment
+        android:id="@+id/nav_home1"
+        android:name="com.servoz.rummi.ui.home.HomeFragment"
+        android:label="menu_home"
+        tools:layout="@layout/fragment_home"/>
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.servoz.rummi.ui.home.HomeFragment"
+        android:name="com.servoz.rummi.ui.home.MyGamesFragment"
         android:label="menu_home"
-        tools:layout="@layout/fragment_home">
+        tools:layout="@layout/fragment_my_games">
 
         <action android:id="@+id/action_my_games_to_edit_game"
             app:destination="@id/nav_edit_game" />
@@ -38,7 +44,7 @@
         android:id="@+id/nav_search_game"
         android:name="com.servoz.rummi.ui.game.SearchGameFragment"
         android:label="menu_search_game"
-        tools:layout="@layout/fragment_find_game" />
+        tools:layout="@layout/fragment_search_game" />
 
     <fragment
         android:id="@+id/nav_rules"
@@ -81,7 +87,13 @@
 
     </fragment>
 
-        <fragment
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.servoz.rummi.ui.home.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
         android:id="@+id/nav_add_game"
         android:name="com.servoz.rummi.ui.game.AddGameFragment"
         android:label="menu_forecasts"
@@ -102,6 +114,9 @@
     <action
         android:id="@+id/action_global_nav_rules"
         app:destination="@id/nav_rules" />
+    <action
+        android:id="@+id/action_global_nav_settings"
+        app:destination="@id/nav_settings" />
     <action
         android:id="@+id/action_global_nav_join_game"
         app:destination="@id/nav_join_game" />

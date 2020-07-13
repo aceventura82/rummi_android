@@ -237,4 +237,8 @@
     <string name="forgot_password">Forgot Password</string>
     <string name="send_code">Send Code</string>
     <string name="reset_password">Reset Password</string>
+    <string name="settings">Settings</string>
+    <string name="in_game_options">In Game Options</string>
+    <string name="general_options">General Options</string>
+    <string name="orientation">Orientation</string>
 </resources>

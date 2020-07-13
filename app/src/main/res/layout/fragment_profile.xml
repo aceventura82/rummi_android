@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.servoz.rummi.tools.MySwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipe_containerUser"
     android:layout_width="match_parent"
+    android:background="@drawable/table"
     android:layout_height="match_parent" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,174 +22,183 @@
                 android:gravity="center"
                 android:orientation="vertical" >
 
-                <androidx.cardview.widget.CardView
+                <LinearLayout
+                    android:id="@+id/gridLayoutProfile"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp">
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/gridLayoutProfile"
+                    <ImageView
+                        android:id="@+id/home_image_profile"
+                        android:layout_marginBottom="20dp"
+                        android:contentDescription="@string/profile_image"
+                        android:minHeight="150dp"
+                        android:maxHeight="150dp"
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        app:srcCompat="@drawable/ic_account_circle_black_24dp" />
+
+                    <TextView
+                        android:id="@+id/buttonDelProfile"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_bg"
+                        android:padding="10dp"
+                        android:text="X"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:id="@+id/textViewProfileName"
+                        android:textAlignment="center"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical">
+                        android:textSize="30sp"
+                        android:textStyle="bold"/>
 
-                        <ImageView
-                            android:id="@+id/ImageViewProfile"
-                            android:layout_marginBottom="20dp"
-                            android:contentDescription="@string/profile_image"
-                            android:minHeight="150dp"
-                            android:maxHeight="150dp"
-                            android:layout_height="match_parent"
-                            android:layout_width="match_parent"
-                            app:srcCompat="@drawable/ic_account_circle_black_24dp" />
-                        <Button
-                            android:id="@+id/buttonDelProfile"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            app:layout_column="0"
-                            app:layout_row="1"
-                            android:text="X" />
-
-                        <TextView
-                            android:id="@+id/textViewProfileName"
-                            android:textAlignment="center"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:textSize="30sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:id="@+id/textViewProfileEmail"
-                            android:layout_marginBottom="20dp"
-                            android:textAlignment="center"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                    <TextView
+                        android:id="@+id/textViewProfileEmail"
+                        android:layout_marginBottom="20dp"
+                        android:textAlignment="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
 
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp">
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:focusableInTouchMode="true"
+                    android:orientation="vertical">
 
-                    <LinearLayout
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:focusableInTouchMode="true"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/name">
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editProfileName"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/name">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileName"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/lastName">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileLastName"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/nickName">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileNickName"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            android:visibility="gone"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/email">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileEmail"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/country">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileCountry"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="4dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:hint="@string/city">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/editProfileCity"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.tiper.MaterialSpinner
-                            android:id="@+id/editProfileGender"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
+                            android:background="@color/white"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
                             android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                        <RelativeLayout
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/lastName">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editProfileLastName"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:background="@color/white"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                            <Button
-                                android:id="@+id/buttonSaveProfile"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="@string/save" />
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/nickName">
 
-                            <Button
-                                android:id="@+id/profile_cancel_button"
-                                style="?attr/materialButtonOutlinedStyle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="12dp"
-                                android:layout_toStartOf="@id/buttonSaveProfile"
-                                android:text="@string/cancel" />
-                        </RelativeLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editProfileNickName"
+                            android:layout_width="match_parent"
+                            android:background="@color/white"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/country">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editProfileCountry"
+                            android:layout_width="match_parent"
+                            android:background="@color/white"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="4dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/city">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editProfileCity"
+                            android:layout_width="match_parent"
+                            android:background="@color/white"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.tiper.MaterialSpinner
+                        android:id="@+id/editProfileGender"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:background="@color/white"
+                        android:textColor="@color/black"
+                        android:textColorHint="@color/gray"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:gravity="center"
+                        android:layout_margin="20dp"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/profile_cancel_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/btn_bg"
+                            android:padding="10dp"
+                            android:text="@string/cancel"
+                            android:layout_marginEnd="20dp"
+                            android:textColor="@color/white"
+                            android:textSize="24sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <TextView
+                            android:id="@+id/buttonSaveProfile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/btn_bg"
+                            android:padding="10dp"
+                            android:text="@string/save"
+                            android:textColor="@color/white"
+                            android:textSize="24sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
 
             </LinearLayout>
 

@@ -3,37 +3,30 @@ package com.servoz.rummi.ui.home
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
-import androidx.recyclerview.widget.GridLayoutManager
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.signature.ObjectKey
+import com.servoz.rummi.MainActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import com.servoz.rummi.ui.login.ProfileFragment
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_home.loadingMyGames
-import kotlinx.android.synthetic.main.fragment_home.recyclerViewMyGames
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
+import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
 
 
-class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryTextListener {
+class HomeFragment : Fragment() {
 
     private var prefs: SharedPreferences? = null
-    private lateinit var searchAdapter: MyGamesRecyclerAdapter
+    private var login=false
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -44,122 +37,89 @@ class HomeFragment : Fragment(),androidx.appcompat.widget.SearchView.OnQueryText
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        requireActivity().window!!.setFlags(
-            WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
-        // if intent with URL stop processing, as will not show this fragment
-        if(handleIntent(requireActivity().intent))
-            return
-        recyclerViewMyGames.layoutManager = GridLayoutManager(context,1)
-        try {
-            requireActivity().toolbar.searchV.isVisible = true
-            requireActivity().toolbar.buttonChangePass.isVisible = false
-        }catch (ex:Exception){}
-        prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
-        val login = prefs!!.getString("appKey", "") !== ""
-
-        //get cached data, update data and populate the search options in the background
-        val data = getData(login)
-        cleanData()
-        doAsync {
-            //check if new data
-            updateData(login, data)
-            val objSearch = mutableListOf<SearchGames>()
-            for (game in data) {
-                objSearch.add(SearchGames((game)))
-            }
-            searchAdapter = MyGamesRecyclerAdapter(objSearch, JSONObject(prefs!!.getString("userInfo","")!!)["userId_id"].toString())
-            uiThread {
-                try{
-                    recyclerViewMyGames.adapter = searchAdapter
-                    requireActivity().toolbar.searchV.setOnQueryTextListener(this@HomeFragment)
-                    loadingMyGames.isVisible = false
-                }catch (ex:Exception){}
-            }
-        }
-        swipe_containerHome.setOnRefreshListener {
-            updateData(login, data)
-            swipe_containerHome.isRefreshing = false
-        }
-        loadingMyGames.isVisible=false
-        checkUpdate()
+        prefs = requireActivity().getSharedPreferences(PREF_FILE, 0)
+        login=prefs!!.getString("appKey", "") !== ""
+        userInfo(login)
+        hideShowMenuItems(login)
+        listeners()
     }
 
-    // intent to Join a Game by URL
-    private fun handleIntent(intent: Intent):Boolean{
-        val appLinkAction = intent.action
-        val appLinkData: Uri? = intent.data
-        val urlCheck= URL.replace("HTTPS", "").replace("HTTP", "")+"/joinGame/"
-        if (Intent.ACTION_VIEW == appLinkAction &&
-            appLinkData.toString().contains(urlCheck)) {
-            val code = appLinkData.toString().substringAfterLast(urlCheck, "").trim('/')
-            NavHostFragment.findNavController(this).navigate(HomeFragmentDirections.actionGlobalNavJoinGame(code))
-            intent.data = null
-            return true
-        }
-        return false
-    }
-
-    // get cached data and display it
-    private fun getData(login:Boolean): ArrayList<ArrayList<String>>{
-        if(!login)
-            return ArrayList()
-        ProfileFragment().updateData(this@HomeFragment)
-        return FetchData(arrayListOf("id", "name", "date", "private", "started", "fullDraw", "speed", "maxPlayers",
-            "code", "current_set", "current_stack", "current_discarded", "userId_id",
-            "playersPos", "currentPlayerPos"), this@HomeFragment).cacheRepo("OK", "game", "`started` ASC, `date` DESC")
-    }
-
-    private fun updateData(login:Boolean, cachedData:ArrayList<ArrayList<String>>){
+    //put the user data in the left drawer
+    private fun userInfo(login:Boolean){
         if(!login)
             return
-            //get my games
-        val fetchGame=FetchData(arrayListOf("id", "name", "date", "private", "started", "fullDraw", "speed", "maxPlayers",
-            "code", "current_set", "current_stack", "current_discarded", "userId_id",
-            "playersPos", "currentPlayerPos"), this)
-        fetchGame.updateData("viewMyGames", "game","`started` ASC, `date` DESC"){
-            if(cachedData!=fetchGame.cacheRepo("OK", "game", "`started` ASC, `date` DESC"))
-                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+        home_player_info.isVisible=true
+        val userData= try{
+            JSONObject(prefs!!.getString("userInfo", "")!!)
+        }catch (ex: JSONException){
+            return
         }
-    }
-
-    private fun cleanData(){
-        val dbHandler=Db(requireContext(), null)
-        dbHandler.deleteWhere("game")
-    }
-
-    override fun onQueryTextSubmit(query: String?): Boolean {
-        search(query)
-        return true
-    }
-
-    override fun onQueryTextChange(newText: String?): Boolean {
-        search(newText)
-        return true
-    }
-
-    private fun search(s: String?) {
-        searchAdapter.search(s) {
-            Toast.makeText(context, getString(R.string.notFound), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    //check app update
-    private fun checkUpdate(){
-        doAsync {
-            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
-                if (result != "OK") {
-                    textUpdate.isVisible=true
-                    textUpdateLink.isVisible=true
-                    textUpdateLink.setOnClickListener {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
-                        startActivity(openURL)
-                    }
-                    textUpdate.text=getString(R.string.update, result)
-                }
+        // set name, nickname or email
+        home_profile_info.text = when {
+            userData.getString("nickname") != "" -> {
+                userData.getString("nickname")
             }
+            userData.getString("name") != "" -> {
+                userData.getString("name") + " " + if (userData.getString("lastname") != "") userData.getString(
+                    "lastname"
+                ) else ""
+            }
+            else -> { FetchData(ArrayList(), nav_host_fragment).getUser() }
+        }
+        GlideApp.with(this).load("${URL}/static/playerAvatars/${userData.getString("userId_id")}${userData.getString("extension")}")
+            .signature(ObjectKey(prefs!!.getString("imageSignature", "")!!))
+            .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_circle_black_24dp)).into(home_profile_pic)
+    }
+
+    private fun listeners() {
+
+        btn_home_new_game.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_add_game, Bundle())
+        }
+        btn_home_my_games.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+        }
+        btn_home_rules.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_rules, Bundle())
+        }
+        btn_home_search_game.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_search_game, Bundle())
+        }
+        btn_home_login.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_login, Bundle())
+        }
+        btn_home_register.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_register, Bundle())
+        }
+        btn_home_settings.setOnClickListener{
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_settings, Bundle())
+        }
+        home_player_info.setOnClickListener {
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_profile, Bundle())
+        }
+        btn_home_logout.setOnClickListener{
+            logout()
         }
     }
+
+    private fun hideShowMenuItems(showMenu:Boolean){
+        btn_home_my_games.isVisible = showMenu
+        btn_home_new_game.isVisible = showMenu
+        btn_home_search_game.isVisible = showMenu
+        btn_home_logout.isVisible = showMenu
+        btn_home_register.isVisible = !showMenu
+        btn_home_login.isVisible = !showMenu
+    }
+
+    private fun logout() {
+        prefs!!.edit().clear().apply()
+        MyTools().toast(requireContext(), getString(R.string.logoutOK))
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        requireActivity().deleteDatabase(DB_NAME)
+        requireActivity().finish()
+        startActivity(intent)
+    }
+
+
 }

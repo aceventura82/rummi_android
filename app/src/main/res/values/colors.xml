@@ -6,4 +6,8 @@
     <color name="white">#FFFFFF</color>
     <color name="game_turn">#FF5722</color>
     <color name="game_ended">#878281</color>
+    <color name="blue">#2196F3</color>
+    <color name="yellow">#FFEB3B</color>
+    <color name="green">#3F51B5</color>
+    <color name="gray">#6E6E6F</color>
 </resources>

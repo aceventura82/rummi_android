@@ -15,8 +15,6 @@ import com.servoz.rummi.R
 import com.servoz.rummi.tools.Db
 import com.servoz.rummi.tools.FetchData
 import com.servoz.rummi.tools.MyTools
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_join_game.*
 import org.json.JSONException
@@ -36,8 +34,6 @@ class JoinGameFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requireActivity().toolbar.searchV.isVisible=false
-        requireActivity().toolbar.buttonChangePass.isVisible=false
         val code = arguments?.getString("code", "")!!
         getGameInfo(code)
         join_game_button.setOnClickListener { joinGame(code) }
@@ -69,7 +65,6 @@ class JoinGameFragment: Fragment() {
                 if(set=='1')
                     fd+="${c+1},"
             textJoinGameP3.text=getString(R.string.full_draw_list, fd.trim(','))
-            textJoinGameP4.text=getString(R.string.speed_game, gameData["speed"].toString())
             textJoinGameP4.text=when(gameData["started"]){
                 "0" ->getString(R.string.open)
                 "1" ->getString(R.string.started)
