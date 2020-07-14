@@ -30,7 +30,6 @@ class EditGameFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val dbHandler = Db(requireContext(), null)
         val gameData = dbHandler.getData("`game`","`id`=${arguments?.getInt("gameId")}")[0]
-        checkBoxPrivate.isChecked= gameData[3].toBoolean()
         textGameCodeInfo.text=getString(R.string.gameCodeInfo, gameData[8])
         editGameName.setText(decode(gameData[1]))
         checkBoxFD1.isChecked = gameData[5][0] == '1'
@@ -66,7 +65,6 @@ class EditGameFragment: Fragment() {
         edit_game_delete_button.isVisible=false
         buttonSaveEditGame.isVisible=false
         edit_game_cancel_button.isVisible=false
-        checkBoxPrivate.isClickable=false
         editGameName.isVisible=false
         checkBoxFD1.isClickable=false
         checkBoxFD2.isClickable=false
@@ -94,7 +92,7 @@ class EditGameFragment: Fragment() {
                     (if(checkBoxFD4.isChecked)"1" else "0")+
                     (if(checkBoxFD5.isChecked)"1" else "0")+
                     (if(checkBoxFD6.isChecked)"1" else "0")
-            hashMapOf("gameId" to gameData[0], "private" to if(checkBoxPrivate.isChecked) "1" else "0",
+            hashMapOf("gameId" to gameData[0], "private" to "1",
                 "fullDraw" to fd, "name" to encode(editGameName.text.toString()), "speed" to "5", "maxPlayers" to "5"
             )
         }

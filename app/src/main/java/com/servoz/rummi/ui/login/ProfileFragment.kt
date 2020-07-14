@@ -164,19 +164,15 @@ class ProfileFragment : Fragment() {
     
     private fun updProfile(userId:String, delPic:Boolean=false){
         loadingSaveProfile.isVisible=true
-        println("go")
         doAsync {
             try{
 
             val requestObj = Multipart(java.net.URL(API_URL))
             requestObj.addFormField("apiKey", MyTools().genKey(nav_host_fragment))
             requestObj.addFormField("usernameUser", FetchData(ArrayList(), nav_host_fragment).getUser())
-            if(delPic){
-                requestObj.addFormField("oper", "delPicture")
+            requestObj.addFormField("oper", "editProfile")
+            if(delPic)
                 requestObj.addFormField("deleteBT", "1")
-            }else{
-                requestObj.addFormField("oper", "editProfile")
-            }
             requestObj.addFormField("name", encode(editProfileName.text.toString()))
             requestObj.addFormField("lastname", encode(editProfileLastName.text.toString()))
             requestObj.addFormField("nickname", encode(editProfileNickName.text.toString()))

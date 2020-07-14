@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
@@ -31,13 +30,14 @@ class SearchGameFragment: Fragment() {
 
     private fun findGame(code:String){
         loadingSearchGame.isVisible=true
-        FetchData(arrayListOf(),this).updateData("gameInfoCode", "",cache = false, addParams = hashMapOf("code" to code)) {
+        FetchData(arrayListOf(),this).updateData("gameInfoCode", "",cache = false, addParams = hashMapOf("code" to code.trim())) {
             result ->
             try{
                 MyTools().stringListToJSON(result)[0]
                 NavHostFragment.findNavController(nav_host_fragment).navigate(SearchGameFragmentDirections.actionGlobalNavJoinGame(code))
             } catch (e: JSONException) {
-                Toast.makeText(context, getString(R.string.notFound), Toast.LENGTH_SHORT).show()
+                MyTools().toast(requireContext(), getString(R.string.notFound))
+                e.printStackTrace()
                 editTextSearchCode.setText("")
             }
             loadingSearchGame.isVisible=false

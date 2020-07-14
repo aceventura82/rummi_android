@@ -7,154 +7,155 @@
     android:background="@drawable/table"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/home_player_info"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:gravity="center"
-        android:contentDescription="@string/player"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:orientation="vertical"
-        tools:ignore="UseCompoundDrawables">
-
-        <ImageView
-            android:id="@+id/home_profile_pic"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="30dp"
-            android:contentDescription="@string/player" />
-
-        <TextView
-            android:id="@+id/home_profile_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textSize="30sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/home_player_info">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/btn_home_my_games"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_casino_black_24dp"
-            android:padding="10dp"
-            android:text="@string/menu_my_games"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_home_new_game"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_home_login" />
+            android:gravity="center"
+            android:orientation="vertical"
 
-        <TextView
-            android:id="@+id/btn_home_new_game"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_add_black_24dp"
-            android:padding="10dp"
-            android:text="@string/menu_add_game"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+            app:layout_constraintTop_toBottomOf="@+id/home_player_info">
 
+            <LinearLayout
+                android:id="@+id/home_player_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:contentDescription="@string/player"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:orientation="vertical"
+                tools:ignore="UseCompoundDrawables">
 
-        <TextView
-            android:id="@+id/btn_home_search_game"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_search_black_24dp"
-            android:padding="10dp"
-            android:text="@string/search_game"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+                <ImageView
+                    android:id="@+id/home_profile_pic"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="30dp"
+                    android:contentDescription="@string/player" />
 
-        <TextView
-            android:id="@+id/btn_home_register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_account_circle_black_24dp"
-            android:padding="10dp"
-            android:text="@string/register"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+                <TextView
+                    android:id="@+id/home_profile_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/btn_home_rules"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_positions"
-            android:padding="10dp"
-            android:text="@string/menu_rules"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/btn_home_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            android:background="@drawable/btn_bg"
-            android:drawableStart="@drawable/ic_baseline_settings_24"
-            android:padding="10dp"
-            android:text="@string/settings"
-            android:textColor="@color/white"
-            android:textSize="24sp" />
+            <TextView
+                android:id="@+id/btn_home_my_games"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_casino_black_24dp"
+                android:padding="10dp"
+                android:text="@string/menu_my_games"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toTopOf="@+id/btn_home_new_game"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_home_login" />
 
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/btn_home_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:background="@drawable/btn_bg"
-        android:drawableStart="@drawable/ic_account_circle_black_24dp"
-        android:padding="10dp"
-        android:text="@string/menu_login"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:id="@+id/btn_home_new_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_add_black_24dp"
+                android:padding="10dp"
+                android:text="@string/menu_add_game"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
 
 
-    <TextView
-        android:id="@+id/btn_home_logout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:background="@drawable/btn_bg"
-        android:drawableStart="@drawable/ic_exit_to_app_black_24dp"
-        android:padding="10dp"
-        android:text="@string/menu_logout"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/btn_home_search_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_search_black_24dp"
+                android:padding="10dp"
+                android:text="@string/search_game"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/btn_home_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_account_circle_black_24dp"
+                android:padding="10dp"
+                android:text="@string/register"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/btn_home_rules"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_positions"
+                android:padding="10dp"
+                android:text="@string/menu_rules"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/btn_home_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_baseline_settings_24"
+                android:padding="10dp"
+                android:text="@string/settings"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/btn_home_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_account_circle_black_24dp"
+                android:padding="10dp"
+                android:text="@string/menu_login"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+
+            <TextView
+                android:id="@+id/btn_home_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/btn_bg"
+                android:drawableStart="@drawable/ic_exit_to_app_black_24dp"
+                android:padding="10dp"
+                android:text="@string/menu_logout"
+                android:textColor="@color/white"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

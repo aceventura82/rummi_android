@@ -51,9 +51,6 @@ import kotlin.collections.ArrayList
 
 /*
 * ROAD MAP:
-* Check Python error
-*     handle1.write(pytz.timezone('America/Bogota').localize(datetime.datetime.now()).strftime("%H:%M:%S") + "|" + message + "\n")
-*  UnicodeEncodeError: 'ascii' codec can't encode character '\xe1' in position 305: ordinal not in range(128)
 Check python API language
 * */
 

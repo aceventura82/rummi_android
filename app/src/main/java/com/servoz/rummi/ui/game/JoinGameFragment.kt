@@ -1,20 +1,16 @@
 package com.servoz.rummi.ui.game
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
+import com.bumptech.glide.request.RequestOptions
 import com.servoz.rummi.R
-import com.servoz.rummi.tools.Db
-import com.servoz.rummi.tools.FetchData
-import com.servoz.rummi.tools.MyTools
+import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_join_game.*
 import org.json.JSONException
@@ -41,7 +37,7 @@ class JoinGameFragment: Fragment() {
 
     private fun getGameInfo(code:String){
         FetchData(arrayListOf(),this).updateData("gameInfoCode", "",
-            cache = false, addParams = hashMapOf( "code" to code, "pos" to playerPos)) { result ->
+            cache = false, addParams = hashMapOf( "code" to code.trim(), "pos" to playerPos)) { result ->
             val gameData:JSONObject
             gameData=try{
                 MyTools().stringListToJSON(result)[0]
@@ -78,59 +74,66 @@ class JoinGameFragment: Fragment() {
                 join_game_button.isVisible=false
             }
             loadingJoinGame.isVisible=false
-            getPositions(gameData["playersPos"].toString())
+            getPositions(gameData["playersPos"].toString().split(","),
+                gameData["players_names"].toString().split(","),
+                gameData["players_ext"].toString().split(","))
 
         }
     }
 
-    private fun getPositions(posStr:String){
-        val posList=posStr.split((","))
-        setSeatColor(posList)
-        playerPOs1.setOnClickListener{ setListener(posList,0) }
-        playerPOs2.setOnClickListener{ setListener(posList,1) }
-        playerPOs3.setOnClickListener{ setListener(posList,2)}
-        playerPOs4.setOnClickListener{ setListener(posList,3)}
-        playerPOs5.setOnClickListener{ setListener(posList,4)}
+    private fun getPositions(ids:List<String>, names:List<String>, extensions:List<String>){
+        setSeat(ids, names, extensions)
+        playerPOs1.setOnClickListener{ setListener(ids, names, extensions,0) }
+        playerPOs2.setOnClickListener{ setListener(ids, names, extensions,1) }
+        playerPOs3.setOnClickListener{ setListener(ids, names, extensions,2)}
+        playerPOs4.setOnClickListener{ setListener(ids, names, extensions,3)}
+        playerPOs5.setOnClickListener{ setListener(ids, names, extensions,4)}
     }
 
-    private fun setListener(pos:List<String>, posN:Int){
-        setSeatColor(pos, posN)
-        if( pos[posN] != "")
-            Toast.makeText(context, R.string.not_available, Toast.LENGTH_SHORT).show()
+    private fun setListener(ids:List<String>, names:List<String>, extensions:List<String>, posN:Int){
+        setSeat(ids, names, extensions, posN)
+        if( names[posN] != "")
+            MyTools().toast(requireContext(), getString(R.string.not_available ,names[posN]))
         else{
             playerPos=posN.toString()
-            Toast.makeText(context, R.string.position_selected, Toast.LENGTH_SHORT).show()
-            setSeatColor(pos, posN)
+            MyTools().toast(requireContext(), getString(R.string.position_selected))
+            setSeat(ids, names, extensions, posN)
         }
     }
 
-    private fun setSeatColor(pos:List<String>, posN:Int=-1){
+    private fun setSeat(ids:List<String>, names:List<String>, extensions:List<String>, posN:Int=-1){
         //refresh all seats
         for(c in 0 until 5){
-            updateChair(c, if(pos[c] == "")Color.BLACK else Color.RED)
+            updateChair(c, ids[c], names[c], extensions[c])
         }
         //set color of selected seat
         if(posN!=-1){
-            updateChair(posN, Color.GRAY)
+            val prefs = requireContext().getSharedPreferences(PREF_FILE, 0)
+            updateChair(posN,
+                JSONObject(prefs.getString("userInfo","")!!)["userId_id"].toString(),
+                getString(R.string.me),
+                JSONObject(prefs.getString("userInfo","")!!)["extension"].toString()
+            )
         }
     }
 
-    private fun updateChair(posN:Int, colorId:Int){
-        val ids = arrayListOf(R.drawable.ic_filter_1_black_24dp,R.drawable.ic_filter_2_black_24dp,
-            R.drawable.ic_filter_3_black_24dp,R.drawable.ic_filter_4_black_24dp,
-            R.drawable.ic_filter_5_black_24dp)
-        val id=ids[posN]
-        val unwrappedDrawable = AppCompatResources.getDrawable(requireContext(), id)
-        val wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, colorId)
+    private fun updateChair(posN:Int, userId:String, name:String, userExt:String){
         val images = arrayListOf(playerPOs1,playerPOs2,playerPOs3,playerPOs4,playerPOs5)
-        images[posN].setImageResource(id)
+        val labels = arrayListOf(playerPOs1T,playerPOs2T,playerPOs3T,playerPOs4T,playerPOs5T)
+        if(userId == ""){
+            labels[posN].text = ""
+            images[posN].setImageResource(R.drawable.ic_account_box_white_80dp)
+        }else{
+            labels[posN].text = name
+            GlideApp.with(requireContext()).load("$URL/static/playerAvatars/${userId}${userExt}")
+                .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_black_80dp)).into(images[posN])
+        }
     }
 
     private fun joinGame(code:String){
         loadingJoinGame.isVisible=true
         FetchData(arrayListOf(),this).updateData("joinGame", "",
-            cache = false, addParams = hashMapOf("code" to code, "pos" to playerPos)) {
+            cache = false, addParams = hashMapOf("code" to code.trim(), "pos" to playerPos)) {
             result ->
             var msg = result
             val res = result.split("|")

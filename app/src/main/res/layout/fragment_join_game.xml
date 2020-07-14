@@ -79,7 +79,7 @@
                         android:id="@+id/playerPOs1"
                         android:layout_row="1"
                         android:layout_column="0"
-                        app:srcCompat="@drawable/ic_filter_1_black_24dp"
+                        app:srcCompat="@drawable/ic_account_box_white_80dp"
                         android:contentDescription="@string/number_players"/>
                     <TextView
                         android:id="@+id/playerPOs1T"
@@ -92,7 +92,7 @@
                         android:id="@+id/playerPOs2"
                         android:layout_row="2"
                         android:layout_column="1"
-                        app:srcCompat="@drawable/ic_filter_2_black_24dp"
+                        app:srcCompat="@drawable/ic_account_box_white_80dp"
                         android:contentDescription="@string/number_players"/>
                     <TextView
                         android:id="@+id/playerPOs2T"
@@ -105,7 +105,7 @@
                         android:id="@+id/playerPOs3"
                         android:layout_row="2"
                         android:layout_column="3"
-                        app:srcCompat="@drawable/ic_filter_3_black_24dp"
+                        app:srcCompat="@drawable/ic_account_box_white_80dp"
                         android:contentDescription="@string/number_players"/>
                     <TextView
                         android:id="@+id/playerPOs3T"
@@ -118,7 +118,7 @@
                         android:id="@+id/playerPOs4"
                         android:layout_row="1"
                         android:layout_column="4"
-                        app:srcCompat="@drawable/ic_filter_4_black_24dp"
+                        app:srcCompat="@drawable/ic_account_box_white_80dp"
                         android:contentDescription="@string/number_players" />
                     <TextView
                         android:id="@+id/playerPOs4T"
@@ -131,7 +131,7 @@
                         android:id="@+id/playerPOs5"
                         android:layout_row="0"
                         android:layout_column="2"
-                        app:srcCompat="@drawable/ic_filter_5_black_24dp"
+                        app:srcCompat="@drawable/ic_account_box_white_80dp"
                         android:contentDescription="@string/number_players"/>
                     <TextView
                         android:id="@+id/playerPOs5T"

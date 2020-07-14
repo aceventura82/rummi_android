@@ -17,14 +17,6 @@
                     android:focusableInTouchMode="true"
                     android:orientation="vertical">
 
-                    <CheckBox
-                        android:id="@+id/checkBoxPrivate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:buttonTint="@color/red"
-                        android:textColor="@color/white"
-                        android:text="@string/privateStr" />
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -37,7 +29,7 @@
                             android:layout_width="match_parent"
                             android:background="@color/white"
                             android:textColorHint="@color/gray"
-                            android:textColor="@color/white"
+                            android:textColor="@color/black"
                             android:layout_height="wrap_content" />
 
                     </com.google.android.material.textfield.TextInputLayout>

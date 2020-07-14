@@ -71,14 +71,6 @@
                     android:focusableInTouchMode="true"
                     android:orientation="vertical">
 
-                    <CheckBox
-                        android:id="@+id/checkBoxPrivate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/white"
-                        android:buttonTint="@color/red"
-                        android:text="@string/privateStr" />
-
                     <LinearLayout
                         android:id="@+id/editGameNameRL"
                         android:layout_width="match_parent"

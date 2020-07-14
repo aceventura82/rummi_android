@@ -38,7 +38,7 @@ class AddGameFragment: Fragment() {
             (if(checkBoxFD5.isChecked)"1" else "0")+
             (if(checkBoxFD6.isChecked)"1" else "0")
         val params=hashMapOf(
-            "private" to if(checkBoxPrivate.isChecked) "1" else "0", "fullDraw" to fd,
+            "private" to "1", "fullDraw" to fd,
             "name" to encode(editGameName.text.toString()), "speed" to "2", "maxPlayers" to "5"
         )
         FetchData(arrayListOf(),this).updateData("addGame", "",cache = false, addParams = params) {

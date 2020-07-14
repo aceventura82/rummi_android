@@ -73,7 +73,7 @@
     <string name="select_table_position">Selecciona puesto en la mesa</string>
     <string name="position_selected">Posición seleccionada</string>
     <string name="start_game">Iniciar Juego</string>
-    <string name="not_available">Lugar no disponible</string>
+    <string name="not_available">Lugar no disponible: %1$s</string>
     <string name="player">Jugador</string>
     <string name="share">Compartir</string>
     <string name="share_desc">Hola!,\n Unete conmigo a un juego de Rummi!\n Usa este codigo en la App: %1$s\ o clic aqui\n%2$s</string>
@@ -244,4 +244,5 @@
     <string name="in_game_options">Opciones durante el juego</string>
     <string name="general_options">Opciones Generales</string>
     <string name="orientation">Orientacion</string>
+    <string name="me">Yo</string>
 </resources>
