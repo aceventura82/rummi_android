@@ -1,8 +1,5 @@
 package com.servoz.rummi.ui.login
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,7 +29,7 @@ class RegisterFragment : Fragment() {
             register()
         }
         register_cancel_button.setOnClickListener {
-            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
         register_resend_button.setOnClickListener {
             register_next_button.text = getString(R.string.register)

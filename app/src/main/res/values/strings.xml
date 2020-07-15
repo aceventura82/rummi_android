@@ -146,6 +146,7 @@
     <string name="flow_auto_hide">Auto hide Game flow messages</string>
     <string name="notif_turn_game">It\'s your turn to play in game %1$s</string>
     <string name="player_cards">%1$s %2$s</string>
+    <string name="cards">Cards: %1$s</string>
     <string name="pick_start">Picked cards placed at %1$s</string>
     <string name="beginnig">Beginning</string>
     <string name="end">End</string>
@@ -242,4 +243,7 @@
     <string name="general_options">General Options</string>
     <string name="orientation">Orientation</string>
     <string name="me">Me</string>
+    <string name="won">Won</string>
+    <string name="lost">Lost</string>
+    <string name="other_winner">Other Winner</string>
 </resources>

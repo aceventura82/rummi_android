@@ -47,7 +47,7 @@ class AddGameFragment: Fragment() {
             val res = result.split("|")
             if(res.count()==2){
                 msg = res[1]
-                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
             }
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             loadingEditGame.isVisible=false

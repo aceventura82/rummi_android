@@ -22,6 +22,7 @@ import android.view.View.*
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.*
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
@@ -46,7 +47,6 @@ import org.json.JSONObject
 import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 /*
@@ -144,45 +144,50 @@ class GameFragment: Fragment() {
     //update remote data each 3 sec
     private fun bgSync(pId:Int){
         doAsync {
-            GlobalScope.launch(context = Dispatchers.Main) {
-                while(ranId==pId){
-                    try{
-                        delay(3000)
-                        if(doRequestBg>3)doRequestBg=0
-                        if(doRequest>3)doRequest=0
-                        remoteData(true)
-                    }catch(ex:Exception){sendError("bgSync:${ex.getStackTraceString()}")}
+            try{
+                GlobalScope.launch(context = Dispatchers.Main) {
+                    while(ranId==pId){
+                        try{
+                            delay(3000)
+                            if(doRequestBg>3)doRequestBg=0
+                            if(doRequest>3)doRequest=0
+                            remoteData(true)
+                        }catch(ex:Exception){sendError("bgSync:${ex.getStackTraceString()}")}
+                    }
                 }
-            }
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
     }
     private fun checkLasUpd(){
         doAsync {
-            GlobalScope.launch(context = Dispatchers.Main) {
-                while(true){
-                    delay(5000)
-                    uiThread {
-                        try{
-                            val tt = (System.currentTimeMillis()-lastUpd).div(1000)
-                            when {
-                                !myTurn && tt > 20 -> {
-                                    text_game_last_upd.setBackgroundResource(R.drawable.circle_red)
-                                    ranId=(0..6000).random()
-                                    doRequestBg=0
-                                    bgSync(ranId)
+            try{
+                GlobalScope.launch(context = Dispatchers.Main) {
+                    while(true){
+                        delay(5000)
+                        uiThread {
+                            try{
+                                val tt = (System.currentTimeMillis()-lastUpd).div(1000)
+                                text_game_last_upd.text=SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()).toString()
+                                when {
+                                    !myTurn && tt > 20 -> {
+                                        text_game_last_upd.setBackgroundResource(R.drawable.circle_red)
+                                        ranId=(0..6000).random()
+                                        doRequestBg=0
+                                        bgSync(ranId)
+                                    }
+                                    !myTurn && tt > 5 -> {
+                                        text_game_last_upd.setBackgroundResource(R.drawable.circle_yellow)
+                                        ranId=(0..6000).random()
+                                        doRequestBg=0
+                                        bgSync(ranId)
+                                    }
+                                    else -> text_game_last_upd.setBackgroundResource(R.drawable.circle)
                                 }
-                                !myTurn && tt > 5 -> {
-                                    text_game_last_upd.setBackgroundResource(R.drawable.circle_yellow)
-                                    ranId=(0..6000).random()
-                                    doRequestBg=0
-                                    bgSync(ranId)
-                                }
-                                else -> text_game_last_upd.setBackgroundResource(R.drawable.circle)
-                            }
-                        }catch (ex:Exception){}
+                            }catch (ex:Exception){}
+                        }
                     }
                 }
-            }
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
     }
 
@@ -203,7 +208,8 @@ class GameFragment: Fragment() {
             dbHandler.addData("remote_data", hashMapOf("gameId_id" to gameId, "date" to SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())))
             ""
         }
-        if(doRequestBg==0){
+        try{
+            if(doRequestBg==0){
             doRequestBg++
             FetchData(arrayListOf(),this).updateData("bundleData", "",cache = false,
                 addParams = hashMapOf("gameId" to gameId, "update_date" to updDate,
@@ -233,6 +239,7 @@ class GameFragment: Fragment() {
                 }
             }
         }
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
     //set game Data in variables
     private fun setGameData(data:ArrayList<JSONObject>){
@@ -306,7 +313,7 @@ class GameFragment: Fragment() {
             }
             // order info starting with me
             orderInfo()
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         // order info starting with me
         private fun orderInfo(){
@@ -332,7 +339,7 @@ class GameFragment: Fragment() {
                         if(player==curUserAux)
                             gameData.put("currentPlayerPos", c.toString())
                 }
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
             //reorder array starting in given position
             private fun reOrderArray(data:ArrayList<String>, pos:Int):ArrayList<String>{
@@ -342,7 +349,7 @@ class GameFragment: Fragment() {
                         aux.add(data[i])
                     for (i in 0 until pos)
                         aux.add(data[i])
-                }catch(ex:Exception){sendError("reOrderArray INFO:${ex.getStackTraceString()}")}
+                }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
                 return aux
             }
 
@@ -369,7 +376,7 @@ class GameFragment: Fragment() {
                 false
             }
         }catch (ex:Exception){
-            sendError("orderInfo:${ex.getStackTraceString()}")
+            sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
             ex.printStackTrace()
             false
         }
@@ -453,7 +460,7 @@ class GameFragment: Fragment() {
                     myTurn=true
                 }
             }
-        }catch(ex:Exception){sendError("gameStatus:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         if(auxMyTurn!=myTurn || ranId==-2){
             ranId=(0..6000).random()
             bgSync(ranId)
@@ -474,9 +481,8 @@ class GameFragment: Fragment() {
             gameP1.text=getString(R.string.player_cards,playersNames[0],cardsCount[0])
             gameP2.text=getString(R.string.player_cards,playersNames[1],cardsCount[1])
             gameP3.text=getString(R.string.player_cards,playersNames[2],cardsCount[2])
-            gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[2])
+            gameP4.text=getString(R.string.player_cards,playersNames[3],cardsCount[3])
             gameP5.text=getString(R.string.player_cards,playersNames[4],cardsCount[4])
-
             // just update image before game start
             if(bg && gameData["started"] != "0")
                 return
@@ -488,7 +494,7 @@ class GameFragment: Fragment() {
                 gameP2.isVisible=true
                 gameP2Img.isVisible=true
                 bubble_p2.setBackgroundResource(R.drawable.bubble)
-                gameP2.setOnClickListener{addPlayerClickListener(gameP2,players[1])}
+                gameP2Img.setOnClickListener{addPlayerClickListener(gameP2,players[1], cardsCount[1])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[1]}${playersExt[1]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP2Img)
             }
@@ -496,7 +502,7 @@ class GameFragment: Fragment() {
                 gameP3.isVisible=true
                 gameP3Img.isVisible=true
                 bubble_p3.setBackgroundResource(R.drawable.bubble)
-                gameP3.setOnClickListener{addPlayerClickListener(gameP3,players[2])}
+                gameP3Img.setOnClickListener{addPlayerClickListener(gameP3,players[2], cardsCount[2])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[2]}${playersExt[2]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP3Img)
             }
@@ -504,7 +510,7 @@ class GameFragment: Fragment() {
                 gameP4Img.isVisible=true
                 gameP4.isVisible=true
                 bubble_p4.setBackgroundResource(R.drawable.bubble)
-                gameP4.setOnClickListener{addPlayerClickListener(gameP4,players[3])}
+                gameP4Img.setOnClickListener{addPlayerClickListener(gameP4,players[3], cardsCount[3])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[3]}${playersExt[3]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP4Img)
             }
@@ -512,7 +518,7 @@ class GameFragment: Fragment() {
                 gameP5.isVisible=true
                 gameP5Img.isVisible=true
                 bubble_p5.setBackgroundResource(R.drawable.bubble)
-                gameP5.setOnClickListener{addPlayerClickListener(gameP5,players[4])}
+                gameP5Img.setOnClickListener{addPlayerClickListener(gameP5,players[4], cardsCount[4])}
                 GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[4]}${playersExt[4]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP5Img)
             }
@@ -529,14 +535,16 @@ class GameFragment: Fragment() {
             if(playersNames[3]!="" &&  players[4]!="")
                 discard5.visibility=VISIBLE
 
-        }catch(ex:Exception){sendError("playersInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         private var muteAudiosIds= arrayListOf<String>()
         private var muteMsgIds= arrayListOf<String>()
-        private fun addPlayerClickListener(view: View, userClickId:String){
+        private fun addPlayerClickListener(view: View, userClickId:String, cards:String){
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.user)
             val userPos=muteAudiosIds.indexOf(userClickId)
+            popup.menu.findItem(R.id.title_menu).title=playersNames[0]
+            popup.menu.findItem(R.id.cards_menu).title=getString(R.string.cards, cards)
             if(userPos==-1)
                 popup.menu.findItem(R.id.mute_audios_menu).title = "${getString(R.string.audios)} ${getString(R.string.on)}"
             else
@@ -781,7 +789,7 @@ class GameFragment: Fragment() {
             }
             if(card=="XX") color else if(card[0]=='0') "10 $color" else "${card[0]} $color"
         }catch(ex:Exception){
-            sendError("orderInfo:${ex.getStackTraceString()}")
+            sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
             card
         }
     }
@@ -815,7 +823,7 @@ class GameFragment: Fragment() {
             }
             //save cards order locally
             prefs!!.edit().putString("CARDS$gameId", currentCards.joinToString(",")).apply()
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         //called by showMyCards to add each card
         private fun addMyCard(card:String, pos:Int){
@@ -832,7 +840,7 @@ class GameFragment: Fragment() {
                     MyTools().toast(requireContext(),getCardName(card))
                     true
                 }
-            }catch(ex:Exception){sendError("addMyCard:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
     //show discarded cards in each position
@@ -873,19 +881,24 @@ class GameFragment: Fragment() {
                     }
                 }
             }
-        }catch(ex:Exception){sendError("showDiscards:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         private fun nextPos(pos:Int,userPick:Int, userDisc:Int):Int{
-            var myPos=pos+1
-            if(myPos>4)
-                myPos=0
-            if(myPos==userPick)
-                myPos++
-            if(myPos==userDisc)
-                myPos++
-            if(myPos==userPick)
-                myPos++
-            return myPos
+            return try{
+                var myPos=pos+1
+                if(myPos>4)
+                    myPos=0
+                if(myPos==userPick)
+                    myPos++
+                if(myPos==userDisc)
+                    myPos++
+                if(myPos==userPick)
+                    myPos++
+                myPos
+            }catch(ex:Exception){
+                sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
+                pos
+            }
         }
         //put card in given display layout position
         private fun displayCardInDiscard(pos:Int, card:String, cp:Int, posDiscard:Int){
@@ -904,7 +917,7 @@ class GameFragment: Fragment() {
                     2 -> discard4.addView(cardImg)
                     3 -> discard5.addView(cardImg)
                 }
-            }catch(ex:Exception){sendError("displayCardInDiscard:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
         private fun previewDiscards(){
             try{
@@ -922,7 +935,7 @@ class GameFragment: Fragment() {
                 previewDiscardsListeners(myPos,discard4)
                 myPos=nextPos(myPos,posDiscard,players.indexOf(userId.toString()))
                 previewDiscardsListeners(myPos,discard5)
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
 
@@ -967,7 +980,32 @@ class GameFragment: Fragment() {
                     }
                 }
             }
-        }catch(ex:Exception){sendError("showDrawn:${ex.getStackTraceString()}")}
+
+            if(currentDraws[0] != ""){
+                println("YES")
+
+                val constraintSet = ConstraintSet()
+                constraintSet.clone(game_constraint_layout)
+                constraintSet.connect(
+                    R.id.gameP1,
+                    ConstraintSet.BOTTOM,
+                    ConstraintSet.PARENT_ID,
+                    ConstraintSet.BOTTOM,
+                    0
+                )
+                constraintSet.applyTo(game_constraint_layout)
+            }
+
+            gameP2.bringToFront()
+            gameP2Img.bringToFront()
+            gameP3.bringToFront()
+            gameP3Img.bringToFront()
+            gameP4.bringToFront()
+            gameP4Img.bringToFront()
+            gameP5.bringToFront()
+            gameP5Img.bringToFront()
+
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         //put each card in user draw area
         private fun displayCardsInDraw(drawn:String, playerId:String, draw:RelativeLayout, preview:Boolean=false){
@@ -976,7 +1014,7 @@ class GameFragment: Fragment() {
                 val numCards=drawn.replace("|", "").trim(',').split(',').count()
                 var cardW=(draw.width).div(numCards+(if(games.count()==2)8 else 13))-5
                 if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && playerId!=userId.toString())
-                    cardW+=(cardW.div(2))
+                    cardW*=2
                 //loop each game
                 var p=0
                 var space=0
@@ -1010,7 +1048,7 @@ class GameFragment: Fragment() {
                     }
                     space+=cardW*4
                 }
-            }catch(ex:Exception){sendError("displayCardsInDraw:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
     //show the selected draw in the preview layout
@@ -1024,7 +1062,7 @@ class GameFragment: Fragment() {
             val showCards=gameSetData["${setAux}_$playerId"]!![1]
             MyTools().toast(requireContext(),getString(R.string.touch_preview_close))
             displayCardsInDraw(showCards, playerId, drawPreview, true)
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
         //raise a card in the hand
@@ -1037,7 +1075,7 @@ class GameFragment: Fragment() {
                 //get raised card info
                 cardViewPos = view
                 cardPos=pos/cardsSpace
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
         //lower a card in the hand
@@ -1047,7 +1085,7 @@ class GameFragment: Fragment() {
                 params.topMargin= 30.dp
                 params.leftMargin=pos
                 view.layoutParams=params
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
         //move a card in the hand
@@ -1078,7 +1116,7 @@ class GameFragment: Fragment() {
                         addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
                 }*/
             }catch(ex:Exception){
-                sendError("MoveCard:$ex")
+                sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
                 showMyCards(true)
             }
         }
@@ -1099,7 +1137,7 @@ class GameFragment: Fragment() {
                     FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
                         addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to cards.joinToString(",")+","))
                 }*/
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
         // fixes for sorting depending on numbers or color
         private fun fixSort(data:ArrayList<String>, start: Boolean, color:Boolean):ArrayList<String>{
@@ -1135,7 +1173,7 @@ class GameFragment: Fragment() {
                     }
                 return data
             }catch(ex:Exception){
-                sendError("orderInfo:${ex.getStackTraceString()}")
+                sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
                 return data
             }
         }
@@ -1161,7 +1199,8 @@ class GameFragment: Fragment() {
                 animate.duration = 500
                 //animate.fillAfter = true
                 configLayout.startAnimation(animate)
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+                configLayout.bringToFront()
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
         // show/hide the message view
@@ -1169,7 +1208,7 @@ class GameFragment: Fragment() {
             try{
                 message_layout.isVisible= prefs!!.getString("MESSAGES" ,"") == ""
                 requireContext().getSharedPreferences(PREF_FILE, 0).edit().putString("MESSAGES", if(message_layout.isVisible) "ON" else "").apply()
-            }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
     // ************ END DISPLAY CARDS FUNCTIONS
@@ -1198,7 +1237,7 @@ class GameFragment: Fragment() {
                     loadingGame.isVisible=false
                 }
             })
-        }catch(ex:Exception){sendError("DragCard:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
         //allow to move view outside the parents boundaries
         private fun setAllParentsClip(viewIn: View) {
@@ -1210,7 +1249,7 @@ class GameFragment: Fragment() {
                 viewGroup.clipToPadding = false
                 view = viewGroup
             }
-        }catch(ex:Exception){sendError("SetParentClip:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
     //call dragCard from deck to preview card
     private fun moveCardFromStack(drawCard:String){
@@ -1228,7 +1267,7 @@ class GameFragment: Fragment() {
                     }
                 }
             }
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from discard1 to last cards
@@ -1248,7 +1287,7 @@ class GameFragment: Fragment() {
                     }
                 }
             }
-        }catch(ex:Exception){sendError("MoveCardFromDiscard:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from raised card to discard 2
@@ -1262,7 +1301,7 @@ class GameFragment: Fragment() {
                 outCard = ""
             }
             initialView()
-        }catch(ex:Exception){sendError("MoveCardToDiscard:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //call dragCard from raised card to drawn
@@ -1275,7 +1314,7 @@ class GameFragment: Fragment() {
                 outCard = ""
             }
             initialView()
-        }catch(ex:Exception){sendError("MoveCardToDraw:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     // ************ MOVE CARDS FUNCTIONS
@@ -1789,7 +1828,7 @@ class GameFragment: Fragment() {
                 messages_input.append(putMsg(message[0], message[1], message[2], message[3] =="FLOW", true))
 
             }
-        }catch(ex:Exception){sendError(ex.toString())}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //get flow message from db when first load
@@ -1798,7 +1837,7 @@ class GameFragment: Fragment() {
             val dbHandler=Db(requireContext(),null)
             val lastId = dbHandler.getData("flow", "`gameId_id`=$gameId", "max(`id`)")
             flowLastId = try { Integer.parseInt(lastId[0][0]) } catch (ex: java.lang.NumberFormatException) { 0 }
-        }catch(ex:Exception){sendError(ex.toString())}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //put a message in the messages area
@@ -1842,7 +1881,7 @@ class GameFragment: Fragment() {
             }
             ss1
         }catch (ex:Exception){
-            sendError(ex.toString())
+            sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
             SpannableString(msg)
         }
     }
@@ -1876,7 +1915,7 @@ class GameFragment: Fragment() {
                 messages_input.scrollTo(0, scrollAmount)
             else
                 messages_input.scrollTo(0, 0)
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     private fun textEnterListener(){
@@ -1907,7 +1946,7 @@ class GameFragment: Fragment() {
                 FetchData(arrayListOf(),this@GameFragment).updateData("addToFlow", "", cache=false,
                     addParams = hashMapOf("gameId" to gameId, "msg" to "${playersNames[0]}||--||$msgId||--||$aux"))
             }
-        }catch(ex:Exception){sendError("orderInfo:${ex.getStackTraceString()}")}
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     private fun getFlowMsg(msg:String):String{
@@ -1930,7 +1969,7 @@ class GameFragment: Fragment() {
                 else -> msg
             }
         }catch(ex:Exception){
-            sendError("orderInfo:${ex.getStackTraceString()}")
+            sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")
             return msg
         }
     }
@@ -1942,9 +1981,7 @@ class GameFragment: Fragment() {
             val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             val r = RingtoneManager.getRingtone(requireContext().applicationContext, notification)
             r.play()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
     //add new message in the server

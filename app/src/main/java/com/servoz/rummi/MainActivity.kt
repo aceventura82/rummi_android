@@ -32,6 +32,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         if(intent.getStringExtra("SETTINGS") == "YES")
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_settings, Bundle())
+        else if(intent.getStringExtra("MY_GAMES") == "YES")
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         //start notifications
         prefs!!.edit().putString("check_turn", "ON").apply()
         processId= (1..99999999).random()

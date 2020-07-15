@@ -107,7 +107,7 @@ class EditGameFragment: Fragment() {
                 val dbHandler = Db(requireContext(), null)
                 dbHandler.deleteWhere("game", "`id`=${gameData[0]}")
                 if(delete && res[0]=="1")
-                    NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                    NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
             }
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             loadingEditGame.isVisible=false

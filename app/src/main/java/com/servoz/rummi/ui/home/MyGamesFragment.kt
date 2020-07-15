@@ -74,8 +74,10 @@ class MyGamesFragment : Fragment() {
             updateData(login, data)
             swipe_containerHome.isRefreshing = false
         }
+        btn_standings.setOnClickListener {
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_to_standings, Bundle())
+        }
         loadingMyGames.isVisible=false
-        checkUpdate()
     }
 
     // intent to Join a Game by URL
@@ -112,30 +114,12 @@ class MyGamesFragment : Fragment() {
             "playersPos", "currentPlayerPos"), this)
         fetchGame.updateData("viewMyGames", "game","`started` ASC, `date` DESC"){
             if(cachedData!=fetchGame.cacheRepo("OK", "game", "`started` ASC, `date` DESC"))
-                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
     }
 
     private fun cleanData(){
         val dbHandler=Db(requireContext(), null)
         dbHandler.deleteWhere("game")
-    }
-
-    //check app update
-    private fun checkUpdate(){
-        doAsync {
-            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
-                if (result != "OK") {
-                    textUpdate.isVisible=true
-                    textUpdateLink.isVisible=true
-                    textUpdateLink.setOnClickListener {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
-                        startActivity(openURL)
-                    }
-                    textUpdate.text=getString(R.string.update, result)
-                }
-            }
-        }
     }
 }

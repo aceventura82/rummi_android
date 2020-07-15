@@ -54,7 +54,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                 NavHostFragment.findNavController(fragment).navigate(MyGamesFragmentDirections.actionMyGamesToEditGame(Integer.parseInt(data[0])))
             }
             //listener to go to the game
-            itemView.gridItemMyGames.setOnClickListener{
+            itemView.gridTitleStandings.setOnClickListener{
                 //NavHostFragment.findNavController(fragment).navigate(HomeFragmentDirections.actionGlobalToGame(Integer.parseInt(data[0])))
                 val intent = Intent(fragment.requireContext(), GameActivity::class.java)
                 intent.putExtra("gameId",data[0])
@@ -78,9 +78,9 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
 
         private fun setColor(fragment: Fragment, color:Int){
             if(Build.VERSION.SDK_INT<=22)
-                itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().resources.getColor(color))
+                itemView.gridTitleStandings.setBackgroundColor(fragment.requireContext().resources.getColor(color))
             else
-                itemView.gridItemMyGames.setBackgroundColor(fragment.requireContext().getColor(color))
+                itemView.gridTitleStandings.setBackgroundColor(fragment.requireContext().getColor(color))
         }
 
         private fun leaveGame(fragment: Fragment,gameId:Int, loadingMyGames: View){
@@ -97,7 +97,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                         val msg=if(res.count()==2){
                             val dbHandler = Db(fragment.requireContext(), null)
                             dbHandler.deleteWhere("game", "`id`=$gameId")
-                            NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_home, Bundle())
+                            NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_my_games, Bundle())
                             res[1]
                         }
                         else
@@ -126,7 +126,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                     FetchData(arrayListOf(),fragment).updateData("hideGame", "",cache = false, addParams = hashMapOf("gameId" to gameId.toString())) { result ->
                         val res = result.split("|")
                         if(res. count() ==2)
-                            NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_home, Bundle())
+                            NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_my_games, Bundle())
                         else
                             MyTools().toast(fragment.requireContext(), result)
                     }

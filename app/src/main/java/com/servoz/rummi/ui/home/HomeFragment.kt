@@ -4,6 +4,7 @@ package com.servoz.rummi.ui.home
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import org.jetbrains.anko.doAsync
 import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
@@ -44,6 +46,7 @@ class HomeFragment : Fragment() {
         userInfo(login)
         hideShowMenuItems(login)
         listeners()
+        checkUpdate()
     }
 
     //put the user data in the left drawer
@@ -79,7 +82,7 @@ class HomeFragment : Fragment() {
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_add_game, Bundle())
         }
         btn_home_my_games.setOnClickListener{
-            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
         btn_home_rules.setOnClickListener{
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_rules, Bundle())
@@ -123,5 +126,21 @@ class HomeFragment : Fragment() {
         startActivity(intent)
     }
 
-
+    //check app update
+    private fun checkUpdate(){
+        doAsync {
+            FetchData(arrayListOf(), nav_host_fragment).updateData("checkVersion", "", cache = false) { result ->
+                if (result != "OK") {
+                    textUpdate.isVisible=true
+                    textUpdateLink.isVisible=true
+                    textUpdateLink.setOnClickListener {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse("https://github.com/aceventura82/rummi_android/raw/master/app/release/app-release.apk")
+                        startActivity(openURL)
+                    }
+                    textUpdate.text=getString(R.string.update, result)
+                }
+            }
+        }
+    }
 }

@@ -36,7 +36,7 @@ class LoginFragment : Fragment() {
             login(editText_email.text.toString(), editText_password.text.toString())
         }
         login_cancel_button.setOnClickListener {
-            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
         login_cancel_reset.setOnClickListener {
             login_reset_button.text=getString(R.string.forgot_password)

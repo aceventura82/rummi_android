@@ -50,6 +50,30 @@
                     android:textAlignment="center"
                     android:textSize="30sp"
                     android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/textUpdate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:visibility="gone"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="30dp"
+                    app:layout_constraintTop_toBottomOf="@id/textTitle" />
+
+                <TextView
+                    android:id="@+id/textUpdateLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_bg"
+                    android:text="@string/download"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:padding="10dp"
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/textUpdate"
+                    app:layout_constraintTop_toBottomOf="@id/textUpdate" />
 
             </LinearLayout>
 
@@ -63,7 +87,7 @@
                 android:padding="10dp"
                 android:text="@string/menu_my_games"
                 android:textColor="@color/white"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 app:layout_constraintBottom_toTopOf="@+id/btn_home_new_game"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -79,8 +103,7 @@
                 android:padding="10dp"
                 android:text="@string/menu_add_game"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
-
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/btn_home_search_game"
@@ -92,7 +115,7 @@
                 android:padding="10dp"
                 android:text="@string/search_game"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/btn_home_register"
@@ -104,7 +127,7 @@
                 android:padding="10dp"
                 android:text="@string/register"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/btn_home_rules"
@@ -112,11 +135,11 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="15dp"
                 android:background="@drawable/btn_bg"
-                android:drawableStart="@drawable/ic_positions"
+                android:drawableStart="@drawable/ic_baseline_format_list_numbered_24"
                 android:padding="10dp"
                 android:text="@string/menu_rules"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/btn_home_settings"
@@ -128,7 +151,7 @@
                 android:padding="10dp"
                 android:text="@string/settings"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/btn_home_login"
@@ -140,7 +163,7 @@
                 android:padding="10dp"
                 android:text="@string/menu_login"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
 
             <TextView
@@ -153,7 +176,7 @@
                 android:padding="10dp"
                 android:text="@string/menu_logout"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="20sp" />
 
         </LinearLayout>
     </ScrollView>

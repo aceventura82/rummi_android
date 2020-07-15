@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/nav_home1">
+    app:startDestination="@id/nav_home">
 
     <fragment
-        android:id="@+id/nav_home1"
+        android:id="@+id/nav_home"
         android:name="com.servoz.rummi.ui.home.HomeFragment"
         android:label="menu_home"
         tools:layout="@layout/fragment_home"/>
 
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/nav_my_games"
         android:name="com.servoz.rummi.ui.home.MyGamesFragment"
         android:label="menu_home"
         tools:layout="@layout/fragment_my_games">
@@ -94,14 +94,20 @@
         tools:layout="@layout/fragment_settings" />
 
     <fragment
+        android:id="@+id/nav_standings"
+        android:name="com.servoz.rummi.ui.home.StandingsFragment"
+        android:label="@string/standing"
+        tools:layout="@layout/fragment_standings" />
+
+    <fragment
         android:id="@+id/nav_add_game"
         android:name="com.servoz.rummi.ui.game.AddGameFragment"
         android:label="menu_forecasts"
         tools:layout="@layout/fragment_add_game" />
 
     <action
-        android:id="@+id/action_global_nav_home"
-        app:destination="@id/nav_home" />
+        android:id="@+id/action_global_nav_my_games"
+        app:destination="@id/nav_my_games" />
         <action
         android:id="@+id/action_global_nav_login"
         app:destination="@id/nav_login" />
@@ -126,7 +132,11 @@
     <action
         android:id="@+id/action_global_nav_add_game"
         app:destination="@id/nav_add_game" />
+
     <action android:id="@+id/action_global_to_game"
             app:destination="@id/nav_game" />
+
+    <action android:id="@+id/action_global_to_standings"
+            app:destination="@id/nav_standings" />
 
 </navigation>

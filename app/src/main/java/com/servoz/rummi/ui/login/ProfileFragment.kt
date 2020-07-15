@@ -71,7 +71,7 @@ class ProfileFragment : Fragment() {
             updProfile(userInfo["userId_id"].toString(), true)
         }
         profile_cancel_button.setOnClickListener{
-            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+            NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
         swipe_containerUser.setOnRefreshListener {
             doAsync {

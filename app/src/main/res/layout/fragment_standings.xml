@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/table"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/StandingsImageMe"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_weight="2"
+        android:contentDescription="@string/player"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/standings_text_me"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="VS"
+        android:padding="10dp"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/StandingsImageMe"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:id="@+id/gridTitleStandings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/transparent_borders"
+        android:gravity="center"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/standings_text_me">
+
+        <ImageView
+            android:id="@+id/StandingsImagePlayer_title"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="2"
+            android:contentDescription="@string/player"
+            android:textAlignment="center"
+            app:layout_gravity="center_vertical" />
+
+        <TextView
+            android:id="@+id/standings_won_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_marginStart="10dp"
+            android:layout_weight="2"
+            android:text="@string/won"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/standings_lost_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:textColor="@color/white"
+            android:text="@string/lost"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/standings_both_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_weight="1"
+            android:text="@string/other_winner"
+            android:layout_marginEnd="20dp"
+            android:textSize="20sp" />
+
+        </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridTitleStandings">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewStandings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ScrollView>
+
+
+        <ProgressBar
+            android:id="@+id/loadingStandings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

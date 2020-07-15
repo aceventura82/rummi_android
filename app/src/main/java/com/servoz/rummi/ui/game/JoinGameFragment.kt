@@ -44,7 +44,7 @@ class JoinGameFragment: Fragment() {
             } catch (e: JSONException) {
                 e.printStackTrace()
                 Toast.makeText(context, getString(R.string.wrong_link), Toast.LENGTH_SHORT).show()
-                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
                 loadingJoinGame.isVisible=false
                 JSONObject()
             }
@@ -139,7 +139,7 @@ class JoinGameFragment: Fragment() {
             val res = result.split("|")
             if(res.count()==2){
                 msg = res[1]
-                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_home, Bundle())
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
             }
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             loadingJoinGame.isVisible=false
