@@ -13,7 +13,6 @@ import com.servoz.rummi.BuildConfig
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.fragment_game.*
 import org.jetbrains.anko.doAsync
 import java.io.File
 import java.net.URL

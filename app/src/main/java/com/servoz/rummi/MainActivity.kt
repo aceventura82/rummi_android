@@ -3,11 +3,13 @@ package com.servoz.rummi
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.media.session.MediaButtonReceiver.handleIntent
 import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -30,9 +32,11 @@ class MainActivity : AppCompatActivity() {
         setDefaultNightMode(MODE_NIGHT_YES)
         prefs = getSharedPreferences(PREF_FILE, 0)
         setContentView(R.layout.activity_main)
+        val urlCheck= URL.replace("HTTPS", "").replace("HTTP", "")+"/joinGame/"
         if(intent.getStringExtra("SETTINGS") == "YES")
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_settings, Bundle())
-        else if(intent.getStringExtra("MY_GAMES") == "YES")
+        else if(intent.getStringExtra("MY_GAMES") == "YES" || (Intent.ACTION_VIEW == intent.action &&
+                    intent.data.toString().contains(urlCheck)))
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         //start notifications
         prefs!!.edit().putString("check_turn", "ON").apply()

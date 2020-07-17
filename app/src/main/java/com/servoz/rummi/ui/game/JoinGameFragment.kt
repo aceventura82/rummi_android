@@ -1,5 +1,6 @@
 package com.servoz.rummi.ui.game
 
+import android.net.Uri.decode
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,7 +50,7 @@ class JoinGameFragment: Fragment() {
                 JSONObject()
             }
             val dbHandler=Db(requireContext(),null)
-            textJoinGameName.text=gameData["name"].toString()
+            textJoinGameName.text=decode(gameData["name"].toString())
             val inGame=try {
                 dbHandler.getData("`game`","`id`=${gameData["id"]}")[0]
                 true

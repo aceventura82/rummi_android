@@ -1,31 +1,18 @@
 package com.servoz.rummi.ui.home
 
 
-import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.request.RequestOptions
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
-import com.servoz.rummi.ui.login.ProfileFragment
-import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.fragment_login.*
-import kotlinx.android.synthetic.main.fragment_my_games.*
-import kotlinx.android.synthetic.main.fragment_my_games.loadingMyGames
-import kotlinx.android.synthetic.main.fragment_my_games.recyclerViewMyGames
 import kotlinx.android.synthetic.main.fragment_standings.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList

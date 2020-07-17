@@ -1199,7 +1199,6 @@ class GameFragment: Fragment() {
                 animate.duration = 500
                 //animate.fillAfter = true
                 configLayout.startAnimation(animate)
-                configLayout.bringToFront()
             }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
         }
 
@@ -1897,6 +1896,7 @@ class GameFragment: Fragment() {
         }
         bubble.isVisible=true
         bubble.text=decode(msg)
+        bubble.bringToFront()
 
         doAsync {
             sleep(5000)

@@ -107,7 +107,7 @@
         android:visibility="gone"
         android:contentDescription="@string/player"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLayout"  />
+        app:layout_constraintTop_toTopOf="parent"  />
 
     <TextView
         android:id="@+id/bubble_p3"
@@ -218,6 +218,7 @@
         android:id="@+id/discard2"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:layout_marginEnd="20dp"
         android:background="@drawable/transparent_borders"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -378,7 +379,7 @@
         android:orientation="vertical"
         android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@+id/text_game_info"
-        app:layout_constraintTop_toBottomOf="@+id/buttonLayout">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/text_draw_info"
@@ -458,9 +459,9 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_gravity="end|bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/configLayout"
@@ -580,6 +581,7 @@
                 android:layout_weight="1"
                 android:autofillHints="@string/messages"
                 android:inputType="text"
+                android:textColor="@color/white"
                 android:maxLines="1"
                 tools:ignore="LabelFor" />
 
