@@ -2,6 +2,7 @@ package com.servoz.rummi.ui.game
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -27,9 +28,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.request.RequestOptions
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_game.*
 import kotlinx.android.synthetic.main.fragment_game.view.text_game_info
 import kotlinx.android.synthetic.main.fragment_profile.*
@@ -51,7 +54,6 @@ import java.util.*
 
 /*
 * ROAD MAP:
-Check python API language
 * */
 
 val Int.dp: Int
@@ -385,6 +387,7 @@ class GameFragment: Fragment() {
     //check Game status, set controls if open or in game
     private fun gameStatus(bg: Boolean=false){
         val auxMyTurn=myTurn
+        shareButton.isVisible=false
         try{
             //check if set just ended and show summary windows
             if(set!="-1" && gameData["current_set"]!=set)
@@ -405,6 +408,7 @@ class GameFragment: Fragment() {
             when{
                 //is started?
                 gameData["started"].toString()== "0"->{
+                    shareButton.isVisible=true
                     text_game_info.text = getString(R.string.waiting_for_player, gameData["code"])
                     // if creator user, show start game button
                     if(playersCount>1 && userId==Integer.parseInt(gameData["userId_id"].toString())){
@@ -417,6 +421,8 @@ class GameFragment: Fragment() {
                 gameData["started"].toString()== "2"->{
                     text_game_info.text = getString(R.string.ended)
                     displaySetSummary("game", bg)
+                    shareButton.text=getString(R.string.menu_add_game)
+                    shareButton.isVisible=true
                 }
                 //if not dealt yet and is dealing player, show deal button
                 gameData["current_stack"]=="" && currentUser==userId ->{
@@ -980,12 +986,9 @@ class GameFragment: Fragment() {
                     }
                 }
             }
-
-            if(currentDraws[0] != ""){
-                println("YES")
-
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(game_constraint_layout)
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(game_constraint_layout)
+            if(currentDraws[0] != "")
                 constraintSet.connect(
                     R.id.gameP1,
                     ConstraintSet.BOTTOM,
@@ -993,8 +996,16 @@ class GameFragment: Fragment() {
                     ConstraintSet.BOTTOM,
                     0
                 )
-                constraintSet.applyTo(game_constraint_layout)
-            }
+            else
+                constraintSet.connect(
+                R.id.gameP1,
+                ConstraintSet.BOTTOM,
+                R.id.cards,
+                ConstraintSet.TOP,
+                0
+            )
+            constraintSet.applyTo(game_constraint_layout)
+
 
             gameP2.bringToFront()
             gameP2Img.bringToFront()
@@ -1323,6 +1334,8 @@ class GameFragment: Fragment() {
     private fun setListeners(){
         //set listener for Start Game Button or start draw
         mainButtonListener()
+        //share game at beginning
+        shareGame()
         //deck when user pick from stack
         deckListener()
         //discard1 when user pick from discard
@@ -1356,8 +1369,9 @@ class GameFragment: Fragment() {
         audioRecObj = AudioRecord(requireActivity(), buttonLauncherRecord, playAudio)
         playAudio.setOnClickListener {
             if(audioRecObj.isRecording){
-                audioRecObj.stopAudio("","", false)
-            }
+                audioRecObj.stopRecording("","", false)
+            }else
+                audioRecObj.stopAudio()
         }
     }
 
@@ -1547,6 +1561,22 @@ class GameFragment: Fragment() {
                 }
             }
         }
+
+    //share button
+    private fun shareGame(){
+        shareButton.setOnClickListener {
+            if (shareButton.text==getString(R.string.share)){
+                val sendIntent = Intent()
+                sendIntent.action = Intent.ACTION_SEND
+                sendIntent.putExtra(
+                    Intent.EXTRA_TEXT,getString(R.string.share_desc, gameData.getString("code"),"$URL/joinGame/${gameData.getString("code")}/")
+                )
+                sendIntent.type = "text/plain"
+                startActivity(sendIntent)
+            }else
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_add_game, Bundle())
+        }
+    }
 
     //deck button, pick up cards from deck
     private fun deckListener(){
@@ -1848,7 +1878,7 @@ class GameFragment: Fragment() {
                     return SpannableString("")
                 val userIdAudio = msg.split("::")[2]
                 if(userIdAudio != userId.toString())
-                    audioRecObj.playAudio(playAudio, userIdAudio, gameId)
+                    audioRecObj.playAudio(userIdAudio, gameId)
             }else{
                 if(muteMsgIds.indexOf(userIdMsg)!=-1) //user muted
                     return SpannableString("")

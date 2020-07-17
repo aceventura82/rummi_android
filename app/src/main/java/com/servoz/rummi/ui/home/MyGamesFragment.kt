@@ -80,6 +80,8 @@ class MyGamesFragment : Fragment() {
         loadingMyGames.isVisible=false
     }
 
+
+
     // intent to Join a Game by URL
     private fun handleIntent(intent: Intent):Boolean{
         val appLinkAction = intent.action

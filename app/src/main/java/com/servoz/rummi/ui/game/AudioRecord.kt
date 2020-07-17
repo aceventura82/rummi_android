@@ -15,6 +15,7 @@ import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.doAsync
 import java.io.File
+import java.lang.Thread.sleep
 import java.net.URL
 
 class AudioRecord(private var activity: FragmentActivity, private val buttonLauncherRecord: ImageView, private val buttonCancelRecord: ImageView){
@@ -31,7 +32,7 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
             if(!isRecording)
                 recordAudio()
             else
-                stopAudio(userId,gameId)
+                stopRecording(userId,gameId)
         }
         requestPermission(Manifest.permission.RECORD_AUDIO, 101)
     }
@@ -57,7 +58,7 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
         }
     }
 
-    fun stopAudio(userId:String,gameId:String, send:Boolean=true) {
+    fun stopRecording(userId:String, gameId:String, send:Boolean=true) {
         if (isRecording) {
             buttonLauncherRecord.setImageResource(0)
             buttonLauncherRecord.setImageResource(R.drawable.ic_baseline_mic_24)
@@ -71,22 +72,34 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
         }
     }
 
-    fun playAudio(view:ImageView, userId: String, gameId: String) {
+    private val mediaPlayer= MediaPlayer()
+    fun playAudio(userId: String, gameId: String) {
         val prefs = activity.baseContext.getSharedPreferences(PREF_FILE, 0)
-        if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF")
+        if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF"){
+            GlideApp.with(activity.baseContext).load(R.drawable.ic_baseline_mute).into(buttonCancelRecord)
+            buttonCancelRecord.isVisible=true
+            doAsync {
+                sleep(2000)
+                buttonCancelRecord.isVisible=false
+            }
             return
+        }
         GlideApp.with(activity.baseContext).load(R.drawable.playing_audio).into(buttonCancelRecord)
-        val mediaPlayer= MediaPlayer()
         try{
             mediaPlayer.setDataSource("$URL/static/audios/${userId}_${gameId}.3gp")
         }catch(ex:IllegalArgumentException){
-            view.isVisible=false
+            buttonCancelRecord.isVisible=false
             return
         }
-        view.isVisible=true
+        buttonCancelRecord.isVisible=true
         mediaPlayer.prepare()
         mediaPlayer.start()
-        mediaPlayer.setOnCompletionListener { view.isVisible=false }
+        mediaPlayer.setOnCompletionListener { buttonCancelRecord.isVisible=false }
+    }
+
+    fun stopAudio(){
+        mediaPlayer.stop()
+        buttonCancelRecord.isVisible=false
     }
 
     fun requestPermission(permissionType: String, requestCode: Int) {

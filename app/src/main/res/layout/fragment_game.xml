@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:textColor="@color/gray"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/cards"
         app:layout_constraintEnd_toEndOf="parent"
@@ -58,7 +60,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:textColor="@color/gray"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discard2"
@@ -90,11 +94,13 @@
 
     <TextView
         android:id="@+id/gameP3"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:textColor="@color/gray"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -130,7 +136,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:textColor="@color/gray"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
@@ -166,7 +174,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textAlignment="center"
-        android:textColor="@color/gray"
+        android:textColor="@color/white"
+        android:padding="5dp"
+        android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/discard1"
@@ -218,9 +228,8 @@
         android:id="@+id/discard2"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_marginEnd="20dp"
         android:background="@drawable/transparent_borders"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <RelativeLayout
@@ -281,8 +290,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/draw1"
-        app:layout_constraintEnd_toStartOf="@+id/discard3"
-        app:layout_constraintTop_toBottomOf="@id/draw3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/discard3"
         app:layout_constraintStart_toEndOf="@+id/deck" />
 
     <RelativeLayout
@@ -290,7 +299,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:minHeight="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/draw2"
+        app:layout_constraintBottom_toTopOf="@+id/discard3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/deck"
         app:layout_constraintTop_toTopOf="parent" />
@@ -300,7 +309,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:minHeight="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/draw5"
+        app:layout_constraintBottom_toTopOf="@+id/discard3"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -313,7 +322,7 @@
         app:layout_constraintBottom_toTopOf="@+id/draw1"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/draw4"/>
+        app:layout_constraintTop_toBottomOf="@id/discard5"/>
 
     <RelativeLayout
         android:id="@+id/drawPreview"
@@ -369,6 +378,15 @@
         android:layout_height="wrap_content"
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/text_game_info"
+        app:layout_constraintTop_toBottomOf="@+id/deck" />
+
+    <Button
+        android:id="@+id/shareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:text="@string/share"
+        app:layout_constraintStart_toEndOf="@+id/text_game_info"
         app:layout_constraintTop_toBottomOf="@+id/deck" />
 
     <!--Layout for draw info-->

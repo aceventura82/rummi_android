@@ -97,6 +97,7 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                         val msg=if(res.count()==2){
                             val dbHandler = Db(fragment.requireContext(), null)
                             dbHandler.deleteWhere("game", "`id`=$gameId")
+                            fragment.requireContext().getSharedPreferences(PREF_FILE, 0).edit().remove("CARDS$gameId").apply()
                             NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_my_games, Bundle())
                             res[1]
                         }
@@ -125,8 +126,10 @@ class MyGamesRecyclerAdapter(private val dataList: MutableList<SearchGames>, pri
                 .setPositiveButton(fragment.requireContext().getString(R.string.hide)) { _, _ ->
                     FetchData(arrayListOf(),fragment).updateData("hideGame", "",cache = false, addParams = hashMapOf("gameId" to gameId.toString())) { result ->
                         val res = result.split("|")
-                        if(res. count() ==2)
+                        if(res. count() ==2){
+                            fragment.requireContext().getSharedPreferences(PREF_FILE, 0).edit().remove("CARDS$gameId").apply()
                             NavHostFragment.findNavController(fragment).navigate(R.id.action_global_nav_my_games, Bundle())
+                        }
                         else
                             MyTools().toast(fragment.requireContext(), result)
                     }

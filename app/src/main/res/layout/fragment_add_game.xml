@@ -5,126 +5,141 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/table"
     android:layout_height="match_parent">
+    <!--Dummy view to get full screen fix-->
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-        <ScrollView
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_gravity="center"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
 
-                <LinearLayout
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:hint="@string/name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editGameName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:focusableInTouchMode="true"
-                    android:orientation="vertical">
+                    android:background="@color/white"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/gray" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="20dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:hint="@string/name">
+            </com.google.android.material.textfield.TextInputLayout>
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/editGameName"
-                            android:layout_width="match_parent"
-                            android:background="@color/white"
-                            android:textColorHint="@color/gray"
-                            android:textColor="@color/black"
-                            android:layout_height="wrap_content" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/full_draw_games"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
-                    </com.google.android.material.textfield.TextInputLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:focusableInTouchMode="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
-                        android:text="@string/full_draw_games"/>
+                <CheckBox
+                    android:id="@+id/checkBoxFD1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="1"
+                    tools:ignore="HardcodedText" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:gravity="center_horizontal"
-                        android:focusableInTouchMode="true"
-                        android:orientation="horizontal">
+                <CheckBox
+                    android:id="@+id/checkBoxFD2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="2"
+                    tools:ignore="HardcodedText" />
 
-                        <CheckBox
-                            android:id="@+id/checkBoxFD1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="1" />
-                        <CheckBox
-                            android:id="@+id/checkBoxFD2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="2" />
-                        <CheckBox
-                            android:id="@+id/checkBoxFD3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="3" />
-                        <CheckBox
-                            android:id="@+id/checkBoxFD4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="4" />
-                        <CheckBox
-                            android:id="@+id/checkBoxFD5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="5" />
-                        <CheckBox
-                            android:id="@+id/checkBoxFD6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:ignore="HardcodedText"
-                            android:buttonTint="@color/red"
-                            android:text="6" />
-                    </LinearLayout>
+                <CheckBox
+                    android:id="@+id/checkBoxFD3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="3"
+                    tools:ignore="HardcodedText" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:gravity="center"
-                        android:layout_height="wrap_content">
+                <CheckBox
+                    android:id="@+id/checkBoxFD4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="4"
+                    tools:ignore="HardcodedText" />
 
-                        <TextView
-                            android:id="@+id/edit_game_cancel_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/btn_bg"
-                            android:padding="10dp"
-                            android:layout_marginEnd="20dp"
-                            android:text="@string/cancel"
-                            android:textColor="@color/white"
-                            android:textSize="24sp" />
+                <CheckBox
+                    android:id="@+id/checkBoxFD5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="5"
+                    tools:ignore="HardcodedText" />
 
-                        <TextView
-                            android:id="@+id/buttonSaveEditGame"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/btn_bg"
-                            android:padding="10dp"
-                            android:layout_marginEnd="20dp"
-                            android:text="@string/save"
-                            android:textColor="@color/white"
-                            android:textSize="24sp" />
+                <CheckBox
+                    android:id="@+id/checkBoxFD6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/red"
+                    android:text="6"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
 
-                    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
 
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/edit_game_cancel_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/btn_bg"
+                    android:padding="10dp"
+                    android:text="@string/cancel"
+                    android:textColor="@color/white"
+                    android:textSize="24sp" />
 
-        </ScrollView>
+                <TextView
+                    android:id="@+id/buttonSaveEditGame"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/btn_bg"
+                    android:padding="10dp"
+                    android:text="@string/save"
+                    android:textColor="@color/white"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
         <ProgressBar
             android:id="@+id/loadingEditGame"
