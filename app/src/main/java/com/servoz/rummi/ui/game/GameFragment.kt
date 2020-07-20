@@ -967,8 +967,8 @@ class GameFragment: Fragment() {
             try{
                 val cardImg=ImageView(requireContext())
                 cardImg.setImageResource(resources.getIdentifier("d"+card.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-                val params = RelativeLayout.LayoutParams(60.dp, LinearLayout.LayoutParams.WRAP_CONTENT)
-                params.leftMargin=30.dp
+                val params = RelativeLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                params.leftMargin=10.dp
                 cardImg.layoutParams=params
                 cardImg.rotation=discardAngles[cp]
                 //user pick from discard1 , other discards follows
@@ -1358,12 +1358,14 @@ class GameFragment: Fragment() {
     //call dragCard from discardX to player img
     private fun moveCardFromUsersDiscard(drawCard:String, curUser:Int, type:Int=0){
         var myPosAux=0
+        var playerAux=gameData["playersPos"].toString().split(",")
         for (i in 0..4)
-            if(players[i]==userId.toString()){
+            if(playerAux[i]==userId.toString()){
                 myPosAux=i
                 break
             }
-        val playerAux =reOrderArray(players as ArrayList<String>, myPosAux)
+        if(myPosAux>0)
+            playerAux =reOrderArray(playerAux as ArrayList<String>, myPosAux)
         val i = playerAux.indexOf(curUser.toString())
         var from:ImageView
         var to:ImageView
@@ -2012,30 +2014,31 @@ class GameFragment: Fragment() {
 
     //put a message in the messages area
     private fun putMsg(msg:String, date:String, userIdMsg:String="", flow:Boolean=false, ini:Boolean=false):SpannableString{
+        var msg1 = msg
         if(!flow && !ini){
             //if Audio play it
             if(msg.count() > 9 && msg.substring(0,9) == "::AUDIO::" && msg.split("::").count()==4) {
-                if(muteAudiosIds.indexOf(userIdMsg)!=-1) //user muted
-                    return SpannableString("")
-                val userIdAudio = msg.split("::")[2]
-                if(userIdAudio != userId.toString())
-                    audioRecObj.playAudio(userIdAudio, gameId)
-                showBubble(getString(R.string.speaking), userIdMsg)
-                return SpannableString("")
-            }else{
-                if(muteMsgIds.indexOf(userIdMsg)!=-1) //user muted
-                    return SpannableString("")
-                //play notification and show messages windows
-                if(userId.toString()!=userIdMsg){
-                    playNotification()
-                    scrollTVDown()
+                if(muteAudiosIds.indexOf(userIdMsg)==-1) { //user not muted
+                    val userIdAudio = msg.split("::")[2]
+                    if (userIdAudio != userId.toString())
+                        audioRecObj.playAudio(userIdAudio, gameId)
+                    showBubble(getString(R.string.speaking), userIdMsg)
                 }
-                showBubble(msg, userIdMsg)
+                msg1=getString(R.string.speaking)
+            }else{
+                if(muteMsgIds.indexOf(userIdMsg)==-1) { //user not muted
+                    //play notification and show messages windows
+                    if (userId.toString() != userIdMsg) {
+                        playNotification()
+                        scrollTVDown()
+                    }
+                    showBubble(msg, userIdMsg)
+                }
             }
         }
         //text msg
         return try{
-            val text=if(userIdMsg!="")decode(msg) else getFlowMsg(msg, ini)
+            val text=if(userIdMsg!="")decode(msg1) else getFlowMsg(msg1, ini)
             val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
             val user = if(userIdMsg!="")playersNames[players.indexOf(userIdMsg)] else ""
