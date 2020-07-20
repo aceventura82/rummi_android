@@ -246,4 +246,7 @@
     <string name="won">Won</string>
     <string name="lost">Lost</string>
     <string name="other_winner">Other Winner</string>
+    <string name="downloading">Downloading</string>
+    <string name="installing">Installing</string>
+    <string name="no_cards">No Cards</string>
 </resources>

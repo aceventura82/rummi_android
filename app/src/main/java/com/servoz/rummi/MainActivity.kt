@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.media.session.MediaButtonReceiver.handleIntent
 import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.tools.*
+import com.servoz.rummi.ui.home.HomeFragmentDirections
+import com.servoz.rummi.ui.home.MyGamesFragmentDirections
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.doAsync
 
@@ -32,16 +34,26 @@ class MainActivity : AppCompatActivity() {
         setDefaultNightMode(MODE_NIGHT_YES)
         prefs = getSharedPreferences(PREF_FILE, 0)
         setContentView(R.layout.activity_main)
+        login=prefs!!.getString("appKey", "") !== ""
         val urlCheck= URL.replace("HTTPS", "").replace("HTTP", "")+"/joinGame/"
         if(intent.getStringExtra("SETTINGS") == "YES")
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_settings, Bundle())
-        else if(intent.getStringExtra("MY_GAMES") == "YES" || (Intent.ACTION_VIEW == intent.action &&
-                    intent.data.toString().contains(urlCheck)))
+        else if(intent.getStringExtra("MY_GAMES") == "YES")
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
+        else if(intent.getStringExtra("GAME") != null){
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("gameId",this.intent.getStringExtra("GAME"))
+            startActivity(intent)
+        }
+        else if(Intent.ACTION_VIEW == intent.action && intent.data.toString().contains(urlCheck)){
+            if(login)
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
+            else
+                NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_login, Bundle())
+        }
         //start notifications
         prefs!!.edit().putString("check_turn", "ON").apply()
         processId= (1..99999999).random()
-        login=prefs!!.getString("appKey", "") !== ""
         checkTurn(processId)
         //set the app theme
         notificationChannels()

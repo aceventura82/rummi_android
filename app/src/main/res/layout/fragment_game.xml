@@ -77,6 +77,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="@string/player" />
 
+    <ImageView
+        android:id="@+id/gameP2ImgPreview"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/gameP2"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/player" />
+
     <TextView
         android:id="@+id/bubble_p2"
         android:layout_width="wrap_content"
@@ -108,6 +117,15 @@
 
     <ImageView
         android:id="@+id/gameP3Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"  />
+
+    <ImageView
+        android:id="@+id/gameP3ImgPreview"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:visibility="gone"
@@ -153,6 +171,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/gameP4ImgPreview"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/bubble_p4"
         android:layout_width="wrap_content"
@@ -184,6 +211,15 @@
 
     <ImageView
         android:id="@+id/gameP5Img"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:visibility="gone"
+        android:contentDescription="@string/player"
+        app:layout_constraintBottom_toTopOf="@+id/gameP5"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/gameP5ImgPreview"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:visibility="gone"
@@ -229,13 +265,13 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:background="@drawable/transparent_borders"
-        app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <RelativeLayout
         android:id="@+id/discard3"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:visibility="gone"
         android:background="@drawable/transparent_borders"
         app:layout_constraintBottom_toTopOf="@+id/gameP2Img"
@@ -244,8 +280,8 @@
 
     <RelativeLayout
         android:id="@+id/discard4"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:visibility="gone"
         android:background="@drawable/transparent_borders"
         app:layout_constraintEnd_toEndOf="parent"
@@ -254,8 +290,8 @@
 
     <RelativeLayout
         android:id="@+id/discard5"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:visibility="gone"
         android:background="@drawable/transparent_borders"
         app:layout_constraintBottom_toTopOf="@+id/gameP5Img"
@@ -281,25 +317,27 @@
         android:id="@+id/draw1"
         android:layout_width="0dp"
         android:layout_height="80dp"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/cards"
-        app:layout_constraintEnd_toStartOf="@+id/gameP2"
-        app:layout_constraintStart_toEndOf="@+id/gameP5" />
+        app:layout_constraintEnd_toStartOf="@+id/gameP2Img"
+        app:layout_constraintStart_toEndOf="@+id/gameP5Img" />
 
     <RelativeLayout
         android:id="@+id/draw2"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/draw1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/discard3"
+        app:layout_constraintTop_toBottomOf="@id/draw3"
         app:layout_constraintStart_toEndOf="@+id/deck" />
 
     <RelativeLayout
         android:id="@+id/draw3"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:minHeight="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/discard3"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/draw2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/deck"
         app:layout_constraintTop_toTopOf="parent" />
@@ -308,21 +346,21 @@
         android:id="@+id/draw4"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:minHeight="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/discard3"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/draw5"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <RelativeLayout
         android:id="@+id/draw5"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:minHeight="100dp"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/draw1"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/discard5"/>
+        app:layout_constraintTop_toBottomOf="@id/draw4"/>
 
     <RelativeLayout
         android:id="@+id/drawPreview"
@@ -442,12 +480,48 @@
 
     <!--Card animation from discard-->
     <ImageView
-        android:id="@+id/moveCardFromDiscard"
+        android:id="@+id/moveCardFromDiscard1"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:contentDescription="@string/deck"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/moveCardFromDiscard2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/deck"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <ImageView
+        android:id="@+id/moveCardFromDiscard3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/deck"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/gameP2Img"
+        app:layout_constraintTop_toBottomOf="@+id/gameP3"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <ImageView
+        android:id="@+id/moveCardFromDiscard4"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/deck"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <ImageView
+        android:id="@+id/moveCardFromDiscard5"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/deck"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/gameP5Img"
+        app:layout_constraintTop_toBottomOf="@+id/gameP4"
         app:layout_constraintStart_toStartOf="parent" />
 
     <!--Loading animation-->

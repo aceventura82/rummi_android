@@ -92,7 +92,6 @@ class JoinGameFragment: Fragment() {
     }
 
     private fun setListener(ids:List<String>, names:List<String>, extensions:List<String>, posN:Int){
-        setSeat(ids, names, extensions, posN)
         if( names[posN] != "")
             MyTools().toast(requireContext(), getString(R.string.not_available ,names[posN]))
         else{

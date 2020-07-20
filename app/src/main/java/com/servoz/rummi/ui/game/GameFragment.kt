@@ -30,6 +30,7 @@ import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.request.RequestOptions
+import com.servoz.rummi.MainActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -54,6 +55,7 @@ import java.util.*
 
 /*
 * ROAD MAP:
+turn time
 * */
 
 val Int.dp: Int
@@ -92,6 +94,7 @@ class GameFragment: Fragment() {
     private var lastUpd:Long = 0
     private lateinit var audioRecObj:AudioRecord
     private var currentCards=arrayListOf<String>()
+    private var currentUser=-1
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -404,7 +407,7 @@ class GameFragment: Fragment() {
             if (gameData["fullDraw"].toString()[Integer.parseInt(set)-1]=='1')
                 text_game_set_number.append(" **")
             // get User position from players array
-            val currentUser=Integer.parseInt(players[Integer.parseInt(gameData["currentPlayerPos"].toString())])
+            currentUser=Integer.parseInt(players[Integer.parseInt(gameData["currentPlayerPos"].toString())])
             when{
                 //is started?
                 gameData["started"].toString()== "0"->{
@@ -494,45 +497,25 @@ class GameFragment: Fragment() {
                 return
             GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[0]}${playersExt[0]}")
                     .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP1Img)
-            // show player icons & draws
             bubble_p1.setBackgroundResource(R.drawable.bubble)
-            if(playersNames[1]!=""){
-                gameP2.isVisible=true
-                gameP2Img.isVisible=true
-                bubble_p2.setBackgroundResource(R.drawable.bubble)
-                gameP2Img.setOnClickListener{addPlayerClickListener(gameP2,players[1], cardsCount[1])}
-                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[1]}${playersExt[1]}")
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP2Img)
+            // show player icons & draws
+            val pics = arrayListOf(gameP2,gameP3,gameP4,gameP5)
+            val images = arrayListOf(gameP2Img,gameP3Img,gameP4Img,gameP5Img)
+            val bubbles = arrayListOf(bubble_p2,bubble_p3,bubble_p4,bubble_p5)
+            val draws = arrayListOf(draw2,draw3,draw4,draw5)
+            for (i in 0..3){
+                if(playersNames[i+1]!=""){
+                    pics[i].isVisible=true
+                    images[i].isVisible=true
+                    bubbles[i].setBackgroundResource(R.drawable.bubble)
+                    images[i].setOnLongClickListener{addPlayerClickListener(pics[i],players[i+1], cardsCount[i+1],playersNames[i+1])}
+                    GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[i+1]}${playersExt[i+1]}")
+                        .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(images[i])
+                }
+                //hide unused draws
+                if(playersNames[i+1]=="")draws[i].visibility=GONE
             }
-            if(playersNames[2]!=""){
-                gameP3.isVisible=true
-                gameP3Img.isVisible=true
-                bubble_p3.setBackgroundResource(R.drawable.bubble)
-                gameP3Img.setOnClickListener{addPlayerClickListener(gameP3,players[2], cardsCount[2])}
-                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[2]}${playersExt[2]}")
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP3Img)
-            }
-            if(playersNames[3]!=""){
-                gameP4Img.isVisible=true
-                gameP4.isVisible=true
-                bubble_p4.setBackgroundResource(R.drawable.bubble)
-                gameP4Img.setOnClickListener{addPlayerClickListener(gameP4,players[3], cardsCount[3])}
-                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[3]}${playersExt[3]}")
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP4Img)
-            }
-            if(playersNames[4]!=""){
-                gameP5.isVisible=true
-                gameP5Img.isVisible=true
-                bubble_p5.setBackgroundResource(R.drawable.bubble)
-                gameP5Img.setOnClickListener{addPlayerClickListener(gameP5,players[4], cardsCount[4])}
-                GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[4]}${playersExt[4]}")
-                    .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(gameP5Img)
-            }
-            //hide unused draws
-            if(playersNames[1]=="")draw2.visibility=GONE
-            if(playersNames[2]=="")draw3.visibility=GONE
-            if(playersNames[3]=="")draw4.visibility=GONE
-            if(playersNames[4]=="")draw5.visibility=GONE
+            gameP1Img.setOnClickListener { addPlayerSettingsClickListener()}
             //show needed discards
             if(playersNames[1]!="" && (players[2]!="" || players[3]!="" || players[4]!=""))
                 discard3.visibility=VISIBLE
@@ -545,12 +528,11 @@ class GameFragment: Fragment() {
     }
         private var muteAudiosIds= arrayListOf<String>()
         private var muteMsgIds= arrayListOf<String>()
-        private fun addPlayerClickListener(view: View, userClickId:String, cards:String){
+        private fun addPlayerClickListener(view: View, userClickId:String, cards:String, name:String):Boolean{
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.user)
             val userPos=muteAudiosIds.indexOf(userClickId)
-            popup.menu.findItem(R.id.title_menu).title=playersNames[0]
-            popup.menu.findItem(R.id.cards_menu).title=getString(R.string.cards, cards)
+            popup.menu.findItem(R.id.title_menu).title=getString(R.string.player_cards,name,cards)
             if(userPos==-1)
                 popup.menu.findItem(R.id.mute_audios_menu).title = "${getString(R.string.audios)} ${getString(R.string.on)}"
             else
@@ -566,6 +548,80 @@ class GameFragment: Fragment() {
                 when (item!!.itemId) {
                     R.id.mute_audios_menu -> muteUser(userClickId, userPos)
                     R.id.mute_messages_menu -> muteUser(userClickId, userMsgPos, true)
+                }
+                true
+            }
+            return true
+        }
+        //player in game settings
+        private fun addPlayerSettingsClickListener(){
+            val popup = PopupMenu(requireContext(), gameP1Img)
+            popup.inflate(R.menu.settings)
+            //set initial values
+            if(prefs!!.getString("LANDSCAPE", "ON") =="OFF")
+                popup.menu.findItem(R.id.settings_landscape_menu_game).title="${getString(R.string.orientation)}: ${getString(R.string.portrait)}"
+            else
+                popup.menu.findItem(R.id.settings_landscape_menu_game).title="${getString(R.string.orientation)}: ${getString(R.string.landscape)}"
+            if(prefs!!.getString("FULLSCREEN", "ON") =="OFF")
+                popup.menu.findItem(R.id.settings_full_screen_menu_game).title="${getString(R.string.full_screen)}: ${getString(R.string.off)}"
+            else
+                popup.menu.findItem(R.id.settings_full_screen_menu_game).title="${getString(R.string.full_screen)}: ${getString(R.string.on)}"
+            if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF")
+                popup.menu.findItem(R.id.settings_mute_audios_menu_game).title="${getString(R.string.audios)}: ${getString(R.string.off)}"
+            else
+                popup.menu.findItem(R.id.settings_mute_audios_menu_game).title="${getString(R.string.audios)}: ${getString(R.string.on)}"
+            if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF")
+                popup.menu.findItem(R.id.settings_mute_notifications_menu_game).title="${getString(R.string.notifications)}: ${getString(R.string.off)}"
+            else
+                popup.menu.findItem(R.id.settings_mute_notifications_menu_game).title="${getString(R.string.notifications)}: ${getString(R.string.on)}"
+            popup.show()
+            popup.setOnMenuItemClickListener{ item: MenuItem? ->
+                when (item!!.itemId) {
+                    R.id.settings_full_screen_menu_game -> {
+                        val current = if(prefs!!.getString("FULLSCREEN", "ON") =="OFF") "ON" else "OFF"
+                        prefs!!.edit().putString("FULLSCREEN", current).apply()
+                        if(current == "OFF")
+                            popup.menu.findItem(R.id.settings_full_screen_menu_game).title="${getString(R.string.full_screen)}: ${getString(R.string.off)}"
+                        else
+                            popup.menu.findItem(R.id.settings_full_screen_menu_game).title="${getString(R.string.full_screen)}: ${getString(R.string.on)}"
+                        requireActivity().recreate()
+                    }
+                    R.id.settings_landscape_menu_game -> {
+                        val current = if(prefs!!.getString("LANDSCAPE", "ON") =="OFF") "ON" else "OFF"
+                        prefs!!.edit().putString("LANDSCAPE", current).apply()
+                        if(current =="OFF")
+                            popup.menu.findItem(R.id.settings_landscape_menu_game).title="${getString(R.string.orientation)}: ${getString(R.string.portrait)}"
+                        else
+                            popup.menu.findItem(R.id.settings_landscape_menu_game).title="${getString(R.string.orientation)}: ${getString(R.string.landscape)}"
+                        val intent = Intent(requireContext(), MainActivity::class.java)
+                        popup.dismiss()
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.putExtra("GAME", gameId)
+                        requireActivity().finish()
+                        startActivity(intent)
+                    }
+                    R.id.settings_mute_audios_menu_game -> {
+                        val current = if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF") "ON" else "OFF"
+                        prefs!!.edit().putString("MUTE_AUDIOS", current).apply()
+                        if(current == "OFF")
+                            popup.menu.findItem(R.id.settings_mute_audios_menu_game).title="${getString(R.string.audios)}: ${getString(R.string.off)}"
+                        else
+                            popup.menu.findItem(R.id.settings_mute_audios_menu_game).title="${getString(R.string.audios)}: ${getString(R.string.on)}"
+                    }
+                    R.id.settings_mute_notifications_menu_game -> {
+                        val current = if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF") "ON" else "OFF"
+                        prefs!!.edit().putString("MUTE_NOTIFICATIONS", current).apply()
+                        if(current == "OFF")
+                            popup.menu.findItem(R.id.settings_mute_notifications_menu_game).title="${getString(R.string.notifications)}: ${getString(R.string.off)}"
+                        else
+                            popup.menu.findItem(R.id.settings_mute_notifications_menu_game).title="${getString(R.string.notifications)}: ${getString(R.string.on)}"
+                        val intent = Intent(requireContext(), MainActivity::class.java)
+                        popup.dismiss()
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.putExtra("GAME", gameId)
+                        requireActivity().finish()
+                        startActivity(intent)
+                    }
                 }
                 true
             }
@@ -1023,16 +1079,16 @@ class GameFragment: Fragment() {
             try{
                 val games=drawn.split("|")
                 val numCards=drawn.replace("|", "").trim(',').split(',').count()
-                var cardW=(draw.width).div(numCards+(if(games.count()==2)8 else 13))-5
-                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && playerId!=userId.toString())
+                var cardW=(draw.width).div(numCards+1+(games.count()*5))-5
+                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && draw!=draw1)
                     cardW*=2
                 //loop each game
                 var p=0
                 var space=0
                 var posH = 0
                 for((c,game) in games.withIndex()){
-                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && playerId!=userId.toString()) {
-                        posH = draw.height.div(3) * c
+                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && draw!=draw1) {
+                        posH = draw.height.div(4) * c
                         p=0
                         space=0
                     }
@@ -1107,7 +1163,7 @@ class GameFragment: Fragment() {
                 //check if card to move is next position, move before
                 if(pos+1==cardPos) {
                     val auxCard= cardList[cardPos]
-                    cardList.remove(auxCard)
+                    try{cardList.remove(auxCard)}catch (ex:Exception){}
                     cardList.add(pos,auxCard)
                     cards=cardList
                 }else
@@ -1284,9 +1340,9 @@ class GameFragment: Fragment() {
     private fun moveCardFromDiscard(drawCard:String){
         try{
             sendFlow(4, drawCard)
-            moveCardFromDiscard.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
-            dragCard(moveCardFromDiscard,discard1,moveCardPreviewHand){
-                moveCardFromDiscard.isVisible=false
+            moveCardFromDiscard1.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+            dragCard(moveCardFromDiscard1,discard1,moveCardPreviewHand){
+                moveCardFromDiscard1.isVisible=false
                 moveCardPreviewHand.isVisible=true
                 moveCardPreviewHand.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
                 doAsync {
@@ -1297,6 +1353,85 @@ class GameFragment: Fragment() {
                     }
                 }
             }
+        }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
+    }
+    //call dragCard from discardX to player img
+    private fun moveCardFromUsersDiscard(drawCard:String, curUser:Int, type:Int=0){
+        var myPosAux=0
+        for (i in 0..4)
+            if(players[i]==userId.toString()){
+                myPosAux=i
+                break
+            }
+        val playerAux =reOrderArray(players as ArrayList<String>, myPosAux)
+        val i = playerAux.indexOf(curUser.toString())
+        var from:ImageView
+        var to:ImageView
+        if(type==0) //pick from discards
+            when(i){
+                1->{
+                    to=gameP2ImgPreview
+                    from=moveCardFromDiscard2
+                }
+                2->{
+                    to=gameP3ImgPreview
+                    from=if (playerAux[1] !="")moveCardFromDiscard3 else moveCardFromDiscard2
+                }
+                3->{
+                    to=gameP4ImgPreview
+                    from=if (playerAux[2] !="")moveCardFromDiscard4 else if (playerAux[1] !="")moveCardFromDiscard3 else moveCardFromDiscard2
+                }
+                else->{
+                    to=gameP5ImgPreview
+                     from=if (playerAux[3] !="")moveCardFromDiscard5 else if (playerAux[2] !="")moveCardFromDiscard4 else if (playerAux[1] !="")moveCardFromDiscard3 else moveCardFromDiscard2
+                }
+            }
+        else //discard to discards
+            when(i){
+                1->{
+                    to=if (playerAux[2] !="")moveCardFromDiscard3 else if (playerAux[3] !="")moveCardFromDiscard4 else if (playerAux[4] !="")moveCardFromDiscard5 else moveCardFromDiscard1
+                    from=gameP2ImgPreview
+                }
+                2->{
+                    to=if (playerAux[3] !="")moveCardFromDiscard4 else if (playerAux[4] !="")moveCardFromDiscard5 else moveCardFromDiscard1
+                    from=gameP3ImgPreview
+                }
+                3->{
+                    to=if (playerAux[4] !="")moveCardFromDiscard5 else moveCardFromDiscard1
+                    from=gameP4ImgPreview
+                }
+                else->{
+                    to=moveCardFromDiscard1
+                     from=gameP5ImgPreview
+                }
+            }
+        if(type==2)
+            to=playAudio
+        else if(type==3){
+            to=from
+            from=moveCardFromDeck
+        }
+        try{
+            if(type==3) {
+                from.setImageResource(R.drawable.red_back)
+                to.setImageResource(R.drawable.red_back)
+            }else{
+                from.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+                to.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
+            }
+            dragCard(from,from,to){
+                from.isVisible=false
+                to.isVisible=true
+                doAsync {
+                    sleep(1000)
+                    uiThread {
+                        to.isVisible=false
+                        from.isVisible=false
+                        initialView()
+                    }
+                }
+            }
+
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
@@ -1445,8 +1580,8 @@ class GameFragment: Fragment() {
                             currentCards.removeAt(cardPos)
                             moveCardToDraw(view)
                             showMyCards(true)
-                        }else
-                            loadingGame.isVisible=false
+                        }
+                        loadingGame.isVisible=false
                         MyTools().toast(requireContext(), msg)
                     }
                 }
@@ -1827,12 +1962,18 @@ class GameFragment: Fragment() {
 
     //put preview listeners on discards
     private fun previewDiscardsListeners(posDiscard:Int, discard:RelativeLayout){
+        //long listener for user discards
         discard.setOnLongClickListener{
-            drawPreview.removeAllViews()
-            drawPreview.isVisible=true
-            val showCards=currentDiscards[posDiscard]
-            MyTools().toast(requireContext(),getString(R.string.touch_preview_close))
-            displayCardsInDraw(showCards, "", drawPreview, true)
+            //check if cards in discard
+            if(currentDiscards[posDiscard].count()==0){
+                MyTools().toast(requireContext(),getString(R.string.no_cards))
+            }else{
+                drawPreview.removeAllViews()
+                drawPreview.isVisible=true
+                val showCards=currentDiscards[posDiscard]
+                MyTools().toast(requireContext(),getString(R.string.touch_preview_close))
+                displayCardsInDraw(showCards, "", drawPreview, true)
+            }
             true
         }
     }
@@ -1879,6 +2020,8 @@ class GameFragment: Fragment() {
                 val userIdAudio = msg.split("::")[2]
                 if(userIdAudio != userId.toString())
                     audioRecObj.playAudio(userIdAudio, gameId)
+                showBubble(getString(R.string.speaking), userIdMsg)
+                return SpannableString("")
             }else{
                 if(muteMsgIds.indexOf(userIdMsg)!=-1) //user muted
                     return SpannableString("")
@@ -1887,17 +2030,12 @@ class GameFragment: Fragment() {
                     playNotification()
                     scrollTVDown()
                 }
-            }
-            if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::"){
-                if(userId.toString()!=userIdMsg)
-                    showBubble(getString(R.string.speaking), userIdMsg)
-            }else
                 showBubble(msg, userIdMsg)
+            }
         }
-        if(msg.split("::").count()==4 && msg.count() > 9 && msg.substring(0,9) == "::AUDIO::")
-            return SpannableString("")
+        //text msg
         return try{
-            val text=if(userIdMsg!="")decode(msg) else getFlowMsg(msg)
+            val text=if(userIdMsg!="")decode(msg) else getFlowMsg(msg, ini)
             val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val formatter = SimpleDateFormat("HH:mm:ss", Locale.ROOT)
             val user = if(userIdMsg!="")playersNames[players.indexOf(userIdMsg)] else ""
@@ -1979,18 +2117,35 @@ class GameFragment: Fragment() {
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
 
-    private fun getFlowMsg(msg:String):String{
+    private fun getFlowMsg(msg:String, ini: Boolean):String{
         try{
             val msgData=msg.split("||--||")
             if(msgData.count()!=3)
                 return msg
             return when(msgData[1]){
-                "1"->getString(R.string.start_game)
+                "1"-> getString(R.string.start_game)
                 "2"->"-------------------\n${getString(R.string.set)} ${msgData[2]}, ${msgData[0]}: ${getString(R.string.deal_cards)}"
-                "3"->"${msgData[0]}: ${getString(R.string.picked_card_stack)}"
-                "4"->"${msgData[0]}: ${getString(R.string.picked_card_discard)}:${getCardName(msgData[2])}"
-                "5"->"${msgData[0]}: ${getString(R.string.discarded_card)}:${getCardName(msgData[2])}"
-                "6"->"${msgData[0]}: ${getString(R.string.draw_over_card)}:${getCardName(msgData[2])}"
+                "3"->{
+                    if(!ini && currentUser!=userId)
+                        moveCardFromUsersDiscard("", currentUser, 3)
+                    "${msgData[0]}: ${getString(R.string.picked_card_stack)}"
+                }
+                "4"->{
+                    //animate card
+                    if(!ini && currentUser!=userId)
+                        moveCardFromUsersDiscard(msgData[2], currentUser)
+                    "${msgData[0]}: ${getString(R.string.picked_card_discard)}:${getCardName(msgData[2])}"
+                }
+                "5"->{
+                    if(!ini && currentUser!=userId)
+                        moveCardFromUsersDiscard(msgData[2], currentUser, 1)
+                    "${msgData[0]}: ${getString(R.string.discarded_card)}:${getCardName(msgData[2])}"
+                }
+                "6"->{
+                    if(!ini && currentUser!=userId)
+                        moveCardFromUsersDiscard(msgData[2], currentUser, 2 )
+                    "${msgData[0]}: ${getString(R.string.draw_over_card)}:${getCardName(msgData[2])}"
+                }
                 "7"->"${msgData[0]}: ${getString(R.string.drawn)}"
                 "8"->"${msgData[0]}: ${getString(R.string.won_set)}"
                 "9"->"${msgData[0]}: ${getString(R.string.won_game)}"

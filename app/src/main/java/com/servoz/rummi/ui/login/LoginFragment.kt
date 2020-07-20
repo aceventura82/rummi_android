@@ -33,7 +33,7 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         login_next_button.setOnClickListener {
-            login(editText_email.text.toString(), editText_password.text.toString())
+            login(editText_email.text.toString().trim(), editText_password.text.toString())
         }
         login_cancel_button.setOnClickListener {
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())

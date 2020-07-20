@@ -249,4 +249,7 @@
     <string name="won">Ganados</string>
     <string name="lost">Perdidos</string>
     <string name="other_winner">Otro Ganador</string>
+    <string name="downloading">Descargando</string>
+    <string name="installing">Instalando</string>
+    <string name="no_cards">No hay Cartas</string>
 </resources>

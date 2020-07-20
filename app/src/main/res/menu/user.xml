@@ -2,14 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:id="@+id/title_menu"
-        android:enabled="false"
         android:orderInCategory="101"
         android:title="@string/player" />
-    <item
-        android:id="@+id/cards_menu"
-        android:orderInCategory="102"
-        android:enabled="false"
-        android:title="@string/cards" />
     <item
         android:id="@+id/mute_audios_menu"
         android:orderInCategory="104"

@@ -1,19 +1,30 @@
 package com.servoz.rummi.ui.home
 
 
-import android.content.Intent
-import android.content.SharedPreferences
+import android.Manifest
+import android.app.DownloadManager
+import android.content.*
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.*
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.signature.ObjectKey
+import com.servoz.rummi.BuildConfig
 import com.servoz.rummi.MainActivity
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
@@ -22,6 +33,8 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.File
+
 import kotlin.collections.ArrayList
 
 
@@ -143,4 +156,5 @@ class HomeFragment : Fragment() {
             }
         }
     }
+
 }

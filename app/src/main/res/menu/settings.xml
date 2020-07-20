@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/settings_full_screen_menu_game"
+        android:orderInCategory="102"
+        android:title="@string/full_screen" />
+    <item
+        android:id="@+id/settings_landscape_menu_game"
+        android:orderInCategory="103"
+        android:title="@string/orientation" />
+    <item
+        android:id="@+id/settings_mute_audios_menu_game"
+        android:orderInCategory="104"
+        android:title="@string/audios" />
+    <item
+        android:id="@+id/settings_mute_notifications_menu_game"
+        android:orderInCategory="105"
+        android:title="@string/notifications" />
+</menu>
