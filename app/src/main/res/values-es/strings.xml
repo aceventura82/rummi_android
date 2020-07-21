@@ -252,4 +252,13 @@
     <string name="downloading">Descargando</string>
     <string name="installing">Instalando</string>
     <string name="no_cards">No hay Cartas</string>
+    <string name="version_info">
+        Canbios generales:\n\n
+        * Agregar numero de version en pnatalla inicial\n
+        \nIn Cambios en Juego:\n\n
+        * Clic en avatar del usuario para silenciar/activar mensajes o audios\n
+        * Clic in avatar propio para acceder al menu de opciones en el juego\n
+        * Arreglo en notificaciones de animacion en movimiento de jugadores\n
+        * Otros pequeños arreglos\n
+    </string>
 </resources>

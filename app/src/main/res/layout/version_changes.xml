@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/transparent_borders"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/gameVersionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Version: 2.91"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:layout_marginBottom="30dp"
+            android:textSize="24sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/text_version_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:layout_margin="20dp"
+            android:text="@string/version_info"
+            android:textSize="20sp"/>
+
+    </LinearLayout>
+
+
+</ScrollView>
+

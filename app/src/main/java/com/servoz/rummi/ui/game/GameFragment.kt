@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
@@ -501,12 +502,14 @@ class GameFragment: Fragment() {
             // show player icons & draws
             val pics = arrayListOf(gameP2,gameP3,gameP4,gameP5)
             val images = arrayListOf(gameP2Img,gameP3Img,gameP4Img,gameP5Img)
+            val imagesPreview = arrayListOf(gameP2ImgPreview,gameP3ImgPreview,gameP4ImgPreview,gameP5ImgPreview)
             val bubbles = arrayListOf(bubble_p2,bubble_p3,bubble_p4,bubble_p5)
             val draws = arrayListOf(draw2,draw3,draw4,draw5)
             for (i in 0..3){
                 if(playersNames[i+1]!=""){
                     pics[i].isVisible=true
                     images[i].isVisible=true
+                    imagesPreview[i].isVisible=true
                     bubbles[i].setBackgroundResource(R.drawable.bubble)
                     images[i].setOnLongClickListener{addPlayerClickListener(pics[i],players[i+1], cardsCount[i+1],playersNames[i+1])}
                     GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[i+1]}${playersExt[i+1]}")
@@ -868,7 +871,7 @@ class GameFragment: Fragment() {
             if(gameData["current_stack"]=="" && Integer.parseInt(gameData["current_set"].toString())>1 && gameData["started"].toString()!="2")
                 setAux=Integer.parseInt(gameData["current_set"].toString())-1
             val myCards= gameSetData["${setAux}_$userId"]?.get(0)!!.trim(',').split(",").toMutableList() as ArrayList<String>
-            if(currentCards.sorted()!=myCards.sorted() || force){
+            if(currentCards.sorted()!=myCards.sorted() || force || cards.childCount!=currentCards.count()){
                 if(!force)
                     currentCards=myCards
                 try{
@@ -1048,8 +1051,8 @@ class GameFragment: Fragment() {
                 constraintSet.connect(
                     R.id.gameP1,
                     ConstraintSet.BOTTOM,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.BOTTOM,
+                    R.id.draw1,
+                    ConstraintSet.TOP,
                     0
                 )
             else
@@ -1071,6 +1074,7 @@ class GameFragment: Fragment() {
             gameP4Img.bringToFront()
             gameP5.bringToFront()
             gameP5Img.bringToFront()
+            cards.bringToFront()
 
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
@@ -1080,14 +1084,14 @@ class GameFragment: Fragment() {
                 val games=drawn.split("|")
                 val numCards=drawn.replace("|", "").trim(',').split(',').count()
                 var cardW=(draw.width).div(numCards+1+(games.count()*5))-5
-                if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && draw!=draw1)
+                if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !preview && draw!=draw1)
                     cardW*=2
                 //loop each game
                 var p=0
                 var space=0
                 var posH = 0
                 for((c,game) in games.withIndex()){
-                    if(prefs!!.getString("LANDSCAPE","ON")=="OFF" && !preview && draw!=draw1) {
+                    if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !preview && draw!=draw1) {
                         posH = draw.height.div(4) * c
                         p=0
                         space=0
@@ -1367,6 +1371,7 @@ class GameFragment: Fragment() {
         if(myPosAux>0)
             playerAux =reOrderArray(playerAux as ArrayList<String>, myPosAux)
         val i = playerAux.indexOf(curUser.toString())
+        if(i==0) return
         var from:ImageView
         var to:ImageView
         if(type==0) //pick from discards
@@ -1383,10 +1388,11 @@ class GameFragment: Fragment() {
                     to=gameP4ImgPreview
                     from=if (playerAux[2] !="")moveCardFromDiscard4 else if (playerAux[1] !="")moveCardFromDiscard3 else moveCardFromDiscard2
                 }
-                else->{
+                4->{
                     to=gameP5ImgPreview
                      from=if (playerAux[3] !="")moveCardFromDiscard5 else if (playerAux[2] !="")moveCardFromDiscard4 else if (playerAux[1] !="")moveCardFromDiscard3 else moveCardFromDiscard2
                 }
+                else->return
             }
         else //discard to discards
             when(i){
@@ -1402,10 +1408,11 @@ class GameFragment: Fragment() {
                     to=if (playerAux[4] !="")moveCardFromDiscard5 else moveCardFromDiscard1
                     from=gameP4ImgPreview
                 }
-                else->{
+                4->{
                     to=moveCardFromDiscard1
-                     from=gameP5ImgPreview
+                    from=gameP5ImgPreview
                 }
+                else->return
             }
         if(type==2)
             to=playAudio
@@ -1421,11 +1428,12 @@ class GameFragment: Fragment() {
                 from.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
                 to.setImageResource(resources.getIdentifier("d"+drawCard.toLowerCase(Locale.ROOT),"drawable",requireContext().packageName))
             }
+
+            to.isVisible=false
             dragCard(from,from,to){
-                from.isVisible=false
                 to.isVisible=true
                 doAsync {
-                    sleep(1000)
+                    sleep(2000)
                     uiThread {
                         to.isVisible=false
                         from.isVisible=false
@@ -1575,13 +1583,13 @@ class GameFragment: Fragment() {
                         var msg = result
                         if (res.count() == 2) {
                             msg = res[1]
-                            doRequest=0
-                            doRequestBg=0
-                            remoteData(true) //get new data
                             cards.removeViewAt(cardPos)
                             currentCards.removeAt(cardPos)
                             moveCardToDraw(view)
                             showMyCards(true)
+                            doRequest=0
+                            doRequestBg=0
+                            remoteData(true) //get new data
                         }
                         loadingGame.isVisible=false
                         MyTools().toast(requireContext(), msg)
@@ -1734,9 +1742,6 @@ class GameFragment: Fragment() {
                         doRequest++
                         FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
                             addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1")) { result ->
-                            doRequest=0
-                            doRequestBg=0
-                            remoteData(true) //get new data
                             val res = result.split("|")
                             var msg=result
                             if(res.count()==2){
@@ -1749,6 +1754,9 @@ class GameFragment: Fragment() {
                                     currentCards.add(inCard)
                                 moveCardFromStack(res[1])
                                 showMyCards(true)
+                                doRequest=0
+                                doRequestBg=0
+                                remoteData(true) //get new data
                             }
                             MyTools().toast(requireContext(),msg)
                         }
@@ -1781,18 +1789,20 @@ class GameFragment: Fragment() {
                         doRequest++
                        FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1")) { result ->
-                           doRequest=0
-                           doRequestBg=0
-                           remoteData(true) //get new data
                             val res = result.split("|")
                            var msg=result
                            if(res.count()==2){
                                msg=res[1]
                                inCard=res[1]
-                               currentCards.add(inCard)
-                               remoteData(true)
+                               if(pickStart=="1")
+                                   currentCards.add(0, inCard)
+                               else
+                                   currentCards.add(inCard)
                                moveCardFromDiscard(res[1])
                                showMyCards(true)
+                               doRequest=0
+                               doRequestBg=0
+                               remoteData(true) //get new data
                             }
                            MyTools().toast(requireContext(),msg)
                         }
@@ -1821,13 +1831,6 @@ class GameFragment: Fragment() {
                     loadingGame.isVisible=false
                 }
                 else->{
-                    //check if discard card is twice, then remove the position selected and save to fixDiscardDouble
-                    /*var fixCardTwice=""
-                    if(gameSetData[keySetUser]!![0].split(outCard).count()==3){
-                        for ((c,cc) in gameSetData[keySetUser]!![0].split(",").withIndex())
-                            if(c!=cardPos && cc!="")
-                                fixCardTwice+="$cc,"
-                    }*/
                     //discard card
                     if(doRequest==0) {
                         doRequest++
@@ -1843,18 +1846,11 @@ class GameFragment: Fragment() {
                                 cards.removeViewAt(cardPos)
                                 currentCards.removeAt(cardPos)
                                 showMyCards(true)
-                                //reorder cards when discard is twice
-                                /*if(fixCardTwice!="")
-                                    currentCards=arrayListOf()
-                                    doAsync {
-                                        FetchData(arrayListOf(),this@GameFragment).updateData("cardsOrder", "",cache = false,
-                                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "cards" to fixCardTwice))
-                                    }*/
+                                doRequest=0
+                                doRequestBg=0
+                                remoteData(true) //get new data
                             }else
                                 loadingGame.isVisible=false
-                            doRequest=0
-                            doRequestBg=0
-                            remoteData(true) //get new data
                             MyTools().toast(requireContext(),msg)
                         }
                     }
@@ -1919,8 +1915,6 @@ class GameFragment: Fragment() {
                 FetchData(arrayListOf(),this).updateData("draw", "",cache = false,
                     addParams = hashMapOf("gameId" to gameData["id"].toString(), "drawCards" to drawCards.trim('|'))) {
                         result ->
-                    doRequest=0
-                    remoteData(true) //get new data
                     val res = result.split("|")
                     var msg=result
                     if(res.count()==2){
@@ -1938,6 +1932,9 @@ class GameFragment: Fragment() {
                         addGameDrawButton.text=getString(R.string.add_draw_game)
                         initialView()
                         sendFlow(7)
+                        doRequest=0
+                        doRequestBg=0
+                        remoteData(true) //get new data
                     }
                     MyTools().toast(requireContext(),msg)
                     loadingGame.isVisible=false
@@ -2129,23 +2126,23 @@ class GameFragment: Fragment() {
                 "1"-> getString(R.string.start_game)
                 "2"->"-------------------\n${getString(R.string.set)} ${msgData[2]}, ${msgData[0]}: ${getString(R.string.deal_cards)}"
                 "3"->{
-                    if(!ini && currentUser!=userId)
+                    if(!ini)
                         moveCardFromUsersDiscard("", currentUser, 3)
                     "${msgData[0]}: ${getString(R.string.picked_card_stack)}"
                 }
                 "4"->{
                     //animate card
-                    if(!ini && currentUser!=userId)
+                    if(!ini)
                         moveCardFromUsersDiscard(msgData[2], currentUser)
                     "${msgData[0]}: ${getString(R.string.picked_card_discard)}:${getCardName(msgData[2])}"
                 }
                 "5"->{
-                    if(!ini && currentUser!=userId)
+                    if(!ini)
                         moveCardFromUsersDiscard(msgData[2], currentUser, 1)
                     "${msgData[0]}: ${getString(R.string.discarded_card)}:${getCardName(msgData[2])}"
                 }
                 "6"->{
-                    if(!ini && currentUser!=userId)
+                    if(!ini)
                         moveCardFromUsersDiscard(msgData[2], currentUser, 2 )
                     "${msgData[0]}: ${getString(R.string.draw_over_card)}:${getCardName(msgData[2])}"
                 }

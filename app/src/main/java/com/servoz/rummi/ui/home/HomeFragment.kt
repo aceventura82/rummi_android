@@ -1,24 +1,17 @@
 package com.servoz.rummi.ui.home
 
 
-import android.Manifest
-import android.app.DownloadManager
 import android.content.*
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.*
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
+import android.widget.LinearLayout
+import android.widget.PopupWindow
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment
@@ -30,10 +23,11 @@ import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.version_changes.view.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.File
 
 import kotlin.collections.ArrayList
 
@@ -60,6 +54,13 @@ class HomeFragment : Fragment() {
         hideShowMenuItems(login)
         listeners()
         checkUpdate()
+        text_version.text= BuildConfig.VERSION_NAME
+        if(prefs!!.getString("VERSION_INFO", "")!=BuildConfig.VERSION_NAME){
+            doAsync {
+                Thread.sleep(2000)
+                uiThread { displayVersionInfo() }
+            }
+        }
     }
 
     //put the user data in the left drawer
@@ -155,6 +156,28 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun displayVersionInfo(){
+        val windowView=LayoutInflater.from(context).inflate(R.layout.version_changes, linearLayout, false)
+        val gameWindow:PopupWindow
+        if(Build.VERSION.SDK_INT<=22){
+            gameWindow= PopupWindow(windowView,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            gameWindow.isOutsideTouchable=false
+            gameWindow.elevation = 5.0f
+        }else
+            gameWindow= PopupWindow(requireContext())
+        gameWindow.contentView=windowView
+        gameWindow.isFocusable=true
+        gameWindow.showAtLocation(linearLayout, Gravity.CENTER, 0 ,0)
+        windowView.gameVersionLayout.setOnClickListener{
+            gameWindow.dismiss()
+        }
+        windowView.text_version_info.text=getString(R.string.version_info)
+        prefs!!.edit().putString("VERSION_INFO", BuildConfig.VERSION_NAME).apply()
     }
 
 }

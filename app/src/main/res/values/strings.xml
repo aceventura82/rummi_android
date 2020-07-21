@@ -249,4 +249,13 @@
     <string name="downloading">Downloading</string>
     <string name="installing">Installing</string>
     <string name="no_cards">No Cards</string>
+    <string name="version_info">
+        General Changes:\n\n
+        * Add version number in home screen\n
+        \nIn Game Changes:\n\n
+        * Click on Players avatar to mute/un-mute messages or audios\n
+        * Click on own avatar to access settings in game menu\n
+        * Fix animations of others players moves\n
+        * Other Minor fixes\n
+    </string>
 </resources>
