@@ -32,77 +32,80 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        login_next_button.setOnClickListener {
-            login(editText_email.text.toString().trim(), editText_password.text.toString())
-        }
+        login_next_button.setOnClickListener { login() }
         login_cancel_button.setOnClickListener {
             NavHostFragment.findNavController(nav_host_fragment).navigate(R.id.action_global_nav_my_games, Bundle())
         }
-        login_cancel_reset.setOnClickListener {
-            login_reset_button.text=getString(R.string.forgot_password)
-            editText_email_rL.isVisible=false
-            editText_email_r.setText("")
-            editText_code.setText("")
-            editText_codeL.isVisible=false
-            editText_password1L.isVisible=false
-            editText_password1.setText("")
-            editText_password2.setText("")
-            editText_password2L.isVisible=false
-            login_cancel_reset.isVisible=false
-        }
-        login_reset_button.setOnClickListener {
-            when(login_reset_button.text){
-                getString(R.string.forgot_password)->{
-                    login_reset_button.text=getString(R.string.send_code)
-                    editText_email_rL.isVisible=true
-                    login_cancel_reset.isVisible=true
-                }
-                getString(R.string.send_code)->{
-                    loadingLogin.isVisible=true
-                    FetchData(arrayListOf(),this).updateData("sendEmailPass", "",cache = false, addParams = hashMapOf("usernameUser" to editText_email_r.text.toString())) {
-                        result ->
-                        var msg =result
-                        if(result.split("|").count() == 2){
-                            editText_email_rL.isVisible=false
-                            login_reset_button.text=getString(R.string.reset_password)
-                            editText_codeL.isVisible=true
-                            editText_password1L.isVisible=true
-                            editText_password2L.isVisible=true
-                            msg = result.split("|")[1]
-                        }
-                        MyTools().toast(requireContext(),msg)
-                        loadingLogin.isVisible=false
+        login_cancel_reset.setOnClickListener {cancelReset()}
+        login_reset_button.setOnClickListener { resetPass() }
+    }
+
+    private fun cancelReset(){
+        login_reset_button.text=getString(R.string.forgot_password)
+        editText_email_rL.isVisible=false
+        editText_email_r.setText("")
+        editText_code.setText("")
+        editText_codeL.isVisible=false
+        editText_password1L.isVisible=false
+        editText_password1.setText("")
+        editText_password2.setText("")
+        editText_password2L.isVisible=false
+        login_cancel_reset.isVisible=false
+    }
+
+    private fun resetPass(){
+        when(login_reset_button.text){
+            getString(R.string.forgot_password)->{
+                login_reset_button.text=getString(R.string.send_code)
+                editText_email_rL.isVisible=true
+                login_cancel_reset.isVisible=true
+            }
+            getString(R.string.send_code)->{
+                loadingLogin.isVisible=true
+                FetchData(arrayListOf(),this).updateData("sendEmailPass", "",cache = false, addParams = hashMapOf("usernameUser" to editText_email_r.text.toString().trim())) {
+                    result ->
+                    var msg =result
+                    if(result.split("|").count() == 2){
+                        editText_email_rL.isVisible=false
+                        login_reset_button.text=getString(R.string.reset_password)
+                        editText_codeL.isVisible=true
+                        editText_password1L.isVisible=true
+                        editText_password2L.isVisible=true
+                        msg = result.split("|")[1]
                     }
+                    MyTools().toast(requireContext(),msg)
+                    loadingLogin.isVisible=false
                 }
-                getString(R.string.reset_password)->{
-                    loadingLogin.isVisible=true
-                    FetchData(arrayListOf(),this).updateData("updPasswordCode", "",cache = false,
-                        addParams = hashMapOf("usernameUser" to editText_email_r.text.toString(), "new_password1" to editText_password1.text.toString(),
-                        "new_password2" to editText_password2.text.toString(), "code" to editText_code.text.toString())) {
-                        result ->
-                        var msg =result
-                        if(result.split("|").count() == 2){
-                            login_reset_button.text=getString(R.string.forgot_password)
-                            editText_email_rL.isVisible=false
-                            editText_codeL.isVisible=false
-                            editText_password1L.isVisible=false
-                            editText_password2L.isVisible=false
-                            login_cancel_reset.isVisible=true
-                            msg = result.split("|")[1]
-                        }
-                        MyTools().toast(requireContext(),msg)
-                        loadingLogin.isVisible=false
+            }
+            getString(R.string.reset_password)->{
+                loadingLogin.isVisible=true
+                FetchData(arrayListOf(),this).updateData("updPasswordCode", "",cache = false,
+                    addParams = hashMapOf("usernameUser" to editText_email_r.text.toString().trim(), "new_password1" to editText_password1.text.toString(),
+                    "new_password2" to editText_password2.text.toString(), "code" to editText_code.text.toString())) {
+                    result ->
+                    var msg =result
+                    if(result.split("|").count() == 2){
+                        login_reset_button.text=getString(R.string.forgot_password)
+                        editText_email_rL.isVisible=false
+                        editText_codeL.isVisible=false
+                        editText_password1L.isVisible=false
+                        editText_password2L.isVisible=false
+                        login_cancel_reset.isVisible=true
+                        msg = result.split("|")[1]
                     }
+                    MyTools().toast(requireContext(),msg)
+                    loadingLogin.isVisible=false
                 }
             }
         }
     }
 
-    private fun login(user:String, pass:String){
+    private fun login(){
+        val user= editText_email.text.toString().trim()
         loadingLogin.isVisible=true
         val prefs: SharedPreferences = requireContext().getSharedPreferences(PREF_FILE, 0)
         //try to login
-        FetchData(arrayListOf(),this).updateData("login", "",cache = false, addParams = hashMapOf("usernameUser" to user, "password" to pass)){
+        FetchData(arrayListOf(),this).updateData("login", "",cache = false, addParams = hashMapOf("usernameUser" to user, "password" to editText_password.text.toString())){
             result ->
             //if result start with OK|, login was successful
             if(result.length>5 && result.substring(0,3)=="OK|"){

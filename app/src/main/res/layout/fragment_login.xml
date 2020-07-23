@@ -24,10 +24,10 @@
                 android:orientation="vertical">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
+                    android:textColorHint="@color/gray"
                     android:hint="@string/email">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -35,17 +35,16 @@
                         android:layout_width="match_parent"
                         android:background="@color/white"
                         android:textColor="@color/black"
-                        android:textColorHint="@color/gray"
                         android:layout_height="wrap_content"
                         android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:hint="@string/password"
+                    android:textColorHint="@color/gray"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -96,12 +95,12 @@
                 android:orientation="vertical">
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:visibility="gone"
                     android:id="@+id/editText_email_rL"
+                    android:textColorHint="@color/gray"
                     android:hint="@string/email">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -109,17 +108,16 @@
                         android:layout_width="match_parent"
                         android:background="@color/white"
                         android:textColor="@color/black"
-                        android:textColorHint="@color/gray"
                         android:layout_height="wrap_content"
                         android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:visibility="gone"
+                    android:textColorHint="@color/gray"
                     android:id="@+id/editText_codeL"
                     android:hint="@string/code">
 
@@ -128,19 +126,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/white"
-                        android:textColorHint="@color/gray"
                         android:textColor="@color/black"
                         android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:visibility="gone"
                     android:id="@+id/editText_password1L"
                     android:hint="@string/password"
+                    android:textColorHint="@color/gray"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -148,19 +145,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@color/white"
-                        android:textColorHint="@color/gray"
                         android:textColor="@color/black"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="4dp"
                     android:visibility="gone"
                     android:id="@+id/editText_password2L"
-                    android:hint="@string/password"
+                    android:hint="@string/repeat_password"
+                    android:textColorHint="@color/gray"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText

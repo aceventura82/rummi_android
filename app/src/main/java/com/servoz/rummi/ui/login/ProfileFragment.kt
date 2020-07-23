@@ -25,6 +25,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.servoz.rummi.R
 import com.servoz.rummi.tools.*
 import com.tiper.MaterialSpinner
+import kotlinx.android.synthetic.main.change_pass.*
 import kotlinx.android.synthetic.main.change_pass.view.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_profile.*
@@ -83,19 +84,19 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        /*requireActivity().toolbar.buttonChangePass.setOnClickListener {
+        buttonChangePass.setOnClickListener {
             val passWindow=PopupWindow(context)
             val windowView=LayoutInflater.from(context).inflate(R.layout.change_pass, layoutProfile, false)
             passWindow.contentView=windowView
             passWindow.isFocusable=true
-            passWindow.showAsDropDown(requireActivity().toolbar.buttonChangePass)
+            passWindow.showAsDropDown(buttonChangePass)
             windowView.password_cancel_button.setOnClickListener{
                 passWindow.dismiss()
             }
             windowView.password_change_button.setOnClickListener {
                 changePass(windowView,passWindow)
             }
-        }*/
+        }
     }
 
     // get cached data and display it

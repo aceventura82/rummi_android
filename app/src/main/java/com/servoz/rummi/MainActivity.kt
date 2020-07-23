@@ -9,11 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
-import androidx.media.session.MediaButtonReceiver.handleIntent
 import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.tools.*
-import com.servoz.rummi.ui.home.HomeFragmentDirections
-import com.servoz.rummi.ui.home.MyGamesFragmentDirections
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.doAsync
 

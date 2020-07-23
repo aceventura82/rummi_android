@@ -28,6 +28,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.Thread.sleep
 
 import kotlin.collections.ArrayList
 
@@ -55,11 +56,8 @@ class HomeFragment : Fragment() {
         listeners()
         checkUpdate()
         text_version.text= BuildConfig.VERSION_NAME
-        if(prefs!!.getString("VERSION_INFO", "")!=BuildConfig.VERSION_NAME){
-            doAsync {
-                Thread.sleep(2000)
-                uiThread { displayVersionInfo() }
-            }
+        text_version.setOnClickListener {
+            displayVersionInfo()
         }
     }
 
@@ -159,7 +157,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun displayVersionInfo(){
-        val windowView=LayoutInflater.from(context).inflate(R.layout.version_changes, linearLayout, false)
+        val windowView=LayoutInflater.from(
+            requireContext()).inflate(
+            R.layout.version_changes,
+            linearLayout,
+            false)
         val gameWindow:PopupWindow
         if(Build.VERSION.SDK_INT<=22){
             gameWindow= PopupWindow(windowView,
@@ -177,7 +179,6 @@ class HomeFragment : Fragment() {
             gameWindow.dismiss()
         }
         windowView.text_version_info.text=getString(R.string.version_info)
-        prefs!!.edit().putString("VERSION_INFO", BuildConfig.VERSION_NAME).apply()
     }
 
 }

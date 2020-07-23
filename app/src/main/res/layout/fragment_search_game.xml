@@ -24,19 +24,22 @@
             android:textColor="@color/white"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/editTextSearchCode"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text"
-            android:background="@color/white"
-            android:textColor="@color/black"
-            android:padding="20dp"
             android:layout_margin="20dp"
-            android:hint="@string/code"
             android:textColorHint="@color/gray"
-            android:autofillHints="@string/code" />
+            android:hint="@string/code">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextSearchCode"
+                android:layout_width="match_parent"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <TextView
             android:id="@+id/search_game_button"
