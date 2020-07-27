@@ -18,7 +18,7 @@ import java.io.File
 import java.lang.Thread.sleep
 import java.net.URL
 
-class AudioRecord(private var activity: FragmentActivity, private val buttonLauncherRecord: ImageView, private val buttonCancelRecord: ImageView){
+class AudioMessages(private var activity: FragmentActivity, private val buttonLauncherRecord: ImageView, private val buttonCancelRecord: ImageView){
     private var audioFilePath: String? = null
     fun prepareRec(userId:String,gameId:String){
         //check if device has mic
@@ -126,8 +126,8 @@ class AudioRecord(private var activity: FragmentActivity, private val buttonLaun
             requestObj.addFilePart("audio", File(audioFilePath!!), File(audioFilePath!!).name,  "audio/3gp")
             requestObj.upload(
                 object: Multipart.OnFileUploadedListener{
-                    override fun onFileUploadingSuccess(response: String){println(response)}
-                    override fun onFileUploadingFailed(responseCode: Int){println(responseCode)}
+                    override fun onFileUploadingSuccess(response: String){}
+                    override fun onFileUploadingFailed(responseCode: Int){}
                 }
             )
         }

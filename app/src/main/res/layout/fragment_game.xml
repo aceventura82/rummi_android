@@ -36,8 +36,7 @@
         android:background="@drawable/ic_account_box_white_80dp"
         android:contentDescription="@string/player"
         app:layout_constraintBottom_toTopOf="@id/gameP1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/gameP1" />
 
     <TextView
         android:id="@+id/bubble_p1"
@@ -65,7 +64,7 @@
         android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/discard2"
+        app:layout_constraintBottom_toTopOf="@+id/gameP2Img"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
@@ -73,7 +72,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/gameP2"
+        app:layout_constraintBottom_toTopOf="@+id/discard2"
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="@string/player" />
 
@@ -206,7 +205,7 @@
         android:background="@drawable/transparent_borders"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/discard1"
+        app:layout_constraintBottom_toTopOf="@+id/gameP5Img"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -215,7 +214,7 @@
         android:layout_height="60dp"
         android:visibility="gone"
         android:contentDescription="@string/player"
-        app:layout_constraintBottom_toTopOf="@+id/gameP5"
+        app:layout_constraintBottom_toTopOf="@+id/discard1"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
@@ -400,15 +399,6 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toStartOf="@+id/deck"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/text_game_last_upd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/circle"
-        android:translationZ="90dp"
-        app:layout_constraintStart_toEndOf="@+id/text_game_set_number"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
