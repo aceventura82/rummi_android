@@ -25,10 +25,8 @@ import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.version_changes.view.*
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Thread.sleep
 
 import kotlin.collections.ArrayList
 

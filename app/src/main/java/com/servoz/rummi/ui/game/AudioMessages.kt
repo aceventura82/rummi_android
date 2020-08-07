@@ -18,7 +18,7 @@ import java.io.File
 import java.lang.Thread.sleep
 import java.net.URL
 
-class AudioMessages(private var activity: FragmentActivity, private val buttonLauncherRecord: ImageView, private val buttonCancelRecord: ImageView){
+class AudioMessages(private var activity: FragmentActivity, private val buttonLauncherRecord: ImageView, private val buttonCancelRecord: ImageView): MediaPlayer.OnPreparedListener{
     private var audioFilePath: String? = null
     fun prepareRec(userId:String,gameId:String){
         //check if device has mic
@@ -74,27 +74,34 @@ class AudioMessages(private var activity: FragmentActivity, private val buttonLa
 
     private val mediaPlayer= MediaPlayer()
     fun playAudio(userId: String, gameId: String) {
-        val prefs = activity.baseContext.getSharedPreferences(PREF_FILE, 0)
-        if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF"){
-            GlideApp.with(activity.baseContext).load(R.drawable.ic_baseline_mute).into(buttonCancelRecord)
-            buttonCancelRecord.isVisible=true
-            doAsync {
-                sleep(2000)
-                buttonCancelRecord.isVisible=false
-            }
-            return
-        }
-        GlideApp.with(activity.baseContext).load(R.drawable.playing_audio).into(buttonCancelRecord)
         try{
-            mediaPlayer.setDataSource("$URL/static/audios/${userId}_${gameId}.3gp")
-        }catch(ex:IllegalArgumentException){
-            buttonCancelRecord.isVisible=false
-            return
-        }
-        buttonCancelRecord.isVisible=true
-        mediaPlayer.prepare()
-        mediaPlayer.start()
-        mediaPlayer.setOnCompletionListener { buttonCancelRecord.isVisible=false }
+            mediaPlayer.reset()
+            val prefs = activity.baseContext.getSharedPreferences(PREF_FILE, 0)
+            if(prefs!!.getString("MUTE_AUDIOS", "ON") =="OFF"){
+                GlideApp.with(activity.baseContext).load(R.drawable.ic_baseline_mute).into(buttonCancelRecord)
+                buttonCancelRecord.isVisible=true
+                doAsync {
+                    sleep(2000)
+                    buttonCancelRecord.isVisible=false
+                }
+                return
+            }
+            GlideApp.with(activity.baseContext).load(R.drawable.playing_audio).into(buttonCancelRecord)
+            try{
+                mediaPlayer.setDataSource("$URL/static/audios/${userId}_${gameId}.wav")
+            }catch(ex:IllegalArgumentException){
+                buttonCancelRecord.isVisible=false
+                return
+            }
+            buttonCancelRecord.isVisible=true
+            mediaPlayer.setOnPreparedListener(this)
+            mediaPlayer.prepareAsync()
+            mediaPlayer.setOnCompletionListener { buttonCancelRecord.isVisible=false }
+        }catch(ex:Exception){ex.printStackTrace()}
+    }
+
+    override fun onPrepared(player: MediaPlayer) {
+        player.start()
     }
 
     fun stopAudio(){

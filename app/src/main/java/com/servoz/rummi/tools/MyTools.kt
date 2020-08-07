@@ -59,7 +59,7 @@ class MyTools {
                     appKey
                 }else
                     ""
-        val sha256Hmac: Mac = Mac.getInstance("HmacSHA256")
+        val sha256Hmac = Mac.getInstance("HmacSHA256")
         val secretKey = SecretKeySpec(key.toByteArray(charset("UTF-8")), "HmacSHA256")
         sha256Hmac.init(secretKey)
         return sha256Hmac.doFinal(data.toByteArray(charset("UTF-8"))).toHexString()

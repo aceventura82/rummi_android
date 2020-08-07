@@ -805,6 +805,7 @@ class GameFragment: Fragment() {
 
     //get card name
     private fun getCardName(card:String):String{
+        if(card.length<2)return card
         return try{
             val color=when(card[1]){
                 'S' -> getString(R.string.spades)
