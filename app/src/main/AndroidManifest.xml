@@ -29,7 +29,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="rummi.servoz.tk"
+                    android:host="rummi.theozserver.com"
                     android:scheme="http"
                     android:pathPrefix="/joinGame" />
             </intent-filter>
@@ -41,7 +41,7 @@
 
                 <data
                     android:scheme="https"
-                    android:host="rummi.servoz.tk"
+                    android:host="rummi.theozserver.com"
                     android:pathPrefix="/joinGame" />
             </intent-filter>
         </activity>

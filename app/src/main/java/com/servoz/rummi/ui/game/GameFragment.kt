@@ -55,7 +55,7 @@ import java.util.*
 
 /*
 * ROAD MAP:
-turn time
+time limit
 * */
 
 val Int.dp: Int
@@ -443,9 +443,9 @@ class GameFragment: Fragment() {
     //************ END CONTROL FUNCTIONS
 
     //*********** INFO
+    private val cardsCount= arrayListOf("","","","","")
     private fun playersInfo(bg: Boolean=false){
         try{
-            val cardsCount= arrayListOf("","","","","")
             for (i in 0..4)
                 if(players[i]!="")
                     cardsCount[i]=if(gameSetData["${gameData["current_set"]}_${players[i]}"]!![0]=="") ""
@@ -474,7 +474,7 @@ class GameFragment: Fragment() {
                     images[i].isVisible=true
                     imagesPreview[i].isVisible=true
                     bubbles[i].setBackgroundResource(R.drawable.bubble)
-                    images[i].setOnLongClickListener{addPlayerClickListener(pics[i],players[i+1], cardsCount[i+1],playersNames[i+1])}
+                    images[i].setOnLongClickListener{addPlayerClickListener(pics[i],players[i+1], playersNames[i+1], i+1)}
                     GlideApp.with(requireContext()).load("${URL}/static/playerAvatars/${players[i+1]}${playersExt[i+1]}")
                         .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_account_box_white_80dp)).into(images[i])
                 }
@@ -492,11 +492,11 @@ class GameFragment: Fragment() {
 
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
-        private fun addPlayerClickListener(view: View, userClickId:String, cards:String, name:String):Boolean{
+        private fun addPlayerClickListener(view: View, userClickId:String, name:String, pos:Int):Boolean{
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.user)
             val userPos=muteAudiosIds.indexOf(userClickId)
-            popup.menu.findItem(R.id.title_menu).title=getString(R.string.player_cards,name,cards)
+            popup.menu.findItem(R.id.title_menu).title=getString(R.string.player_cards,name,cardsCount[pos])
             if(userPos==-1)
                 popup.menu.findItem(R.id.mute_audios_menu).title = "${getString(R.string.audios)} ${getString(R.string.on)}"
             else
@@ -1231,9 +1231,6 @@ class GameFragment: Fragment() {
         }
     }
 
-
-
-    
     //**** DRAW CARS
 
     //show user cards in hand

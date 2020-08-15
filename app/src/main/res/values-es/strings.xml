@@ -60,7 +60,7 @@
     <string name="full_draw_games">Juegos obligados</string>
     <string name="speed">Velocidad</string>
     <string name="max_players">Max jugadores</string>
-    <string name="gameCodeInfo">Codigo para unirse: %1$s\nURL unirse: https://rummi.servoz.tk/joinGame/%1$s/</string>
+    <string name="gameCodeInfo">Codigo para unirse: %1$s\nURL unirse: https://rummi.theozserver.com/joinGame/%1$s/</string>
     <string name="menu_add_game">Crear juego</string>
     <string name="publicStr">Publico</string>
     <string name="number_players">Max Jugadores: %1$s</string>
