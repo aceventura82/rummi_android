@@ -124,6 +124,8 @@ class HomeFragment : Fragment() {
         btn_home_logout.isVisible = showMenu
         btn_home_register.isVisible = !showMenu
         btn_home_login.isVisible = !showMenu
+        btn_home_settings.isVisible = showMenu
+        home_player_info.isVisible = showMenu
     }
 
     private fun logout() {

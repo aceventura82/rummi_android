@@ -107,7 +107,7 @@
     <string name="summary_congrats">Felicitaciones ganaste esta mano!</string>
     <string name="summary_lost">Lo siento, has perdido!! %1$s Gano la mano!</string>
     <string name="summary_congrats_game">Felicitaciones has ganado el juego!</string>
-    <string name="summary_lost_game">Lo siento, has perdido, %1$s gamó el juego!</string>
+    <string name="summary_lost_game">Lo siento, has perdido, %1$s ganó el juego!</string>
     <string name="set">Mano</string>
     <string name="total">Total</string>
     <string name="message_joker_pos">Selecciona izquierda o derecha para poner el comodin</string>
@@ -120,12 +120,12 @@
     <string name="toakN">%1$s Terna</string>
     <string name="game_set_info">%1$s%2$s</string>
     <string name="not_upper">NO</string>
-    <string name="first">Primera</string>
-    <string name="second">Segunda</string>
-    <string name="third">Tercera</string>
-    <string name="fourth">Cuarta</string>
-    <string name="fifth">QUinta</string>
-    <string name="sixth">Sexta</string>
+    <string name="first">Primero</string>
+    <string name="second">Segundo</string>
+    <string name="third">Tercero</string>
+    <string name="fourth">Cuarto</string>
+    <string name="fifth">QUinto</string>
+    <string name="sixth">Sexto</string>
     <string name="winner_full_draw">Ganador juego obligado</string>
     <string name="winner">Ganador</string>
     <string name="touch_preview_close">Toca en cualquier parte  de l vista para cerrarla</string>

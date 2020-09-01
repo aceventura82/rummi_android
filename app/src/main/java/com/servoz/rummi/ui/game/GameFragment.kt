@@ -39,10 +39,7 @@ import kotlinx.android.synthetic.main.fragment_game.view.text_game_info
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.game_info.view.*
 import kotlinx.android.synthetic.main.set_summary.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import okhttp3.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.getStackTraceString
 import org.jetbrains.anko.uiThread
@@ -63,6 +60,12 @@ val Int.dp: Int
 
 class GameFragment: Fragment() {
 
+    companion object {
+        private const val NORMAL_CLOSURE_STATUS = 1000
+        lateinit var webSocket1: WebSocket
+    }
+    private var client: OkHttpClient? = null
+
     private var prefs: SharedPreferences? = null
     private var gameData=JSONObject()
     private var gameSetData= hashMapOf<String,ArrayList<String>>()
@@ -77,8 +80,6 @@ class GameFragment: Fragment() {
     private var gameId=""
     private lateinit var summaryWindow:PopupWindow
     private var pickStart=""
-    private var doRequest=0
-    private var doRequestBg=0
     private var ranId=-2
     private var lastUpd:Long = 0
     private lateinit var audioRecObj:AudioMessages
@@ -117,7 +118,7 @@ class GameFragment: Fragment() {
         pickStart=if(prefs!!.getString("PICK_START","")=="ON") "1" else ""
         try{
             gameId= arguments?.getInt("gameId")!!.toString()
-            audioRecObj = AudioMessages(requireActivity(), buttonLauncherRecord, playAudio)
+            audioRecObj = AudioMessages(this, requireActivity(), buttonLauncherRecord, playAudio)
             userId=Integer.parseInt(JSONObject(requireContext().getSharedPreferences(PREF_FILE, 0).getString("userInfo","")!!)["userId_id"].toString())
             if(prefs!!.getString("CARDS$gameId","")!!.count()>3)
                 currentCards=prefs!!.getString("CARDS$gameId","")!!.split(",") as ArrayList<String>
@@ -131,7 +132,6 @@ class GameFragment: Fragment() {
             try{
                 resources
             }catch (ex:IllegalStateException){return}
-
             getMessagesIds()
             setListeners()
             doAsync {
@@ -139,7 +139,9 @@ class GameFragment: Fragment() {
                 remoteData(false)
             }
         }catch (ex:NullPointerException){}
-        checkLasUpd()
+        remoteData(true)
+        client = OkHttpClient()
+        start()
     }
 
     override fun onPause() {
@@ -149,55 +151,6 @@ class GameFragment: Fragment() {
     }
 
     //************ CONTROL FUNCTIONS
-
-    //update remote data each 3 sec
-    private fun bgSync(pId:Int){
-        doAsync {
-            try{
-                GlobalScope.launch(context = Dispatchers.Main) {
-                    while(ranId==pId){
-                        try{
-                            delay(5000)
-                            if(doRequestBg>3)doRequestBg=0
-                            if(doRequest>3)doRequest=0
-                            remoteData(true)
-                        }catch(ex:Exception){sendError("bgSync:${ex.getStackTraceString()}")}
-                    }
-                }
-            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
-        }
-    }
-    private fun checkLasUpd(){
-        doAsync {
-            try{
-                GlobalScope.launch(context = Dispatchers.Main) {
-                    while(true){
-                        delay(5000)
-                        uiThread {
-                            try{
-                                val tt = (System.currentTimeMillis()-lastUpd).div(1000)
-                                when {
-                                    !myTurn && tt > 20 -> {
-                                        text_game_set_number.setBackgroundResource(R.drawable.circle_red)
-                                        ranId=(0..6000).random()
-                                        doRequestBg=0
-                                        bgSync(ranId)
-                                    }
-                                    !myTurn && tt > 5 -> {
-                                        text_game_set_number.setBackgroundResource(R.drawable.circle_yellow)
-                                        ranId=(0..6000).random()
-                                        doRequestBg=0
-                                        bgSync(ranId)
-                                    }
-                                    else -> text_game_set_number.setBackgroundResource(R.color.game_text_bg)
-                                }
-                            }catch (ex:Exception){}
-                        }
-                    }
-                }
-            }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
-        }
-    }
 
     private fun remoteData(bg:Boolean){
         var dbHandler:Db
@@ -217,8 +170,6 @@ class GameFragment: Fragment() {
             ""
         }
         try{
-            if(doRequestBg==0){
-            doRequestBg++
             FetchData(arrayListOf(),this).updateData("bundleData", "",cache = false,
                 addParams = hashMapOf("gameId" to gameId, "update_date" to updDate, "set" to set,
                     "lastId" to (messagesLastId+1).toString(), "lastIdF" to (flowLastId+1).toString())) { result ->
@@ -244,9 +195,7 @@ class GameFragment: Fragment() {
                     }else
                         text_game_info.text = getString(R.string.unknown_error)
                 }
-                doRequestBg=0
             }
-        }
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
     }
     //set game Data in variables
@@ -267,7 +216,9 @@ class GameFragment: Fragment() {
             }
             keySetUser="${gameData["current_set"]}_$userId"
             var recordType=0
-            val dbHandler=Db(requireContext(),null)
+            val dbHandler=try{
+                Db(requireContext(),null)
+            }catch (ex:Exception){return}
             for((c, dataSet) in data.withIndex()) {
                 if(c==0) continue
                 if (dataSet.has("messages") && dataSet["messages"] == 1) {//add messages
@@ -350,7 +301,8 @@ class GameFragment: Fragment() {
 
     //check Game status, set controls if open or in game
     private fun gameStatus(bg: Boolean=false){
-        val auxMyTurn=myTurn
+        if(shareButton==null)
+            return
         shareButton.isVisible=false
         try{
             //check if set just ended and show summary windows
@@ -434,10 +386,6 @@ class GameFragment: Fragment() {
                 }
             }
         }catch(ex:Exception){sendError("${object{}.javaClass.enclosingMethod!!.name}:${ex.getStackTraceString()}")}
-        if(auxMyTurn!=myTurn || ranId==-2){
-            ranId=(0..6000).random()
-            bgSync(ranId)
-        }
     }
 
     //************ END CONTROL FUNCTIONS
@@ -967,21 +915,17 @@ class GameFragment: Fragment() {
                 .setCancelable(true)
                 // positive button text and action
                 .setPositiveButton(requireContext().getString(R.string.start_game)) { _, _ ->
-                    if(doRequest==0) {
-                        doRequest++
-                        FetchData(arrayListOf(),this).updateData("startGame", "",cache = false, addParams = hashMapOf("gameId" to gameData["id"].toString())) { result ->
-                            doRequest=0
-                            val res = result.split("|")
-                            var msg = result
-                            if (res.count() == 2) {
-                                msg = res[1]
-                                text_game_info.text = getString(R.string.loading)
-                                mainButton.isVisible = false
-                                initialView()
-                                sendFlow(1)
-                            }
-                            MyTools().toast(requireContext(), msg)
+                    FetchData(arrayListOf(),this).updateData("startGame", "",cache = false, addParams = hashMapOf("gameId" to gameData["id"].toString())) { result ->
+                        val res = result.split("|")
+                        var msg = result
+                        if (res.count() == 2) {
+                            msg = res[1]
+                            text_game_info.text = getString(R.string.loading)
+                            mainButton.isVisible = false
+                            initialView()
+                            sendFlow(1)
                         }
+                        MyTools().toast(requireContext(), msg)
                     }
                 }
                 // negative button text and action
@@ -994,26 +938,21 @@ class GameFragment: Fragment() {
         }
         //users deal the cards
         private fun dealCards(){
-            if(doRequest==0) {
-                doRequest++
-                cards.removeAllViews()
-                FetchData(arrayListOf(),this).updateData("dealCards", "",cache = false, addParams = hashMapOf("gameId" to gameData["id"].toString())) {
-                        result ->
-                    doRequest=0
-                    val res = result.split("|")
-                    var msg=result
-                    if(res.count()==2){
-                        remoteData(true) //get new data
-                        msg=res[1]
-                        text_game_info.text = getString(R.string.loading)
-                        mainButton.isVisible=false
-                        initialView()
-                        ranId=(0..6000).random()
-                        bgSync(ranId)
-                        sendFlow(2, set)
-                    }
-                    MyTools().toast(requireContext(),msg)
+            cards.removeAllViews()
+            FetchData(arrayListOf(),this).updateData("dealCards", "",cache = false, addParams = hashMapOf("gameId" to gameData["id"].toString())) {
+                    result ->
+                val res = result.split("|")
+                var msg=result
+                if(res.count()==2){
+                    remoteData(true) //get new data
+                    msg=res[1]
+                    text_game_info.text = getString(R.string.loading)
+                    mainButton.isVisible=false
+                    initialView()
+                    ranId=(0..6000).random()
+                    sendFlow(2, set)
                 }
+                MyTools().toast(requireContext(),msg)
             }
         }
 
@@ -1048,27 +987,23 @@ class GameFragment: Fragment() {
                     loadingGame.isVisible=false
                 }
                 else->{
-                    if(doRequest==0) {
-                        doRequest++
-                        FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
-                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1")) { result ->
-                            val res = result.split("|")
-                            var msg=result
-                            doRequest=0
-                            if(res.count()==2){
-                                msg=res[1]
-                                inCard=res[1]
-                                remoteData(true)
-                                if(pickStart=="1")
-                                    currentCards.add(0, inCard)
-                                else
-                                    currentCards.add(inCard)
-                                moveCardFromStack(res[1])
-                                showMyCards(true)
-                                remoteData(true) //get new data
-                            }
-                            MyTools().toast(requireContext(),msg)
+                    FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
+                        addParams = hashMapOf("gameId" to gameData["id"].toString(), "stack" to "1")) { result ->
+                        val res = result.split("|")
+                        var msg=result
+                        if(res.count()==2){
+                            msg=res[1]
+                            inCard=res[1]
+                            remoteData(true)
+                            if(pickStart=="1")
+                                currentCards.add(0, inCard)
+                            else
+                                currentCards.add(inCard)
+                            moveCardFromStack(res[1])
+                            showMyCards(true)
+                            remoteData(true) //get new data
                         }
+                        MyTools().toast(requireContext(),msg)
                     }
                 }
             }
@@ -1094,26 +1029,22 @@ class GameFragment: Fragment() {
                     loadingGame.isVisible=false
                 }
                 else->{
-                    if(doRequest==0) {
-                        doRequest++
-                       FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
-                           addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1")) { result ->
-                            val res = result.split("|")
-                           var msg=result
-                           doRequest=0
-                           if(res.count()==2){
-                               msg=res[1]
-                               inCard=res[1]
-                               if(pickStart=="1")
-                                   currentCards.add(0, inCard)
-                               else
-                                   currentCards.add(inCard)
-                               moveCardFromDiscard(res[1])
-                               showMyCards(true)
-                               remoteData(true) //get new data
-                            }
-                           MyTools().toast(requireContext(),msg)
+                   FetchData(arrayListOf(),this).updateData("pickCard", "",cache = false,
+                       addParams = hashMapOf("gameId" to gameData["id"].toString(), "discard" to "1")) { result ->
+                        val res = result.split("|")
+                       var msg=result
+                       if(res.count()==2){
+                           msg=res[1]
+                           inCard=res[1]
+                           if(pickStart=="1")
+                               currentCards.add(0, inCard)
+                           else
+                               currentCards.add(inCard)
+                           moveCardFromDiscard(res[1])
+                           showMyCards(true)
+                           remoteData(true) //get new data
                         }
+                       MyTools().toast(requireContext(),msg)
                     }
                 }
             }
@@ -1140,26 +1071,22 @@ class GameFragment: Fragment() {
                 }
                 else->{
                     //discard card
-                    if(doRequest==0) {
-                        doRequest++
-                        FetchData(arrayListOf(), this).updateData(
-                            "discardCard", "", cache = false,
-                            addParams = hashMapOf("gameId" to gameData["id"].toString(), "out" to outCard)
-                        ) { result ->
-                            val res = result.split("|")
-                            var msg=result
-                            doRequest=0
-                            if(res.count()==2){
-                                msg=res[1]
-                                moveCardToDiscard()
-                                cards.removeViewAt(cardPos)
-                                currentCards.removeAt(cardPos)
-                                showMyCards(true)
-                                remoteData(true) //get new data
-                            }
-                            loadingGame.isVisible=false
-                            MyTools().toast(requireContext(),msg)
+                    FetchData(arrayListOf(), this).updateData(
+                        "discardCard", "", cache = false,
+                        addParams = hashMapOf("gameId" to gameData["id"].toString(), "out" to outCard)
+                    ) { result ->
+                        val res = result.split("|")
+                        var msg=result
+                        if(res.count()==2){
+                            msg=res[1]
+                            moveCardToDiscard()
+                            cards.removeViewAt(cardPos)
+                            currentCards.removeAt(cardPos)
+                            showMyCards(true)
+                            remoteData(true) //get new data
                         }
+                        loadingGame.isVisible=false
+                        MyTools().toast(requireContext(),msg)
                     }
                 }
             }
@@ -1336,36 +1263,32 @@ class GameFragment: Fragment() {
             for (v in drawViewCards)
                 v.isEnabled=false
         }else{
-            if(doRequest==0) {
-                doRequest++
                 loadingGame.isVisible=true
                 //confirm and draw game
-                FetchData(arrayListOf(),this).updateData("draw", "",cache = false,
-                    addParams = hashMapOf("gameId" to gameData["id"].toString(), "drawCards" to drawCards.trim('|'))) {
-                        result ->
-                    val res = result.split("|")
-                    var msg=result
-                    doRequest=0
-                    if(res.count()==2){
-                        msg=res[1]
-                        draw_info_layout.isVisible=false
-                        mainButton.isVisible=false
-                        mainButton.text=requireContext().getString(R.string.draw)
-                        for (cc in drawCards.trim('|').split("|"))
-                            currentCards.remove(cc)
-                        drawCards="-1"
-                        for (cc in drawViewCards)
-                            cards.removeView(cc)
-                        showMyCards(true)
-                        text_draw_info.removeAllViews()
-                        addGameDrawButton.text=requireContext().getString(R.string.add_draw_game)
-                        initialView()
-                        sendFlow(7)
-                        remoteData(true) //get new data
-                    }
-                    MyTools().toast(requireContext(),msg)
-                    loadingGame.isVisible=false
+            FetchData(arrayListOf(),this).updateData("draw", "",cache = false,
+                addParams = hashMapOf("gameId" to gameData["id"].toString(), "drawCards" to drawCards.trim('|'))) {
+                    result ->
+                val res = result.split("|")
+                var msg=result
+                if(res.count()==2){
+                    msg=res[1]
+                    draw_info_layout.isVisible=false
+                    mainButton.isVisible=false
+                    mainButton.text=requireContext().getString(R.string.draw)
+                    for (cc in drawCards.trim('|').split("|"))
+                        currentCards.remove(cc)
+                    drawCards="-1"
+                    for (cc in drawViewCards)
+                        cards.removeView(cc)
+                    showMyCards(true)
+                    text_draw_info.removeAllViews()
+                    addGameDrawButton.text=requireContext().getString(R.string.add_draw_game)
+                    initialView()
+                    sendFlow(7)
+                    remoteData(true) //get new data
                 }
+                MyTools().toast(requireContext(),msg)
+                loadingGame.isVisible=false
             }
         }
     }
@@ -1767,36 +1690,32 @@ class GameFragment: Fragment() {
                 loadingGame.isVisible=false
             }
             else->{
-                if(doRequest==0) {
-                    doRequest++
                     //put card in draw
-                    FetchData(arrayListOf(), this).updateData(
-                        "drawOver",
-                        "",
-                        cache = false,
-                        addParams = hashMapOf(
-                            "gameId" to gameData["id"].toString(),
-                            "in" to outCard,
-                            "drawPos" to pos.toString(),
-                            "pos" to posJ.toString(),
-                            "drawUserId" to user_id
-                        )
-                    ) { result ->
-                        doRequest=0
-                        inCard="1"
-                        val res = result.split("|")
-                        var msg = result
-                        if (res.count() == 2) {
-                            msg = res[1]
-                            cards.removeViewAt(cardPos)
-                            currentCards.removeAt(cardPos)
-                            moveCardToDraw(view)
-                            showMyCards(true)
-                            remoteData(true) //get new data
-                        }
-                        loadingGame.isVisible=false
-                        MyTools().toast(requireContext(), msg)
+                FetchData(arrayListOf(), this).updateData(
+                    "drawOver",
+                    "",
+                    cache = false,
+                    addParams = hashMapOf(
+                        "gameId" to gameData["id"].toString(),
+                        "in" to outCard,
+                        "drawPos" to pos.toString(),
+                        "pos" to posJ.toString(),
+                        "drawUserId" to user_id
+                    )
+                ) { result ->
+                    inCard="1"
+                    val res = result.split("|")
+                    var msg = result
+                    if (res.count() == 2) {
+                        msg = res[1]
+                        cards.removeViewAt(cardPos)
+                        currentCards.removeAt(cardPos)
+                        moveCardToDraw(view)
+                        showMyCards(true)
+                        remoteData(true) //get new data
                     }
+                    loadingGame.isVisible=false
+                    MyTools().toast(requireContext(), msg)
                 }
             }
         }
@@ -2000,16 +1919,15 @@ class GameFragment: Fragment() {
     //add new message in the server
     private fun sendMessage(){
         if(messages_text.text.toString().count()>0)
-            if(doRequest==0) {
-                doRequest++
-                FetchData(arrayListOf(),this).updateData("addMessage", "", cache=false,
-                    addParams = hashMapOf("gameId" to gameId, "msg" to Uri.encode(messages_text.text.toString()))){doRequest=0}
-                messages_text.setText("")
-            }
+            FetchData(arrayListOf(),this).updateData("addMessage", "", cache=false,
+                addParams = hashMapOf("gameId" to gameId, "msg" to Uri.encode(messages_text.text.toString())))
+        messages_text.setText("")
+        sendUpdNotify(0)
     }
 
     //add new message in the server
     private fun sendFlow(msgId:Int, aux:String=""){
+        sendUpdNotify(msgId)
         try{
             doAsync{
                 FetchData(arrayListOf(),this@GameFragment).updateData("addToFlow", "", cache=false,
@@ -2139,4 +2057,41 @@ class GameFragment: Fragment() {
     }
 
     //**** MESSAGES
+
+    //webSocket class
+    private inner class EchoWebSocketListener : WebSocketListener() {
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            webSocket1 = webSocket
+        }
+
+        override fun onMessage(webSocket: WebSocket, text: String) {
+            val msg = JSONObject(text).getString("message").split("|")
+            //update data
+            if(msg[0] != "8" || userId != Integer.parseInt(msg[1])){
+                remoteData(true)
+            }
+        }
+
+        override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+            println("Closing")
+            webSocket.close(NORMAL_CLOSURE_STATUS, null)
+        }
+
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            println("Error111 : " + t.printStackTrace())
+            remoteData(true)
+        }
+    }
+
+    //WebSocket start
+    private fun start() {
+        val request = Request.Builder().url("wss://${URL.replace("https://", "")}/ws/$gameId/").build()
+        val listener = EchoWebSocketListener()
+        client!!.newWebSocket(request, listener)
+        client!!.dispatcher.executorService.shutdown()
+    }
+
+    fun sendUpdNotify(operation:Int) {
+        webSocket1.send("{\"message\":\"$operation|$userId\"}")
+    }
 }

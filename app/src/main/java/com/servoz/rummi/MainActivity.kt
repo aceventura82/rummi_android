@@ -12,12 +12,10 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.navigation.fragment.NavHostFragment
 import com.servoz.rummi.tools.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.doAsync
 
 class MainActivity : AppCompatActivity() {
 
     private var prefs: SharedPreferences? = null
-    private var processId=0
     private var login=false
 
     override fun attachBaseContext(newBase: Context?) {
@@ -50,22 +48,8 @@ class MainActivity : AppCompatActivity() {
         }
         //start notifications
         prefs!!.edit().putString("check_turn", "ON").apply()
-        processId= (1..99999999).random()
-        checkTurn(processId)
         //set the app theme
         notificationChannels()
-    }
-
-    override fun onPause() {
-        processId= (1..99999999).random()
-        checkTurn(processId)
-        super.onPause()
-    }
-
-    override fun onResume() {
-        processId= (1..99999999).random()
-        checkTurn(processId)
-        super.onResume()
     }
 
     private fun notificationChannels(){
@@ -75,43 +59,6 @@ class MainActivity : AppCompatActivity() {
             mChannel.description = "For main Notifications"
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mChannel)
-        }
-    }
-
-    //check turn for notifications
-    private fun checkTurn(pId:Int){
-        doAsync {
-            while(processId==pId && login) {
-                if (prefs!!.getString("check_turn", "") == "ON") {
-                    //check remote if my turn only if app in background and game started and not ended
-                    FetchData(arrayListOf(), nav_host_fragment).updateData("myTurn", "", cache = false) { result ->
-                        if (result != "" && result != "--") {
-                            val res = result.split(",")
-                            //send notification
-                            for (gameId in res)
-                                checkGameName(gameId)
-                        }else
-                            processId=-1
-                    }
-                }
-                Thread.sleep(30000)
-            }
-        }
-    }
-
-    private fun checkGameName(gameId:String){
-        if(prefs!!.getString("MUTE_NOTIFICATIONS", "ON") =="OFF")
-            return
-        //notify if user not in current game
-        if(prefs!!.getString("current_game","")!=gameId)
-        FetchData(arrayListOf(),nav_host_fragment).updateData("gameInfo", "",cache = false,addParams = hashMapOf("gameId" to gameId)) { result ->
-            val data = MyTools().stringListToJSON(result)
-            //notify if game is started
-            if (data.count() > 0 && data[0]["started"]=="1"){
-                Notifications().create(this@MainActivity, getString(R.string.your_turn), getString(R.string.notif_turn_game, data[0]["name"]), gameId)
-                //pause notification until user click on notification or open app
-                prefs!!.edit().putString("check_turn", "").apply()
-            }
         }
     }
 }
